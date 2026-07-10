@@ -12,6 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional light theme for the vault window (the current window ships with a dark theme by default).
 - Import of entries from a previously exported encrypted backup.
 
+## [1.1.0] - 2026-07-10
+
+### Added
+
+- Bilingual interface: a full English translation alongside German, with a DE/EN switch in the top-right corner and in Settings. The chosen language is remembered.
+- Entry types and their field templates are now localized (German and English), so a new entry created in English gets English field names.
+
+### Changed
+
+- API results now use stable string error codes that the interface localizes, so error messages appear in the selected language.
+
 ## [1.0.0] - 2026-07-10
 
 ### Added
@@ -32,5 +43,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Encrypted backup export to a separate file.
 - Packaged single-file Windows executable built with PyInstaller (`dist/Tresor.exe`), portable with no installer and no admin rights.
 
-[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Juri-Halveth/halveth-tresor/releases/tag/v1.0.0

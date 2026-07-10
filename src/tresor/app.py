@@ -7,8 +7,9 @@ every button to the encrypted core in vault.py.
 Run for development:   python app.py   (from the source directory)
 As the finished app:    a single .exe (see scripts/build.bat)
 
-Note: user-facing strings are intentionally German (the product UI is German). Code
-comments and logs are English so international contributors can read the source.
+Note: the UI is bilingual (German and English, switchable in the app). Error results from
+this API are stable string codes (for example "wrong_credentials") that the UI localizes.
+Code comments and logs are English so international contributors can read the source.
 """
 
 import datetime
@@ -55,9 +56,9 @@ def _log_error(context: str, exc: BaseException) -> None:
 class Api:
     """Everything the UI can call via pywebview.api.*
 
-    Methods return small dicts. User-facing 'error' strings are German (product UI);
-    unexpected exceptions are logged internally and reported as a generic message so no
-    internal detail (paths, stack) ever reaches the front-end.
+    Methods return small dicts. The 'error' field is a stable string code (for example
+    'wrong_credentials') that the UI localizes; unexpected exceptions are logged
+    internally and reported as a generic code so no internal detail reaches the front-end.
     """
 
     def __init__(self):
@@ -75,12 +76,12 @@ class Api:
         """Create a new vault and return the one-time recovery key."""
         try:
             if self._session.exists():
-                return {"ok": False, "error": "Es gibt bereits einen Tresor."}
+                return {"ok": False, "error": "vault_exists"}
             recovery = self._session.create(master, pin)
             return {"ok": True, "recovery": recovery}
         except Exception as e:
             _log_error("create_vault", e)
-            return {"ok": False, "error": "Der Tresor konnte nicht angelegt werden."}
+            return {"ok": False, "error": "create_failed"}
 
     # ---------------------------------------------------------------- Open
     def unlock(self, master, pin):
@@ -89,12 +90,12 @@ class Api:
             entries = self._session.unlock(master, pin)
             return {"ok": True, "entries": entries}
         except vault.WrongCredentials:
-            return {"ok": False, "error": "Passwort oder PIN ist falsch."}
+            return {"ok": False, "error": "wrong_credentials"}
         except vault.Corrupt:
-            return {"ok": False, "error": "Die Tresordatei ist beschädigt."}
+            return {"ok": False, "error": "corrupt"}
         except Exception as e:
             _log_error("unlock", e)
-            return {"ok": False, "error": "Der Tresor konnte nicht geöffnet werden."}
+            return {"ok": False, "error": "unlock_failed"}
 
     def unlock_recovery(self, recovery_key):
         """Unlock with the recovery key."""
@@ -102,12 +103,12 @@ class Api:
             entries = self._session.unlock_recovery(recovery_key)
             return {"ok": True, "entries": entries}
         except vault.WrongCredentials:
-            return {"ok": False, "error": "Der Notfall-Schlüssel ist falsch."}
+            return {"ok": False, "error": "recovery_wrong"}
         except vault.Corrupt:
-            return {"ok": False, "error": "Die Tresordatei ist beschädigt."}
+            return {"ok": False, "error": "corrupt"}
         except Exception as e:
             _log_error("unlock_recovery", e)
-            return {"ok": False, "error": "Öffnen mit Notfall-Schlüssel fehlgeschlagen."}
+            return {"ok": False, "error": "recovery_failed"}
 
     def lock(self):
         """Lock the vault and cancel any pending clipboard clear."""
@@ -119,35 +120,35 @@ class Api:
     def save_entry(self, entry):
         """Insert or update an entry and persist it."""
         if not self._session.is_open():
-            return {"ok": False, "error": "Der Tresor ist gesperrt."}
+            return {"ok": False, "error": "locked"}
         try:
             saved = self._session.upsert(entry)
             return {"ok": True, "entry": saved}
         except Exception as e:
             _log_error("save_entry", e)
-            return {"ok": False, "error": "Speichern fehlgeschlagen."}
+            return {"ok": False, "error": "save_failed"}
 
     def delete_entry(self, entry_id):
         """Delete an entry by id."""
         if not self._session.is_open():
-            return {"ok": False, "error": "Der Tresor ist gesperrt."}
+            return {"ok": False, "error": "locked"}
         try:
             self._session.delete(entry_id)
             return {"ok": True}
         except Exception as e:
             _log_error("delete_entry", e)
-            return {"ok": False, "error": "Löschen fehlgeschlagen."}
+            return {"ok": False, "error": "delete_failed"}
 
     def change_master(self, new_master, new_pin):
         """Change the master password and PIN of the open vault."""
         if not self._session.is_open():
-            return {"ok": False, "error": "Der Tresor ist gesperrt."}
+            return {"ok": False, "error": "locked"}
         try:
             self._session.change_credentials(new_master, new_pin)
             return {"ok": True}
         except Exception as e:
             _log_error("change_master", e)
-            return {"ok": False, "error": "Ändern fehlgeschlagen."}
+            return {"ok": False, "error": "change_failed"}
 
     # ---------------------------------------------------------------- Tools
     def generate_password(self, length, opts=None):
@@ -181,7 +182,7 @@ class Api:
     def export_backup(self):
         """Save an encrypted copy of the vault to a user-chosen path."""
         if not self._session.exists():
-            return {"ok": False, "error": "Es gibt noch keinen Tresor zum Sichern."}
+            return {"ok": False, "error": "no_vault_backup"}
         try:
             result = self._window.create_file_dialog(
                 webview.SAVE_DIALOG,
@@ -195,7 +196,7 @@ class Api:
             return {"ok": True, "path": dest}
         except Exception as e:
             _log_error("export_backup", e)
-            return {"ok": False, "error": "Die Sicherung ist fehlgeschlagen."}
+            return {"ok": False, "error": "backup_failed"}
 
     # ---------------------------------------------------------------- internal
     def _cancel_timer(self):

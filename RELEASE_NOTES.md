@@ -1,11 +1,14 @@
-# Tresor v1.0.0
+# Tresor v1.1.0
 
 **A local, offline credential vault for Windows. Your complete access, encrypted in a single file, with no cloud and no account.**
+
+> New in 1.1.0: the interface is now bilingual (German and English). Switch language any time with the DE/EN toggle in the top-right corner or in Settings. Entry types and field names are localized too.
 
 Tresor is a desktop credential vault. It is more than a password manager: it stores complete access, not just passwords. Keep login credentials, websites, FTP, SFTP, SSH, API keys, databases, mail accounts (IMAP/SMTP), cards, notes, and any other secret in one place. Each entry type has fields tailored to it, entries are organized by place or purpose into groups you name (for example Work, Servers, or Personal), and every field is one click to copy. Everything is fully offline: no cloud, no account, no telemetry, and no network calls, all kept in one local encrypted file.
 
 ## Highlights
 
+- **Bilingual, German and English:** switch language any time with the DE/EN toggle; the app remembers your choice.
 - **Complete access, not just passwords:** dedicated entry types for logins, websites, FTP, SFTP, SSH, API keys, databases, mail accounts (IMAP/SMTP), cards, and notes, each with fields tailored to that type.
 - **Organized by place or purpose:** group entries under names you choose, such as Work, Servers, or Personal.
 - **One-click copy on every field,** with a detail view that reveals masked values on demand.

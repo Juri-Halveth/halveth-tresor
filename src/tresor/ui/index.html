@@ -39,6 +39,14 @@ input,textarea,select{font-family:inherit; font-size:14px}
 ::-webkit-scrollbar-thumb{background:#232c3d;border-radius:20px;border:2px solid var(--bg-1)}
 ::-webkit-scrollbar-thumb:hover{background:#2f3a4f}
 
+/* ============================ Sprach-Umschalter =================== */
+#langToggle{position:fixed;top:13px;right:16px;z-index:100;display:flex;gap:3px;
+  background:rgba(15,19,28,.72);border:1px solid var(--line);border-radius:20px;padding:3px;backdrop-filter:blur(6px)}
+#langToggle button{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--tx-dim);
+  padding:4px 10px;border-radius:16px;transition:.12s}
+#langToggle button:hover{color:var(--tx-hi)}
+#langToggle button.on{background:var(--accent);color:#08131f}
+
 /* ============================ Zentrierte Screens (Lock / Setup) ==== */
 .center-screen{
   position:relative; z-index:1; height:100vh; display:flex;
@@ -130,7 +138,7 @@ input,textarea,select{font-family:inherit; font-size:14px}
 /* -------- Main -------- */
 #main{display:flex;flex-direction:column;min-width:0;min-height:0}
 .topbar{
-  display:flex;align-items:center;gap:16px;padding:20px 26px 16px;
+  display:flex;align-items:center;gap:16px;padding:20px 96px 16px 26px;
 }
 .topbar .tt{flex:1;min-width:0}
 .topbar h2{font-size:20px;letter-spacing:.2px;display:flex;align-items:center;gap:10px}
@@ -299,23 +307,28 @@ input,textarea,select{font-family:inherit; font-size:14px}
 </head>
 <body>
 
+<div id="langToggle">
+  <button data-lang="de">DE</button>
+  <button data-lang="en">EN</button>
+</div>
+
 <!-- ===================== LOCK ===================== -->
 <div id="screen-lock" class="center-screen hidden">
   <div class="gate">
     <div class="brand-lock" id="lockGlyph"></div>
     <h1>Tresor</h1>
-    <div class="sub">Alle deine Zugänge an einem sicheren Ort.<br>Bitte entsperren.</div>
+    <div class="sub" data-i18n-html="lock.sub"></div>
     <div class="inp-wrap">
-      <label class="field-lab">Master-Passwort</label>
-      <input id="lkPass" class="inp" type="password" autocomplete="off" placeholder="Dein Passwort">
+      <label class="field-lab" data-i18n="lock.master"></label>
+      <input id="lkPass" class="inp" type="password" autocomplete="off" data-i18n-ph="lock.masterPh">
     </div>
     <div class="inp-wrap">
-      <label class="field-lab">PIN</label>
+      <label class="field-lab" data-i18n="lock.pin"></label>
       <input id="lkPin" class="inp pin" type="password" inputmode="numeric" autocomplete="off" placeholder="••••">
     </div>
-    <button id="lkBtn" class="btn-primary">Entsperren</button>
+    <button id="lkBtn" class="btn-primary" data-i18n="lock.unlock"></button>
     <div id="lkMsg" class="gate-msg"></div>
-    <button class="gate-hint" id="lkForgot" style="background:none;border:none;cursor:pointer;text-decoration:underline">Passwort oder PIN vergessen?</button>
+    <button class="gate-hint" id="lkForgot" data-i18n="lock.forgot" style="background:none;border:none;cursor:pointer;text-decoration:underline"></button>
   </div>
 </div>
 
@@ -323,24 +336,24 @@ input,textarea,select{font-family:inherit; font-size:14px}
 <div id="screen-setup" class="center-screen hidden">
   <div class="gate">
     <div class="brand-lock" id="setupGlyph"></div>
-    <h1>Willkommen</h1>
-    <div class="sub">Richte deinen Tresor ein. Merke dir beides gut,<br>ohne diese zwei Angaben kommt niemand hinein, auch du nicht.</div>
+    <h1 data-i18n="setup.welcome"></h1>
+    <div class="sub" data-i18n-html="setup.sub"></div>
     <div class="inp-wrap">
-      <label class="field-lab">Master-Passwort wählen</label>
-      <input id="stPass" class="inp" type="password" autocomplete="off" placeholder="Mindestens 8 Zeichen">
+      <label class="field-lab" data-i18n="setup.chooseMaster"></label>
+      <input id="stPass" class="inp" type="password" autocomplete="off" data-i18n-ph="setup.min8">
       <div class="strength"><i id="stBar"></i></div>
     </div>
     <div class="inp-wrap">
-      <label class="field-lab">Passwort wiederholen</label>
-      <input id="stPass2" class="inp" type="password" autocomplete="off" placeholder="Nochmal eingeben">
+      <label class="field-lab" data-i18n="setup.repeat"></label>
+      <input id="stPass2" class="inp" type="password" autocomplete="off" data-i18n-ph="setup.repeatPh">
     </div>
     <div class="inp-wrap">
-      <label class="field-lab">PIN wählen (4 bis 8 Ziffern)</label>
+      <label class="field-lab" data-i18n="setup.choosePin"></label>
       <input id="stPin" class="inp pin" type="password" inputmode="numeric" autocomplete="off" placeholder="••••">
     </div>
-    <button id="stBtn" class="btn-primary">Tresor erstellen</button>
+    <button id="stBtn" class="btn-primary" data-i18n="setup.create"></button>
     <div id="stMsg" class="gate-msg"></div>
-    <div class="gate-hint">Es gibt keine Passwort-Zurücksetzung. Alles wird nur auf diesem Gerät verschlüsselt gespeichert.</div>
+    <div class="gate-hint" data-i18n="setup.hint"></div>
   </div>
 </div>
 
@@ -348,17 +361,17 @@ input,textarea,select{font-family:inherit; font-size:14px}
 <div id="screen-recovery" class="center-screen hidden">
   <div class="gate" style="max-width:460px">
     <div class="brand-lock" id="recGlyph" style="box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 30px -10px rgba(231,178,74,.5)"></div>
-    <h1>Dein Notfall-Schlüssel</h1>
-    <div class="sub">Falls du Passwort oder PIN vergisst, ist das deine einzige Rettung.<br>Schreib ihn ab und leg ihn an einen sicheren Ort. Er wird nur dieses eine Mal gezeigt.</div>
+    <h1 data-i18n="rec.title"></h1>
+    <div class="sub" data-i18n-html="rec.sub"></div>
     <div style="background:var(--bg-0);border:1px solid #4a3d1f;border-radius:13px;padding:16px;margin-bottom:16px">
       <div class="mono" id="rvKey" style="font-size:16px;letter-spacing:1px;line-height:2;word-break:break-all;color:var(--gold);user-select:text;text-align:center"></div>
-      <button class="btn-line" id="rvCopy" style="margin-top:12px;width:100%">Notfall-Schlüssel kopieren</button>
+      <button class="btn-line" id="rvCopy" data-i18n="rec.copy" style="margin-top:12px;width:100%"></button>
     </div>
     <label style="display:flex;gap:11px;align-items:flex-start;text-align:left;font-size:13px;color:var(--tx);margin-bottom:16px;cursor:pointer">
       <input type="checkbox" id="rvChk" style="margin-top:2px;width:17px;height:17px;accent-color:var(--accent-2);flex:none">
-      <span>Ich habe den Notfall-Schlüssel abgeschrieben und sicher aufbewahrt.</span>
+      <span data-i18n="rec.confirm"></span>
     </label>
-    <button id="rvBtn" class="btn-primary" disabled>Fertig, Tresor öffnen</button>
+    <button id="rvBtn" class="btn-primary" data-i18n="rec.done" disabled></button>
   </div>
 </div>
 
@@ -366,23 +379,23 @@ input,textarea,select{font-family:inherit; font-size:14px}
 <div id="screen-forgot" class="center-screen hidden">
   <div class="gate" style="max-width:460px">
     <div class="brand-lock" id="fgGlyph"></div>
-    <h1>Vergessen?</h1>
-    <div class="sub">Gib deinen Notfall-Schlüssel ein und setze ein neues<br>Master-Passwort samt PIN. Deine Einträge bleiben erhalten.</div>
+    <h1 data-i18n="fg.title"></h1>
+    <div class="sub" data-i18n-html="fg.sub"></div>
     <div class="inp-wrap">
-      <label class="field-lab">Notfall-Schlüssel</label>
+      <label class="field-lab" data-i18n="fg.key"></label>
       <textarea id="fgKey" class="inp mono" rows="2" autocomplete="off" placeholder="XXXXX-XXXXX-XXXXX ..." style="resize:none;letter-spacing:1px"></textarea>
     </div>
     <div class="inp-wrap">
-      <label class="field-lab">Neues Master-Passwort</label>
-      <input id="fgPass" class="inp" type="password" autocomplete="off" placeholder="Mindestens 8 Zeichen">
+      <label class="field-lab" data-i18n="fg.newMaster"></label>
+      <input id="fgPass" class="inp" type="password" autocomplete="off" data-i18n-ph="setup.min8">
     </div>
     <div class="inp-wrap">
-      <label class="field-lab">Neue PIN (4 bis 8 Ziffern)</label>
+      <label class="field-lab" data-i18n="fg.newPin"></label>
       <input id="fgPin" class="inp pin" type="password" inputmode="numeric" autocomplete="off" placeholder="••••">
     </div>
-    <button id="fgBtn" class="btn-primary">Entsperren und neu setzen</button>
+    <button id="fgBtn" class="btn-primary" data-i18n="fg.submit"></button>
     <div id="fgMsg" class="gate-msg"></div>
-    <button class="gate-hint" id="fgBack" style="background:none;border:none;cursor:pointer;text-decoration:underline">Zurück zum Anmelden</button>
+    <button class="gate-hint" id="fgBack" data-i18n="fg.back" style="background:none;border:none;cursor:pointer;text-decoration:underline"></button>
   </div>
 </div>
 
@@ -391,19 +404,19 @@ input,textarea,select{font-family:inherit; font-size:14px}
   <aside id="sidebar">
     <div class="side-brand">
       <div class="mk" id="sideGlyph"></div>
-      <div><b>Tresor</b><span>Zugänge & Schlüssel</span></div>
+      <div><b>Tresor</b><span data-i18n="side.tagline"></span></div>
     </div>
     <div class="search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="searchBox" placeholder="Suchen ...">
+      <input id="searchBox" data-i18n-ph="side.search">
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="side-foot">
-      <button class="side-btn" id="btnBackup" title="Verschlüsselte Sicherung speichern">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Sichern</button>
-      <button class="side-btn lock" id="btnLock" title="Tresor sofort abschließen">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10.5" width="16" height="11" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>Sperren</button>
-      <button class="side-btn" id="btnSettings" title="Einstellungen" style="flex:0 0 44px">
+      <button class="side-btn" id="btnBackup" data-i18n-title="side.backupTitle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span data-i18n="side.backup"></span></button>
+      <button class="side-btn lock" id="btnLock" data-i18n-title="side.lockTitle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10.5" width="16" height="11" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg><span data-i18n="side.lock"></span></button>
+      <button class="side-btn" id="btnSettings" data-i18n-title="side.settingsTitle" style="flex:0 0 44px">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></button>
     </div>
   </aside>
@@ -411,11 +424,11 @@ input,textarea,select{font-family:inherit; font-size:14px}
   <main id="main">
     <div class="topbar">
       <div class="tt">
-        <h2 id="viewTitle"><span id="viewIcon"></span><span id="viewName">Alle Einträge</span></h2>
+        <h2 id="viewTitle"><span id="viewIcon"></span><span id="viewName"></span></h2>
         <div class="cnt" id="viewCount"></div>
       </div>
       <button class="btn-add" id="btnAdd">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>Neu anlegen</button>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="app.new"></span></button>
     </div>
     <div class="cards" id="cards"></div>
   </main>
@@ -433,9 +446,9 @@ input,textarea,select{font-family:inherit; font-size:14px}
   <div class="dw-body" id="dwBody"></div>
   <div class="dw-foot">
     <button class="btn-line" id="dwEdit">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Bearbeiten</button>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span data-i18n="dw.edit"></span></button>
     <button class="btn-line danger" id="dwDel">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>Löschen</button>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg><span data-i18n="dw.delete"></span></button>
   </div>
 </div>
 
@@ -444,7 +457,7 @@ input,textarea,select{font-family:inherit; font-size:14px}
   <div class="sheet">
     <div class="sh-head">
       <div class="badge" id="mdBadge" style="width:38px;height:38px;font-size:18px"></div>
-      <h3 id="mdTitle">Neuer Eintrag</h3>
+      <h3 id="mdTitle"></h3>
       <button class="icon-btn" id="mdClose">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
@@ -458,36 +471,42 @@ input,textarea,select{font-family:inherit; font-size:14px}
   <div class="sheet" style="max-width:520px">
     <div class="sh-head">
       <div class="badge" style="width:38px;height:38px;font-size:18px">⚙️</div>
-      <h3>Einstellungen</h3>
+      <h3 data-i18n="set.title"></h3>
       <button class="icon-btn" id="stClose">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
     <div class="sh-body">
       <div>
-        <label class="form-lab">Automatisch sperren nach</label>
+        <label class="form-lab" data-i18n="set.language"></label>
+        <select class="finp" id="setLangSel">
+          <option value="de">Deutsch</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-lab" data-i18n="set.autolock"></label>
         <select class="finp" id="setAutolock">
-          <option value="1">1 Minute ohne Aktivität</option>
-          <option value="5">5 Minuten ohne Aktivität</option>
-          <option value="15">15 Minuten ohne Aktivität</option>
-          <option value="0">Nicht automatisch sperren</option>
+          <option value="1" data-i18n="set.min1"></option>
+          <option value="5" data-i18n="set.min5"></option>
+          <option value="15" data-i18n="set.min15"></option>
+          <option value="0" data-i18n="set.never"></option>
         </select>
       </div>
       <div class="edit-field" style="border-color:var(--line)">
-        <div class="ef-key" style="color:var(--tx-hi);margin-bottom:12px">Master-Passwort und PIN ändern</div>
-        <input class="finp" id="setPass" type="password" placeholder="Neues Master-Passwort" style="margin-bottom:9px" autocomplete="off">
-        <input class="finp" id="setPass2" type="password" placeholder="Neues Passwort wiederholen" style="margin-bottom:9px" autocomplete="off">
-        <input class="finp pin" id="setPin" type="password" inputmode="numeric" placeholder="Neue PIN" style="margin-bottom:12px;letter-spacing:6px" autocomplete="off">
-        <button class="btn-save" id="setChangeBtn" style="width:100%">Passwort und PIN ändern</button>
+        <div class="ef-key" data-i18n="set.changeTitle" style="color:var(--tx-hi);margin-bottom:12px"></div>
+        <input class="finp" id="setPass" type="password" data-i18n-ph="set.newMasterPh" style="margin-bottom:9px" autocomplete="off">
+        <input class="finp" id="setPass2" type="password" data-i18n-ph="set.repeatPh" style="margin-bottom:9px" autocomplete="off">
+        <input class="finp pin" id="setPin" type="password" inputmode="numeric" data-i18n-ph="set.newPinPh" style="margin-bottom:12px;letter-spacing:6px" autocomplete="off">
+        <button class="btn-save" id="setChangeBtn" data-i18n="set.changeBtn" style="width:100%"></button>
         <div id="setMsg" class="gate-msg" style="text-align:center"></div>
       </div>
       <div style="background:var(--bg-0);border:1px solid var(--line-soft);border-radius:13px;padding:14px 16px;font-size:12.5px;color:var(--tx-dim);line-height:1.6">
-        <b style="color:var(--tx);display:block;margin-bottom:6px">Ehrlich gesagt</b>
-        Dieser Tresor schützt deine Daten, wenn jemand die Datei stiehlt. Ohne dein Passwort und deine PIN ist sie wertlos für Fremde.
-        Er schützt dich nicht vor Schadsoftware, die auf diesem PC mitliest, während du entsperrt bist. Und ohne Passwort, PIN oder Notfall-Schlüssel sind die Daten für immer verloren, auch für uns. Tipp: Aktiviere BitLocker für die Festplatte.
+        <b data-i18n="set.honestTitle" style="color:var(--tx);display:block;margin-bottom:6px"></b>
+        <span data-i18n="set.honestBody"></span>
       </div>
     </div>
     <div class="sh-foot">
-      <button class="btn-line" id="setBackup" style="flex:1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Verschlüsselte Sicherung speichern</button>
+      <button class="btn-line" id="setBackup" style="flex:1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span data-i18n="side.backupTitle"></span></button>
     </div>
   </div>
 </div>
@@ -496,19 +515,100 @@ input,textarea,select{font-family:inherit; font-size:14px}
 
 <script>
 /* ================================================================
-   API-Anbindung: echt (pywebview) oder Test-Mock (Browser-Vorschau)
+   Diagnose + sicherer Einstellungs-Speicher
    ================================================================ */
 window.__diag=[];
 window.addEventListener('error',e=>{try{window.__diag.push('ERR: '+(e.message||e.error)+' @'+(e.filename||'').split('/').pop()+':'+e.lineno);}catch(_){}});
 window.addEventListener('unhandledrejection',e=>{try{window.__diag.push('REJ: '+(e.reason&&e.reason.message?e.reason.message:String(e.reason)));}catch(_){}});
 
-/* Sicherer Einstellungs-Speicher: im nativen Fenster (Herkunft about:blank) ist
-   localStorage gesperrt, daher mit try/catch und Rückfall auf den Arbeitsspeicher. */
 const store={_m:{},
   get(k){try{return localStorage.getItem(k);}catch(e){return (k in this._m)?this._m[k]:null;}},
   set(k,v){try{localStorage.setItem(k,v);}catch(e){this._m[k]=String(v);}},
   del(k){try{localStorage.removeItem(k);}catch(e){delete this._m[k];}}
 };
+
+/* ================================================================
+   Sprachen (DE / EN)
+   ================================================================ */
+const I18N={
+ de:{
+  'lock.sub':'Alle deine Zugänge an einem sicheren Ort.<br>Bitte entsperren.',
+  'lock.master':'Master-Passwort','lock.masterPh':'Dein Passwort','lock.pin':'PIN','lock.unlock':'Entsperren','lock.forgot':'Passwort oder PIN vergessen?',
+  'setup.welcome':'Willkommen','setup.sub':'Richte deinen Tresor ein. Merke dir beides gut,<br>ohne diese zwei Angaben kommt niemand hinein, auch du nicht.',
+  'setup.chooseMaster':'Master-Passwort wählen','setup.min8':'Mindestens 8 Zeichen','setup.repeat':'Passwort wiederholen','setup.repeatPh':'Nochmal eingeben',
+  'setup.choosePin':'PIN wählen (4 bis 8 Ziffern)','setup.create':'Tresor erstellen','setup.hint':'Es gibt keine Passwort-Zurücksetzung. Alles wird nur auf diesem Gerät verschlüsselt gespeichert.',
+  'rec.title':'Dein Notfall-Schlüssel','rec.sub':'Falls du Passwort oder PIN vergisst, ist das deine einzige Rettung.<br>Schreib ihn ab und leg ihn an einen sicheren Ort. Er wird nur dieses eine Mal gezeigt.',
+  'rec.copy':'Notfall-Schlüssel kopieren','rec.confirm':'Ich habe den Notfall-Schlüssel abgeschrieben und sicher aufbewahrt.','rec.done':'Fertig, Tresor öffnen','rec.none':'(kein Schlüssel)',
+  'fg.title':'Vergessen?','fg.sub':'Gib deinen Notfall-Schlüssel ein und setze ein neues<br>Master-Passwort samt PIN. Deine Einträge bleiben erhalten.',
+  'fg.key':'Notfall-Schlüssel','fg.newMaster':'Neues Master-Passwort','fg.newPin':'Neue PIN (4 bis 8 Ziffern)','fg.submit':'Entsperren und neu setzen','fg.back':'Zurück zum Anmelden','fg.enterKey':'Bitte den Notfall-Schlüssel eingeben.',
+  'side.tagline':'Zugänge & Schlüssel','side.search':'Suchen ...','side.backup':'Sichern','side.backupTitle':'Verschlüsselte Sicherung speichern','side.lock':'Sperren','side.lockTitle':'Tresor sofort abschließen','side.settingsTitle':'Einstellungen',
+  'app.new':'Neu anlegen','app.all':'Alle Einträge','app.groups':'Orte / Wofür','app.ungrouped':'Ohne Zuordnung','app.untitled':'Ohne Titel','app.open':'Öffnen',
+  'app.one':'Eintrag','app.many':'Einträge','app.found':'gefunden',
+  'app.emptyReadyTitle':'Dein Tresor ist bereit','app.emptyReadyBody':'Leg deinen ersten Zugang an. Wähle eine Art, gib ihm einen Namen, fertig. Danach kopierst du jedes Feld mit einem Klick.',
+  'app.emptyNoneTitle':'Nichts gefunden','app.emptyNoneBody':'Zu deiner Suche oder diesem Ort gibt es keinen Eintrag.','app.firstEntry':'Ersten Eintrag anlegen',
+  'dw.edit':'Bearbeiten','dw.delete':'Löschen','dw.noFields':'Dieser Eintrag hat noch keine ausgefüllten Felder.',
+  'md.newEntry':'Neuer Eintrag','md.editEntry':'Eintrag bearbeiten','md.newOf':'Neu: {0}','md.whatStore':'Was möchtest du speichern?',
+  'md.name':'Name / Titel','md.namePh':'z. B. Firmen-Server FTP','md.group':'Ort / Wofür','md.groupPh':'z. B. Arbeit, meine-webseite.de',
+  'md.fields':'Felder (jedes wird später mit einem Klick kopierbar)','md.addField':'Feld hinzufügen','md.cancel':'Abbrechen','md.back':'Zurück','md.save':'Speichern',
+  'md.secret':'Geheim','md.valuePh':'Wert ...','md.newField':'Neues Feld','md.genTitle':'Passwort erzeugen','md.field':'Feld',
+  'gen.length':'Länge','gen.upper':'GROSS','gen.lower':'klein','gen.apply':'Übernehmen',
+  'set.title':'Einstellungen','set.language':'Sprache','set.autolock':'Automatisch sperren nach','set.min1':'1 Minute ohne Aktivität','set.min5':'5 Minuten ohne Aktivität','set.min15':'15 Minuten ohne Aktivität','set.never':'Nicht automatisch sperren',
+  'set.changeTitle':'Master-Passwort und PIN ändern','set.newMasterPh':'Neues Master-Passwort','set.repeatPh':'Neues Passwort wiederholen','set.newPinPh':'Neue PIN','set.changeBtn':'Passwort und PIN ändern',
+  'set.honestTitle':'Ehrlich gesagt','set.honestBody':'Dieser Tresor schützt deine Daten, wenn jemand die Datei stiehlt. Ohne dein Passwort und deine PIN ist sie wertlos für Fremde. Er schützt dich nicht vor Schadsoftware, die auf diesem PC mitliest, während du entsperrt bist. Und ohne Passwort, PIN oder Notfall-Schlüssel sind die Daten für immer verloren, auch für uns. Tipp: Aktiviere BitLocker für die Festplatte.',
+  'toast.copied':'Kopiert','toast.copiedSub':'Wird in {0} s automatisch aus der Zwischenablage gelöscht','toast.saved':'Gespeichert','toast.deleted':'Gelöscht','toast.newPwSet':'Neues Passwort gesetzt','toast.pwChanged':'Passwort und PIN geändert','toast.backupSaved':'Sicherung gespeichert','toast.backupSub':'Verschlüsselte Kopie deines Tresors','toast.autolockSet':'Sperrt nach {0} min','toast.autolockOff':'Auto-Sperre aus',
+  'msg.enterBoth':'Bitte Passwort und PIN eingeben.','msg.min8':'Das Passwort braucht mindestens 8 Zeichen.','msg.min8new':'Das neue Passwort braucht mindestens 8 Zeichen.','msg.min8short':'Mindestens 8 Zeichen.','msg.mismatch':'Die beiden Passwörter sind nicht gleich.','msg.mismatch2':'Die Passwörter sind nicht gleich.','msg.pinFmt':'Die PIN muss 4 bis 8 Ziffern haben.','msg.pinFmtNew':'Die neue PIN muss 4 bis 8 Ziffern haben.','msg.pinFmtShort':'PIN: 4 bis 8 Ziffern.',
+  'confirm.delete':'Eintrag "{0}" wirklich löschen? Das kann nicht rückgängig gemacht werden.',
+  'err.vault_exists':'Es gibt bereits einen Tresor.','err.create_failed':'Der Tresor konnte nicht angelegt werden.','err.wrong_credentials':'Passwort oder PIN ist falsch.','err.corrupt':'Die Tresordatei ist beschädigt.','err.unlock_failed':'Der Tresor konnte nicht geöffnet werden.','err.recovery_wrong':'Der Notfall-Schlüssel ist falsch.','err.recovery_failed':'Öffnen mit Notfall-Schlüssel fehlgeschlagen.','err.locked':'Der Tresor ist gesperrt.','err.save_failed':'Speichern fehlgeschlagen.','err.delete_failed':'Löschen fehlgeschlagen.','err.change_failed':'Ändern fehlgeschlagen.','err.backup_failed':'Die Sicherung ist fehlgeschlagen.','err.no_vault_backup':'Es gibt noch keinen Tresor zum Sichern.','err.unknown':'Etwas ist schiefgelaufen.'
+ },
+ en:{
+  'lock.sub':'All your access in one secure place.<br>Please unlock.',
+  'lock.master':'Master password','lock.masterPh':'Your password','lock.pin':'PIN','lock.unlock':'Unlock','lock.forgot':'Forgot password or PIN?',
+  'setup.welcome':'Welcome','setup.sub':'Set up your vault. Remember both well,<br>without these two, no one gets in, not even you.',
+  'setup.chooseMaster':'Choose a master password','setup.min8':'At least 8 characters','setup.repeat':'Repeat password','setup.repeatPh':'Enter again',
+  'setup.choosePin':'Choose a PIN (4 to 8 digits)','setup.create':'Create vault','setup.hint':'There is no password reset. Everything is stored encrypted on this device only.',
+  'rec.title':'Your recovery key','rec.sub':'If you forget your password or PIN, this is your only way back in.<br>Write it down and keep it somewhere safe. It is shown only this once.',
+  'rec.copy':'Copy recovery key','rec.confirm':'I have written down the recovery key and stored it safely.','rec.done':'Done, open the vault','rec.none':'(no key)',
+  'fg.title':'Forgot?','fg.sub':'Enter your recovery key and set a new<br>master password and PIN. Your entries are kept.',
+  'fg.key':'Recovery key','fg.newMaster':'New master password','fg.newPin':'New PIN (4 to 8 digits)','fg.submit':'Unlock and reset','fg.back':'Back to sign in','fg.enterKey':'Please enter the recovery key.',
+  'side.tagline':'Access & keys','side.search':'Search ...','side.backup':'Back up','side.backupTitle':'Save an encrypted backup','side.lock':'Lock','side.lockTitle':'Lock the vault now','side.settingsTitle':'Settings',
+  'app.new':'New entry','app.all':'All entries','app.groups':'Places / Purpose','app.ungrouped':'Ungrouped','app.untitled':'Untitled','app.open':'Open',
+  'app.one':'entry','app.many':'entries','app.found':'found',
+  'app.emptyReadyTitle':'Your vault is ready','app.emptyReadyBody':'Add your first entry. Pick a type, give it a name, done. Then copy any field with a single click.',
+  'app.emptyNoneTitle':'Nothing found','app.emptyNoneBody':'No entry matches your search or this place.','app.firstEntry':'Add your first entry',
+  'dw.edit':'Edit','dw.delete':'Delete','dw.noFields':'This entry has no filled fields yet.',
+  'md.newEntry':'New entry','md.editEntry':'Edit entry','md.newOf':'New: {0}','md.whatStore':'What do you want to store?',
+  'md.name':'Name / Title','md.namePh':'e.g. Company Server FTP','md.group':'Place / Purpose','md.groupPh':'e.g. Work, my-website.com',
+  'md.fields':'Fields (each becomes one-click copyable)','md.addField':'Add field','md.cancel':'Cancel','md.back':'Back','md.save':'Save',
+  'md.secret':'Secret','md.valuePh':'Value ...','md.newField':'New field','md.genTitle':'Generate password','md.field':'Field',
+  'gen.length':'Length','gen.upper':'UPPER','gen.lower':'lower','gen.apply':'Apply',
+  'set.title':'Settings','set.language':'Language','set.autolock':'Auto-lock after','set.min1':'1 minute of inactivity','set.min5':'5 minutes of inactivity','set.min15':'15 minutes of inactivity','set.never':'Do not auto-lock',
+  'set.changeTitle':'Change master password and PIN','set.newMasterPh':'New master password','set.repeatPh':'Repeat new password','set.newPinPh':'New PIN','set.changeBtn':'Change password and PIN',
+  'set.honestTitle':'Honestly','set.honestBody':'This vault protects your data if someone steals the file. Without your password and PIN it is worthless to a stranger. It does not protect you from malware reading along on this PC while you are unlocked. And without the password, PIN, or recovery key the data is gone forever, even for us. Tip: enable BitLocker for your drive.',
+  'toast.copied':'Copied','toast.copiedSub':'Cleared from the clipboard automatically in {0} s','toast.saved':'Saved','toast.deleted':'Deleted','toast.newPwSet':'New password set','toast.pwChanged':'Password and PIN changed','toast.backupSaved':'Backup saved','toast.backupSub':'Encrypted copy of your vault','toast.autolockSet':'Locks after {0} min','toast.autolockOff':'Auto-lock off',
+  'msg.enterBoth':'Please enter password and PIN.','msg.min8':'The password needs at least 8 characters.','msg.min8new':'The new password needs at least 8 characters.','msg.min8short':'At least 8 characters.','msg.mismatch':'The two passwords do not match.','msg.mismatch2':'The passwords do not match.','msg.pinFmt':'The PIN must be 4 to 8 digits.','msg.pinFmtNew':'The new PIN must be 4 to 8 digits.','msg.pinFmtShort':'PIN: 4 to 8 digits.',
+  'confirm.delete':'Really delete "{0}"? This cannot be undone.',
+  'err.vault_exists':'A vault already exists.','err.create_failed':'The vault could not be created.','err.wrong_credentials':'Password or PIN is wrong.','err.corrupt':'The vault file is damaged.','err.unlock_failed':'The vault could not be opened.','err.recovery_wrong':'The recovery key is wrong.','err.recovery_failed':'Unlocking with the recovery key failed.','err.locked':'The vault is locked.','err.save_failed':'Saving failed.','err.delete_failed':'Deleting failed.','err.change_failed':'Changing failed.','err.backup_failed':'The backup failed.','err.no_vault_backup':'There is no vault to back up yet.','err.unknown':'Something went wrong.'
+ }
+};
+let LANG=(function(){const s=store.get('tresor_lang');if(s==='de'||s==='en')return s;return (navigator.language||'').toLowerCase().indexOf('de')===0?'de':'en';})();
+function t(key,a){let s=(I18N[LANG]&&I18N[LANG][key]);if(s==null)s=(I18N.en[key]!=null?I18N.en[key]:key);if(a!=null)s=String(s).split('{0}').join(a);return s;}
+function errText(r){const c='err.'+((r&&r.error)||'unknown');return (I18N.en[c]!=null)?t(c):t('err.unknown');}
+function applyStatic(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-i18n]').forEach(e=>{e.textContent=t(e.dataset.i18n);});
+  document.querySelectorAll('[data-i18n-html]').forEach(e=>{e.innerHTML=t(e.dataset.i18nHtml);});
+  document.querySelectorAll('[data-i18n-ph]').forEach(e=>{e.placeholder=t(e.dataset.i18nPh);});
+  document.querySelectorAll('[data-i18n-title]').forEach(e=>{e.title=t(e.dataset.i18nTitle);});
+  document.querySelectorAll('#langToggle button').forEach(b=>b.classList.toggle('on',b.dataset.lang===LANG));
+  const ls=$('#setLangSel');if(ls)ls.value=LANG;
+}
+function setLang(l){
+  if(l!==LANG){LANG=l;store.set('tresor_lang',l);}
+  applyStatic();
+  if(!$('#screen-app').classList.contains('hidden')){S.group='__all';renderApp();}
+  if($('#drawer').classList.contains('show')&&S.drawerId)openDrawer(S.drawerId);
+  if($('#modal').classList.contains('show'))closeModal();
+}
 
 const ICONS = {
   copy:'<path d="M9 9h10a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
@@ -517,11 +617,15 @@ const ICONS = {
   eyeoff:'<path d="M9.9 4.2A10.9 10.9 0 0 1 12 4c6.5 0 10 7 10 7a17 17 0 0 1-3.3 4M6.6 6.6A17 17 0 0 0 2 11s3.5 7 10 7a10.8 10.8 0 0 0 4.1-.8"/><path d="m3 3 18 18"/>',
   refresh:'<path d="M21 12a9 9 0 1 1-2.6-6.3M21 4v5h-5"/>',
   lock:'<rect x="4" y="10.5" width="16" height="11" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
   trash:'<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>',
 };
 function svg(name,w){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="'+(w||16)+'" height="'+(w||16)+'">'+ICONS[name]+'</svg>';}
 
-const MockAPI = (()=>{ // nur fuer die Browser-Vorschau, damit man das Design sieht
+/* ================================================================
+   API-Anbindung: echt (pywebview) oder Test-Mock (Browser-Vorschau)
+   ================================================================ */
+const MockAPI = (()=>{
   const KEY='tresor_mock';
   function load(){try{return JSON.parse(store.get(KEY))||null}catch(e){return null}}
   function save(d){store.set(KEY,JSON.stringify(d))}
@@ -531,8 +635,8 @@ const MockAPI = (()=>{ // nur fuer die Browser-Vorschau, damit man das Design si
     create_vault:(m,p)=>{data={entries:[]};creds={m,p};save(data);
       const rk=Array.from({length:11},()=>Math.random().toString(36).slice(2,7).toUpperCase()).join('-');
       return Promise.resolve({ok:true,recovery:rk})},
-    unlock:(m,p)=>{if(!data)return Promise.resolve({ok:false,error:'Kein Tresor'});creds={m,p};return Promise.resolve({ok:true,entries:data.entries})},
-    unlock_recovery:(rk)=>{if(!data)return Promise.resolve({ok:false,error:'Kein Tresor'});return Promise.resolve({ok:true,entries:data.entries})},
+    unlock:(m,p)=>{if(!data)return Promise.resolve({ok:false,error:'unknown'});creds={m,p};return Promise.resolve({ok:true,entries:data.entries})},
+    unlock_recovery:(rk)=>{if(!data)return Promise.resolve({ok:false,error:'unknown'});return Promise.resolve({ok:true,entries:data.entries})},
     change_master:(m,p)=>{creds={m,p};return Promise.resolve({ok:true})},
     lock:()=>{creds=null;return Promise.resolve({ok:true})},
     save_entry:(e)=>{if(!e.id){e.id='id'+Math.random().toString(36).slice(2)}
@@ -542,7 +646,7 @@ const MockAPI = (()=>{ // nur fuer die Browser-Vorschau, damit man das Design si
     generate_password:(len,o)=>{let s='';const L='abcdefghijkmnpqrstuvwxyz',U='ABCDEFGHJKLMNPQRSTUVWXYZ',N='23456789',S='!@#$%&*?-_=+';
       let pool=(o.lower?L:'')+(o.upper?U:'')+(o.digits?N:'')+(o.symbols?S:'');if(!pool)pool=L+U+N;
       for(let i=0;i<len;i++)s+=pool[Math.floor(Math.random()*pool.length)];return Promise.resolve({password:s})},
-    export_backup:()=>Promise.resolve({ok:true,path:'(Vorschau, keine echte Datei)'}),
+    export_backup:()=>Promise.resolve({ok:true,path:'(preview)'}),
   };
 })();
 
@@ -550,25 +654,28 @@ let API=MockAPI;
 const apiReady=new Promise(res=>{
   if(window.pywebview&&window.pywebview.api){API=window.pywebview.api;return res();}
   window.addEventListener('pywebviewready',()=>{API=window.pywebview.api;res();});
-  setTimeout(res,900); // Fallback: Browser-Vorschau ohne pywebview
+  setTimeout(res,900);
 });
 function call(m,...a){return API[m]?API[m](...a):Promise.reject('no '+m);}
 
 /* ================================================================
-   Typen-Vorlagen
+   Typen-Vorlagen (zweisprachig)
    ================================================================ */
+const F=(de,en)=>({de,en});
 const TYPES={
-  login:{lb:'Login / Webseite',em:'🌐',f:[['Webseite / URL','',0],['Benutzername','',0],['Passwort','',1],['Notiz','',0]]},
-  email:{lb:'E-Mail (IMAP/SMTP)',em:'📧',f:[['E-Mail-Adresse','',0],['Passwort','',1],['IMAP-Server','',0],['IMAP-Port','993',0],['SMTP-Server','',0],['SMTP-Port','465',0],['Verschlüsselung','SSL/TLS',0],['Benutzername','',0]]},
-  ftp:{lb:'FTP / SFTP',em:'📁',f:[['Protokoll','FTP',0],['Host / Server','',0],['Port','21',0],['Benutzername','',0],['Passwort','',1],['Verzeichnis','/',0]]},
-  database:{lb:'Datenbank',em:'🗄️',f:[['Typ','MySQL',0],['Host','',0],['Port','3306',0],['Datenbank','',0],['Benutzer','',0],['Passwort','',1],['Connection-String','',1]]},
-  api:{lb:'API-Verbindung',em:'🔌',f:[['Dienst / Name','',0],['Verbindet (von)','',0],['Verbindet (nach)','',0],['Endpoint / URL','',0],['API-Key','',1],['Client-ID','',0],['Client-Secret','',1],['Public Key','',0],['Private Key','',1],['Notiz','',0]]},
-  ssh:{lb:'SSH / Schlüssel',em:'🔑',f:[['Host','',0],['Benutzer','',0],['Port','22',0],['Public Key','',0],['Private Key','',1],['Passphrase','',1]]},
-  card:{lb:'Karte / Zahlung',em:'💳',f:[['Karteninhaber','',0],['Kartennummer','',1],['Gültig bis','',0],['CVC','',1],['PIN','',1],['Bank','',0]]},
-  note:{lb:'Notiz / Geheimnis',em:'📝',f:[['Inhalt','',1]]},
-  custom:{lb:'Frei / Sonstiges',em:'✨',f:[['Bezeichnung','',0],['Wert','',1]]},
+  login:{lb:{de:'Login / Webseite',en:'Login / Website'},em:'🌐',f:[[F('Webseite / URL','Website / URL'),'',0],[F('Benutzername','Username'),'',0],[F('Passwort','Password'),'',1],[F('Notiz','Note'),'',0]]},
+  email:{lb:{de:'E-Mail (IMAP/SMTP)',en:'Email (IMAP/SMTP)'},em:'📧',f:[[F('E-Mail-Adresse','Email address'),'',0],[F('Passwort','Password'),'',1],[F('IMAP-Server','IMAP server'),'',0],[F('IMAP-Port','IMAP port'),'993',0],[F('SMTP-Server','SMTP server'),'',0],[F('SMTP-Port','SMTP port'),'465',0],[F('Verschlüsselung','Encryption'),'SSL/TLS',0],[F('Benutzername','Username'),'',0]]},
+  ftp:{lb:{de:'FTP / SFTP',en:'FTP / SFTP'},em:'📁',f:[[F('Protokoll','Protocol'),'FTP',0],[F('Host / Server','Host / Server'),'',0],[F('Port','Port'),'21',0],[F('Benutzername','Username'),'',0],[F('Passwort','Password'),'',1],[F('Verzeichnis','Directory'),'/',0]]},
+  database:{lb:{de:'Datenbank',en:'Database'},em:'🗄️',f:[[F('Typ','Type'),'MySQL',0],[F('Host','Host'),'',0],[F('Port','Port'),'3306',0],[F('Datenbank','Database'),'',0],[F('Benutzer','User'),'',0],[F('Passwort','Password'),'',1],[F('Connection-String','Connection string'),'',1]]},
+  api:{lb:{de:'API-Verbindung',en:'API connection'},em:'🔌',f:[[F('Dienst / Name','Service / Name'),'',0],[F('Verbindet (von)','Connects (from)'),'',0],[F('Verbindet (nach)','Connects (to)'),'',0],[F('Endpoint / URL','Endpoint / URL'),'',0],[F('API-Key','API key'),'',1],[F('Client-ID','Client ID'),'',0],[F('Client-Secret','Client secret'),'',1],[F('Public Key','Public key'),'',0],[F('Private Key','Private key'),'',1],[F('Notiz','Note'),'',0]]},
+  ssh:{lb:{de:'SSH / Schlüssel',en:'SSH / Keys'},em:'🔑',f:[[F('Host','Host'),'',0],[F('Benutzer','User'),'',0],[F('Port','Port'),'22',0],[F('Public Key','Public key'),'',0],[F('Private Key','Private key'),'',1],[F('Passphrase','Passphrase'),'',1]]},
+  card:{lb:{de:'Karte / Zahlung',en:'Card / Payment'},em:'💳',f:[[F('Karteninhaber','Cardholder'),'',0],[F('Kartennummer','Card number'),'',1],[F('Gültig bis','Expires'),'',0],[F('CVC','CVC'),'',1],[F('PIN','PIN'),'',1],[F('Bank','Bank'),'',0]]},
+  note:{lb:{de:'Notiz / Geheimnis',en:'Note / Secret'},em:'📝',f:[[F('Inhalt','Content'),'',1]]},
+  custom:{lb:{de:'Frei / Sonstiges',en:'Free / Other'},em:'✨',f:[[F('Bezeichnung','Label'),'',0],[F('Wert','Value'),'',1]]},
 };
 function typeOf(t){return TYPES[t]||TYPES.custom;}
+function typeLb(t){return (t.lb&&t.lb[LANG])||(t.lb&&t.lb.en)||'';}
+function fkey(k){if(k&&typeof k==='object')return k[LANG]||k.en;return k;}
 
 /* ================================================================
    Zustand + Helfer
@@ -591,7 +698,7 @@ async function copyVal(text,btn){
   if(btn){const old=btn.innerHTML;btn.classList.add('ok','done');btn.innerHTML=svg('check',15);
     setTimeout(()=>{btn.classList.remove('ok','done');btn.innerHTML=old;},1100);}
   const secs=(r&&r.cleared_in)||20;
-  toast('Kopiert','Wird in '+secs+' s automatisch aus der Zwischenablage gelöscht');
+  toast(t('toast.copied'),t('toast.copiedSub',secs));
 }
 
 /* ================================================================
@@ -602,12 +709,12 @@ function scorePw(p){let s=0;if(p.length>=8)s++;if(p.length>=12)s++;if(/[a-z]/.te
 function bindLock(){
   const go=async()=>{
     const p=$('#lkPass').value,pin=$('#lkPin').value;
-    if(!p||!pin){$('#lkMsg').textContent='Bitte Passwort und PIN eingeben.';return;}
+    if(!p||!pin){$('#lkMsg').textContent=t('msg.enterBoth');return;}
     $('#lkBtn').disabled=true;$('#lkMsg').textContent='';
     const r=await call('unlock',p,pin);
     $('#lkBtn').disabled=false;
     if(r&&r.ok){S.entries=r.entries||[];$('#lkPass').value='';$('#lkPin').value='';openApp();}
-    else{$('#lkMsg').textContent=(r&&r.error)||'Passwort oder PIN ist falsch.';$('#lkPin').value='';$('#lkPin').focus();}
+    else{$('#lkMsg').textContent=errText(r);$('#lkPin').value='';$('#lkPin').focus();}
   };
   $('#lkBtn').onclick=go;
   ['lkPass','lkPin'].forEach(id=>$('#'+id).addEventListener('keydown',e=>{if(e.key==='Enter')go();}));
@@ -621,21 +728,21 @@ function bindSetup(){
   const go=async()=>{
     const p=$('#stPass').value,p2=$('#stPass2').value,pin=$('#stPin').value;
     const m=$('#stMsg');
-    if(p.length<8){m.textContent='Das Passwort braucht mindestens 8 Zeichen.';return;}
-    if(p!==p2){m.textContent='Die beiden Passwörter sind nicht gleich.';return;}
-    if(!/^\d{4,8}$/.test(pin)){m.textContent='Die PIN muss 4 bis 8 Ziffern haben.';return;}
+    if(p.length<8){m.textContent=t('msg.min8');return;}
+    if(p!==p2){m.textContent=t('msg.mismatch');return;}
+    if(!/^\d{4,8}$/.test(pin)){m.textContent=t('msg.pinFmt');return;}
     $('#stBtn').disabled=true;m.textContent='';
     const r=await call('create_vault',p,pin);
     $('#stBtn').disabled=false;
     if(r&&r.ok){$('#stPass').value='';$('#stPass2').value='';$('#stPin').value='';showRecovery(r.recovery,p,pin);}
-    else{m.textContent=(r&&r.error)||'Konnte den Tresor nicht erstellen.';}
+    else{m.textContent=errText(r);}
   };
   $('#stBtn').onclick=go;
   $('#stPin').addEventListener('keydown',e=>{if(e.key==='Enter')go();});
 }
 function showRecovery(key,pass,pin){
   show('screen-recovery');
-  $('#rvKey').textContent=key||'(kein Schlüssel)';
+  $('#rvKey').textContent=key||t('rec.none');
   $('#rvChk').checked=false;$('#rvBtn').disabled=true;
   $('#rvChk').onchange=e=>{$('#rvBtn').disabled=!e.target.checked;};
   $('#rvCopy').onclick=()=>{copyVal(key,null);};
@@ -648,16 +755,16 @@ function showRecovery(key,pass,pin){
 function bindForgot(){
   const go=async()=>{
     const key=$('#fgKey').value.trim(),p=$('#fgPass').value,pin=$('#fgPin').value,m=$('#fgMsg');
-    if(!key){m.textContent='Bitte den Notfall-Schlüssel eingeben.';return;}
-    if(p.length<8){m.textContent='Das neue Passwort braucht mindestens 8 Zeichen.';return;}
-    if(!/^\d{4,8}$/.test(pin)){m.textContent='Die neue PIN muss 4 bis 8 Ziffern haben.';return;}
+    if(!key){m.textContent=t('fg.enterKey');return;}
+    if(p.length<8){m.textContent=t('msg.min8new');return;}
+    if(!/^\d{4,8}$/.test(pin)){m.textContent=t('msg.pinFmtNew');return;}
     $('#fgBtn').disabled=true;m.textContent='';
     const r=await call('unlock_recovery',key);
-    if(!(r&&r.ok)){$('#fgBtn').disabled=false;m.textContent=(r&&r.error)||'Notfall-Schlüssel ist falsch.';return;}
+    if(!(r&&r.ok)){$('#fgBtn').disabled=false;m.textContent=errText(r);return;}
     const c=await call('change_master',p,pin);
     $('#fgBtn').disabled=false;
-    if(c&&c.ok){S.entries=r.entries||[];$('#fgKey').value='';$('#fgPass').value='';$('#fgPin').value='';openApp();toast('Neues Passwort gesetzt');}
-    else{m.textContent=(c&&c.error)||'Konnte das neue Passwort nicht setzen.';}
+    if(c&&c.ok){S.entries=r.entries||[];$('#fgKey').value='';$('#fgPass').value='';$('#fgPin').value='';openApp();toast(t('toast.newPwSet'));}
+    else{m.textContent=errText(c);}
   };
   $('#fgBtn').onclick=go;
   $('#lkForgot').onclick=()=>{show('screen-forgot');setTimeout(()=>$('#fgKey').focus(),80);};
@@ -669,17 +776,17 @@ function bindForgot(){
    ================================================================ */
 function groups(){
   const m=new Map();
-  S.entries.forEach(e=>{const g=(e.group||'Ohne Zuordnung');m.set(g,(m.get(g)||0)+1);});
-  return [...m.entries()].sort((a,b)=>a[0].localeCompare(b[0],'de'));
+  S.entries.forEach(e=>{const g=(e.group||t('app.ungrouped'));m.set(g,(m.get(g)||0)+1);});
+  return [...m.entries()].sort((a,b)=>a[0].localeCompare(b[0],LANG));
 }
 function renderNav(){
   const nav=$('#nav');nav.innerHTML='';
   const all=el('div','nav-item'+(S.group==='__all'?' active':''));
-  all.innerHTML='<span class="ico">🗂️</span><span class="nm">Alle Einträge</span><span class="ct">'+S.entries.length+'</span>';
+  all.innerHTML='<span class="ico">🗂️</span><span class="nm">'+esc(t('app.all'))+'</span><span class="ct">'+S.entries.length+'</span>';
   all.onclick=()=>{S.group='__all';renderApp();};
   nav.appendChild(all);
   const gs=groups();
-  if(gs.length){nav.appendChild(el('div','nav-lab',null)).textContent='Orte / Wofür';}
+  if(gs.length){nav.appendChild(el('div','nav-lab',null)).textContent=t('app.groups');}
   gs.forEach(([g,c])=>{
     const it=el('div','nav-item'+(S.group===g?' active':''));
     it.innerHTML='<span class="ico">📍</span><span class="nm">'+esc(g)+'</span><span class="ct">'+c+'</span>';
@@ -689,10 +796,10 @@ function renderNav(){
 }
 function visibleEntries(){
   let list=S.entries.slice();
-  if(S.group!=='__all')list=list.filter(e=>(e.group||'Ohne Zuordnung')===S.group);
+  if(S.group!=='__all')list=list.filter(e=>(e.group||t('app.ungrouped'))===S.group);
   const q=S.query.trim().toLowerCase();
   if(q)list=list.filter(e=>{
-    const hay=[e.title,e.group,typeOf(e.type).lb].concat((e.fields||[]).map(f=>f.key+' '+(f.secret?'':f.value))).join(' ').toLowerCase();
+    const hay=[e.title,e.group,typeLb(typeOf(e.type))].concat((e.fields||[]).map(f=>f.key+' '+(f.secret?'':f.value))).join(' ').toLowerCase();
     return hay.includes(q);
   });
   return list.sort((a,b)=>(b.updated||0)-(a.updated||0));
@@ -702,32 +809,29 @@ function primarySecret(e){return (e.fields||[]).find(x=>x.secret&&x.value)||null
 
 function renderApp(){
   renderNav();
-  const t=typeOf('');
   $('#viewIcon').textContent = S.group==='__all'?'':'📍 ';
-  $('#viewName').textContent = S.group==='__all'?'Alle Einträge':S.group;
+  $('#viewName').textContent = S.group==='__all'?t('app.all'):S.group;
   const list=visibleEntries();
-  $('#viewCount').textContent = list.length+(list.length===1?' Eintrag':' Einträge')+(S.query?' gefunden':'');
+  $('#viewCount').textContent = list.length+' '+(list.length===1?t('app.one'):t('app.many'))+(S.query?(' '+t('app.found')):'');
   const box=$('#cards');box.innerHTML='';
   if(!list.length){
     const e=el('div','empty');
     const first=S.entries.length===0;
-    e.innerHTML='<div class="big">'+svg('lock',40)+'</div><h3>'+(first?'Dein Tresor ist bereit':'Nichts gefunden')+'</h3>'+
-      '<p>'+(first?'Leg deinen ersten Zugang an. Wähle eine Art, gib ihm einen Namen, fertig. Danach kopierst du jedes Feld mit einem Klick.':'Zu deiner Suche oder diesem Ort gibt es keinen Eintrag.')+'</p>'+
-      (first?'<button class="btn-add" style="margin:0 auto" onclick="openEditor()">'+svg('copy',0).replace(ICONS.copy,'<path d=\'M12 5v14M5 12h14\'/>')+'Ersten Eintrag anlegen</button>':'');
+    e.innerHTML='<div class="big">'+svg('lock',40)+'</div><h3>'+esc(first?t('app.emptyReadyTitle'):t('app.emptyNoneTitle'))+'</h3>'+
+      '<p>'+esc(first?t('app.emptyReadyBody'):t('app.emptyNoneBody'))+'</p>';
+    if(first){const b=el('button','btn-add');b.style.margin='0 auto';b.innerHTML=svg('plus',17)+esc(t('app.firstEntry'));b.onclick=()=>openEditor();e.appendChild(b);}
     box.appendChild(e);
-    // Button-Icon sauber setzen
-    const b=box.querySelector('.btn-add');if(b){b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>Ersten Eintrag anlegen';b.onclick=()=>openEditor();}
     return;
   }
   list.forEach(e=>box.appendChild(cardEl(e)));
 }
 function cardEl(e){
-  const t=typeOf(e.type);const c=el('div','card');
+  const t2=typeOf(e.type);const c=el('div','card');
   const id=primaryIdent(e),sec=primarySecret(e);
   c.innerHTML=
-    '<div class="row1"><div class="badge">'+t.em+'</div>'+
-      '<div class="ti"><b>'+esc(e.title||'Ohne Titel')+'</b>'+
-      '<div class="grp">'+t.em+' '+esc(t.lb)+(e.group?' · '+esc(e.group):'')+'</div></div></div>'+
+    '<div class="row1"><div class="badge">'+t2.em+'</div>'+
+      '<div class="ti"><b>'+esc(e.title||t('app.untitled'))+'</b>'+
+      '<div class="grp">'+t2.em+' '+esc(typeLb(t2))+(e.group?' · '+esc(e.group):'')+'</div></div></div>'+
     (id?'<div class="ident"><span class="k">'+esc(id.k)+'</span><span class="v">'+esc(id.v)+'</span></div>':'')+
     '<div class="quick"></div>';
   const q=c.querySelector('.quick');
@@ -735,7 +839,7 @@ function cardEl(e){
     b.onclick=ev=>{ev.stopPropagation();copyVal(id.v,b);};q.appendChild(b);}
   if(sec){const b=el('button','qbtn pw');b.innerHTML=svg('copy',14)+esc(shorten(sec.key));
     b.onclick=ev=>{ev.stopPropagation();copyVal(sec.value,b);};q.appendChild(b);}
-  if(!id&&!sec){const b=el('button','qbtn');b.innerHTML=svg('eye',14)+'Öffnen';b.onclick=()=>openDrawer(e.id);q.appendChild(b);}
+  if(!id&&!sec){const b=el('button','qbtn');b.innerHTML=svg('eye',14)+esc(t('app.open'));b.onclick=()=>openDrawer(e.id);q.appendChild(b);}
   c.onclick=()=>openDrawer(e.id);
   return c;
 }
@@ -746,10 +850,10 @@ function shorten(s){s=String(s);return s.length>14?s.slice(0,13)+'…':s;}
    ================================================================ */
 function openDrawer(id){
   const e=S.entries.find(x=>x.id===id);if(!e)return;S.drawerId=id;
-  const t=typeOf(e.type);
-  $('#dwBadge').textContent=t.em;
-  $('#dwTitle').textContent=e.title||'Ohne Titel';
-  $('#dwGroup').textContent=t.lb+(e.group?'  ·  '+e.group:'');
+  const t2=typeOf(e.type);
+  $('#dwBadge').textContent=t2.em;
+  $('#dwTitle').textContent=e.title||t('app.untitled');
+  $('#dwGroup').textContent=typeLb(t2)+(e.group?'  ·  '+e.group:'');
   const body=$('#dwBody');body.innerHTML='';
   (e.fields||[]).filter(f=>f.value!=='').forEach(f=>{
     const row=el('div','frow');
@@ -769,7 +873,7 @@ function openDrawer(id){
     if(eye)eye.onclick=()=>{shown=!shown;paint();eye.innerHTML=svg(shown?'eyeoff':'eye',15);eye.classList.toggle('ok',shown);};
     row.querySelector('[data-copy]').onclick=(ev)=>copyVal(f.value,ev.currentTarget);
   });
-  if(!body.children.length)body.innerHTML='<div class="frow"><div class="fv" style="color:var(--tx-dim)">Dieser Eintrag hat noch keine ausgefüllten Felder.</div></div>';
+  if(!body.children.length)body.innerHTML='<div class="frow"><div class="fv" style="color:var(--tx-dim)">'+esc(t('dw.noFields'))+'</div></div>';
   $('#ovDrawer').classList.add('show');$('#drawer').classList.add('show');
 }
 function closeDrawer(){$('#ovDrawer').classList.remove('show');$('#drawer').classList.remove('show');S.drawerId=null;}
@@ -780,13 +884,14 @@ function closeDrawer(){$('#ovDrawer').classList.remove('show');$('#drawer').clas
 function openEditor(id){
   S.editing=id?JSON.parse(JSON.stringify(S.entries.find(x=>x.id===id))):null;
   const md=$('#modal');
-  if(!S.editing){ // Schritt 1: Art waehlen
-    $('#mdTitle').textContent='Neuer Eintrag';$('#mdBadge').textContent='✨';
+  if(!S.editing){
+    $('#mdTitle').textContent=t('md.newEntry');$('#mdBadge').textContent='✨';
     $('#mdFoot').innerHTML='';
-    const body=$('#mdBody');body.innerHTML='<label class="form-lab">Was möchtest du speichern?</label>';
+    const body=$('#mdBody');body.innerHTML='';
+    const lab=el('label','form-lab');lab.textContent=t('md.whatStore');body.appendChild(lab);
     const grid=el('div','type-grid');
-    Object.entries(TYPES).forEach(([k,t])=>{
-      const c=el('button','type-card');c.innerHTML='<span class="em">'+t.em+'</span><span class="lb">'+esc(t.lb)+'</span>';
+    Object.entries(TYPES).forEach(([k,tp])=>{
+      const c=el('button','type-card');c.innerHTML='<span class="em">'+tp.em+'</span><span class="lb">'+esc(typeLb(tp))+'</span>';
       c.onclick=()=>startForm(k);grid.appendChild(c);
     });
     body.appendChild(grid);
@@ -794,33 +899,31 @@ function openEditor(id){
   md.classList.add('show');
 }
 function startForm(type,existing){
-  const t=typeOf(type);
-  const e=existing||{type,title:'',group:(S.group!=='__all'?S.group:''),fields:t.f.map(([k,v,s])=>({key:k,value:v,secret:!!s}))};
+  const tp=typeOf(type);
+  const e=existing||{type,title:'',group:(S.group!=='__all'?S.group:''),fields:tp.f.map(([k,v,s])=>({key:fkey(k),value:v,secret:!!s}))};
   S.editing=e;
-  $('#mdBadge').textContent=t.em;
-  $('#mdTitle').textContent=existing?'Eintrag bearbeiten':'Neu: '+t.lb;
+  $('#mdBadge').textContent=tp.em;
+  $('#mdTitle').textContent=existing?t('md.editEntry'):t('md.newOf',typeLb(tp));
   const body=$('#mdBody');body.innerHTML='';
-  // Titel + Gruppe
   const glist=[...new Set(S.entries.map(x=>x.group).filter(Boolean))];
   const head=el('div');
   head.innerHTML=
-    '<label class="form-lab">Name / Titel</label><input class="finp" id="fTitle" placeholder="z. B. Firmen-Server FTP" value="'+esc(e.title)+'" style="margin-bottom:16px">'+
-    '<label class="form-lab">Ort / Wofür</label><input class="finp" id="fGroup" list="glist" placeholder="z. B. Arbeit, meine-webseite.de" value="'+esc(e.group)+'">'+
+    '<label class="form-lab">'+esc(t('md.name'))+'</label><input class="finp" id="fTitle" placeholder="'+esc(t('md.namePh'))+'" value="'+esc(e.title)+'" style="margin-bottom:16px">'+
+    '<label class="form-lab">'+esc(t('md.group'))+'</label><input class="finp" id="fGroup" list="glist" placeholder="'+esc(t('md.groupPh'))+'" value="'+esc(e.group)+'">'+
     '<datalist id="glist">'+glist.map(g=>'<option value="'+esc(g)+'">').join('')+'</datalist>';
   body.appendChild(head);
   const sep=el('div');sep.style.cssText='height:1px;background:var(--line-soft);margin:18px 0';body.appendChild(sep);
-  body.appendChild(el('label','form-lab',null)).textContent='Felder (jedes wird später mit einem Klick kopierbar)';
+  body.appendChild(el('label','form-lab',null)).textContent=t('md.fields');
   const wrap=el('div');wrap.id='fieldWrap';wrap.style.cssText='display:flex;flex-direction:column;gap:10px';body.appendChild(wrap);
   (e.fields||[]).forEach(f=>wrap.appendChild(fieldRow(f)));
-  const add=el('button','add-field');add.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Feld hinzufügen';
-  add.onclick=()=>wrap.appendChild(fieldRow({key:'Neues Feld',value:'',secret:false},true));
+  const add=el('button','add-field');add.innerHTML=svg('plus',16)+esc(t('md.addField'));
+  add.onclick=()=>wrap.appendChild(fieldRow({key:t('md.newField'),value:'',secret:false},true));
   body.appendChild(add);
-  // Footer
   $('#mdFoot').innerHTML='';
-  const back=el('button','btn-line');back.style.flex='0 0 auto';back.textContent=existing?'Abbrechen':'Zurück';
+  const back=el('button','btn-line');back.style.flex='0 0 auto';back.textContent=existing?t('md.cancel'):t('md.back');
   back.onclick=()=>{ if(existing)closeModal(); else openEditor(); };
   const spring=el('div','spring');
-  const saveB=el('button','btn-save');saveB.textContent='Speichern';saveB.onclick=saveForm;
+  const saveB=el('button','btn-save');saveB.textContent=t('md.save');saveB.onclick=saveForm;
   $('#mdFoot').append(back,spring,saveB);
   setTimeout(()=>$('#fTitle').focus(),50);
 }
@@ -828,10 +931,10 @@ function fieldRow(f,focus){
   const row=el('div','edit-field');row.dataset.field='1';
   row.innerHTML=
     '<div class="ef-top"><input class="ef-key" value="'+esc(f.key)+'">'+
-      '<div class="ef-tools"><button class="chip-tog'+(f.secret?' on':'')+'" data-sec>'+svg('lock',12)+'Geheim</button>'+
+      '<div class="ef-tools"><button class="chip-tog'+(f.secret?' on':'')+'" data-sec>'+svg('lock',12)+esc(t('md.secret'))+'</button>'+
       '<button class="ef-x" data-del><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div></div>'+
-    '<div class="ef-val-line"><input class="ef-val" value="'+esc(f.value)+'" '+(f.secret?'type="password"':'')+' placeholder="Wert ...">'+
-      '<button class="mini" data-gen title="Passwort erzeugen">'+svg('refresh',15)+'</button></div>';
+    '<div class="ef-val-line"><input class="ef-val" value="'+esc(f.value)+'" '+(f.secret?'type="password"':'')+' placeholder="'+esc(t('md.valuePh'))+'">'+
+      '<button class="mini" data-gen title="'+esc(t('md.genTitle'))+'">'+svg('refresh',15)+'</button></div>';
   const secBtn=row.querySelector('[data-sec]');
   const val=row.querySelector('.ef-val');
   let secret=!!f.secret;
@@ -848,10 +951,10 @@ function openGen(row,valInput){
   const g=el('div','gen-tool');
   g.innerHTML=
     '<div class="gen-out"><span class="val mono" data-out>...</span><button class="mini" data-reroll>'+svg('refresh',15)+'</button></div>'+
-    '<div class="gen-row"><label style="flex:1">Länge <b data-lenlab>20</b><br><input type="range" min="8" max="48" value="20" data-len style="width:100%"></label></div>'+
-    '<div class="gen-row"><label><input type="checkbox" data-o="upper" checked>GROSS</label><label><input type="checkbox" data-o="lower" checked>klein</label>'+
+    '<div class="gen-row"><label style="flex:1">'+esc(t('gen.length'))+' <b data-lenlab>20</b><br><input type="range" min="8" max="48" value="20" data-len style="width:100%"></label></div>'+
+    '<div class="gen-row"><label><input type="checkbox" data-o="upper" checked>'+esc(t('gen.upper'))+'</label><label><input type="checkbox" data-o="lower" checked>'+esc(t('gen.lower'))+'</label>'+
       '<label><input type="checkbox" data-o="digits" checked>123</label><label><input type="checkbox" data-o="symbols" checked>!@#</label>'+
-      '<div style="flex:1"></div><button class="gen-apply" data-apply>Übernehmen</button></div>';
+      '<div style="flex:1"></div><button class="gen-apply" data-apply>'+esc(t('gen.apply'))+'</button></div>';
   row.appendChild(g);
   const out=g.querySelector('[data-out]');
   const opts=()=>({upper:g.querySelector('[data-o=upper]').checked,lower:g.querySelector('[data-o=lower]').checked,digits:g.querySelector('[data-o=digits]').checked,symbols:g.querySelector('[data-o=symbols]').checked});
@@ -865,18 +968,18 @@ function openGen(row,valInput){
 }
 async function saveForm(){
   const e=S.editing;
-  e.title=$('#fTitle').value.trim()||'Ohne Titel';
+  e.title=$('#fTitle').value.trim()||t('app.untitled');
   e.group=$('#fGroup').value.trim();
   const rows=[...$('#fieldWrap').querySelectorAll('[data-field]')];
-  e.fields=rows.map(r=>({key:r.querySelector('.ef-key').value.trim()||'Feld',value:r.querySelector('.ef-val').value,secret:r.dataset.secret==='1'}));
+  e.fields=rows.map(r=>({key:r.querySelector('.ef-key').value.trim()||t('md.field'),value:r.querySelector('.ef-val').value,secret:r.dataset.secret==='1'}));
   e.updated=Date.now();
   const r=await call('save_entry',e);
   if(r&&r.ok){
     const saved=r.entry||e;
     const i=S.entries.findIndex(x=>x.id===saved.id);
     if(i>=0)S.entries[i]=saved;else S.entries.push(saved);
-    closeModal();renderApp();toast('Gespeichert');
-  }else{toast((r&&r.error)||'Speichern fehlgeschlagen',null,true);}
+    closeModal();renderApp();toast(t('toast.saved'));
+  }else{toast(errText(r),null,true);}
 }
 function closeModal(){$('#modal').classList.remove('show');S.editing=null;}
 
@@ -886,9 +989,9 @@ function closeModal(){$('#modal').classList.remove('show');S.editing=null;}
 async function delEntry(){
   const id=S.drawerId;if(!id)return;
   const e=S.entries.find(x=>x.id===id);
-  if(!confirm('Eintrag "'+(e?e.title:'')+'" wirklich löschen? Das kann nicht rückgängig gemacht werden.'))return;
+  if(!confirm(t('confirm.delete',(e?e.title:''))))return;
   const r=await call('delete_entry',id);
-  if(r&&r.ok){S.entries=S.entries.filter(x=>x.id!==id);closeDrawer();renderApp();toast('Gelöscht');}
+  if(r&&r.ok){S.entries=S.entries.filter(x=>x.id!==id);closeDrawer();renderApp();toast(t('toast.deleted'));}
 }
 async function lockNow(){
   await call('lock');S.entries=[];S.group='__all';S.query='';
@@ -897,8 +1000,8 @@ async function lockNow(){
 }
 async function doBackup(){
   const r=await call('export_backup');
-  if(r&&r.ok)toast('Sicherung gespeichert', r.path&&r.path[0]!=='('?r.path:'Verschlüsselte Kopie deines Tresors');
-  else if(r&&r.error)toast(r.error,null,true);
+  if(r&&r.ok)toast(t('toast.backupSaved'), r.path&&r.path[0]!=='('?r.path:t('toast.backupSub'));
+  else if(r&&r.error)toast(errText(r),null,true);
 }
 
 /* ================================================================
@@ -916,6 +1019,7 @@ function resetIdle(){
 }
 function openSettings(){
   $('#setAutolock').value=String(autolockMin);
+  $('#setLangSel').value=LANG;
   $('#setPass').value='';$('#setPass2').value='';$('#setPin').value='';$('#setMsg').textContent='';
   $('#settings').classList.add('show');
 }
@@ -924,18 +1028,22 @@ function bindSettings(){
   $('#btnSettings').onclick=openSettings;
   $('#stClose').onclick=closeSettings;
   $('#setBackup').onclick=doBackup;
-  $('#setAutolock').onchange=e=>{autolockMin=parseInt(e.target.value,10)||0;store.set('tresor_autolock',autolockMin);resetIdle();toast(autolockMin?('Sperrt nach '+autolockMin+' min'):'Auto-Sperre aus');};
+  $('#setLangSel').onchange=e=>{setLang(e.target.value);};
+  $('#setAutolock').onchange=e=>{autolockMin=parseInt(e.target.value,10)||0;store.set('tresor_autolock',autolockMin);resetIdle();toast(autolockMin?t('toast.autolockSet',autolockMin):t('toast.autolockOff'));};
   $('#setChangeBtn').onclick=async()=>{
     const p=$('#setPass').value,p2=$('#setPass2').value,pin=$('#setPin').value,m=$('#setMsg');
-    if(p.length<8){m.textContent='Mindestens 8 Zeichen.';return;}
-    if(p!==p2){m.textContent='Die Passwörter sind nicht gleich.';return;}
-    if(!/^\d{4,8}$/.test(pin)){m.textContent='PIN: 4 bis 8 Ziffern.';return;}
+    if(p.length<8){m.textContent=t('msg.min8short');return;}
+    if(p!==p2){m.textContent=t('msg.mismatch2');return;}
+    if(!/^\d{4,8}$/.test(pin)){m.textContent=t('msg.pinFmtShort');return;}
     $('#setChangeBtn').disabled=true;
     const r=await call('change_master',p,pin);
     $('#setChangeBtn').disabled=false;
-    if(r&&r.ok){closeSettings();toast('Passwort und PIN geändert');}
-    else{m.textContent=(r&&r.error)||'Ändern fehlgeschlagen.';}
+    if(r&&r.ok){closeSettings();toast(t('toast.pwChanged'));}
+    else{m.textContent=errText(r);}
   };
+}
+function bindLang(){
+  document.querySelectorAll('#langToggle button').forEach(b=>{b.onclick=()=>setLang(b.dataset.lang);});
 }
 
 /* ================================================================
@@ -955,7 +1063,7 @@ function wire(){
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#settings').classList.contains('show'))closeSettings();else if($('#modal').classList.contains('show'))closeModal();else if($('#drawer').classList.contains('show'))closeDrawer();}});
 }
 async function boot(){
-  try{initGlyphs();bindLock();bindSetup();bindForgot();bindSettings();wire();}
+  try{initGlyphs();bindLock();bindSetup();bindForgot();bindSettings();bindLang();wire();applyStatic();}
   catch(e){window.__diag.push('BIND-THREW: '+(e&&e.message||e));}
   await apiReady;
   let st=null;
