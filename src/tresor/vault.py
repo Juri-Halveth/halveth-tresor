@@ -352,6 +352,15 @@ def save_file(path: str, env: Envelope) -> None:
     os.replace(tmp, path)
 
 
+def _stat_sig(path: str):
+    """A cheap signature of a file's on-disk state, to detect external changes."""
+    try:
+        st = os.stat(path)
+        return (st.st_mtime_ns, st.st_size)
+    except OSError:
+        return None
+
+
 # ------------------------------------------------------------------ Password generator
 _LOWER = "abcdefghijkmnpqrstuvwxyz"  # without l, o (look-alikes)
 _UPPER = "ABCDEFGHJKLMNPQRSTUVWXYZ"  # without I, O
@@ -389,6 +398,7 @@ class Session:
         self._dek: bytearray | None = None  # bytearray while the vault is open
         self.entries: list[Entry] | None = None
         self.fail = 0
+        self._sig: tuple | None = None  # on-disk state we last read/wrote (change detection)
 
     # --- Status ---
     def exists(self) -> bool:
@@ -404,6 +414,7 @@ class Session:
         """Create a new vault on disk and return the recovery key (Base32) to show once."""
         env, rk = create_envelope(master, pin, [], n_exp=n_exp)
         save_file(self.path, env)
+        self._sig = _stat_sig(self.path)
         return b32_display(rk)
 
     # --- Open ---
@@ -421,6 +432,7 @@ class Session:
         self._dek = bytearray(dek)
         self.entries = entries
         self.fail = 0
+        self._sig = _stat_sig(self.path)
         return entries
 
     def unlock_recovery(self, recovery_display: str) -> list[Entry]:
@@ -431,6 +443,7 @@ class Session:
         self._dek = bytearray(dek)
         self.entries = entries
         self.fail = 0
+        self._sig = _stat_sig(self.path)
         return entries
 
     # --- Save ---
@@ -438,9 +451,26 @@ class Session:
         """Re-seal the data block with the current DEK and write it to disk atomically."""
         self.env = reseal_data(self.env, bytes(self._dek), self.entries)
         save_file(self.path, self.env)
+        self._sig = _stat_sig(self.path)
+
+    def _reload_if_changed(self) -> None:
+        """If another process wrote the vault since we last read it, reload the current
+        entries first (with our DEK), so a save never overwrites changes made elsewhere."""
+        if self._dek is None or not os.path.exists(self.path):
+            return
+        if _stat_sig(self.path) == self._sig:
+            return
+        env = load_file(self.path)
+        _structural_check(env)
+        _verify_checksum(env)
+        hdr = _hdr_of(env)
+        self.entries = _open_data(env, bytes(self._dek), hdr)
+        self.env = env
+        self._sig = _stat_sig(self.path)
 
     def upsert(self, entry: Entry) -> Entry:
         """Insert or update an entry (by id) and persist. Returns the stored entry."""
+        self._reload_if_changed()
         if not entry.get("id"):
             entry["id"] = "e" + secrets.token_hex(8)
         found = False
@@ -456,13 +486,16 @@ class Session:
 
     def delete(self, entry_id: str) -> None:
         """Delete an entry by id and persist."""
+        self._reload_if_changed()
         self.entries = [e for e in self.entries if e.get("id") != entry_id]
         self._persist()
 
     def change_credentials(self, new_master: str, new_pin: str) -> None:
         """Change the master password/PIN of the currently open vault."""
+        self._reload_if_changed()
         self.env = rewrap_credentials(self.env, bytes(self._dek), new_master, new_pin)
         save_file(self.path, self.env)
+        self._sig = _stat_sig(self.path)
 
     # --- Close ---
     def lock(self) -> None:

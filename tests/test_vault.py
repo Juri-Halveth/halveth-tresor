@@ -168,3 +168,29 @@ def test_password_generator():
 
 def test_kdf_input_length_prefix():
     assert V.kdf_input("ab", "123") != V.kdf_input("ab1", "23")
+
+
+def test_concurrent_no_clobber(vault_path):
+    # Two sessions on the same vault: a stale one must not wipe the other's entries.
+    def note(idstr):
+        return {"id": idstr, "type": "note", "title": idstr, "group": "", "fields": []}
+
+    a = V.Session(vault_path)
+    a.create("pw", "1234", n_exp=NEXP)
+    a.unlock("pw", "1234")
+    for i in range(3):
+        a.upsert(note(f"a{i}"))  # disk now holds 3 entries
+
+    b = V.Session(vault_path)
+    b.unlock("pw", "1234")  # b loads the 3-entry view
+
+    for i in range(3, 12):
+        a.upsert(note(f"a{i}"))  # a grows the file to 12
+
+    b.upsert(note("b1"))  # b saves; the fix must reload first, not clobber a's 9
+
+    final = V.Session(vault_path).unlock("pw", "1234")
+    ids = {e["id"] for e in final}
+    assert len(final) == 13
+    assert "b1" in ids
+    assert all((f"a{i}") in ids for i in range(12))

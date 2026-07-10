@@ -12,6 +12,7 @@ this API are stable string codes (for example "wrong_credentials") that the UI l
 Code comments and logs are English so international contributors can read the source.
 """
 
+import ctypes
 import datetime
 import os
 import shutil
@@ -209,8 +210,40 @@ class Api:
             self._clear_timer = None
 
 
+_SINGLE_INSTANCE_MUTEX = None
+
+
+def _is_only_instance() -> bool:
+    """Take a session-wide named mutex; return False if another Tresor is already running.
+
+    This prevents two windows on the same vault at once, which is what could otherwise let
+    a stale window overwrite entries that were added in another window.
+    """
+    global _SINGLE_INSTANCE_MUTEX
+    try:
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel32.CreateMutexW.restype = ctypes.c_void_p
+        kernel32.CreateMutexW.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_wchar_p]
+        _SINGLE_INSTANCE_MUTEX = kernel32.CreateMutexW(None, False, "HalvethTresorSingleInstance")
+        return ctypes.get_last_error() != 183  # 183 = ERROR_ALREADY_EXISTS
+    except Exception:
+        return True  # if the guard cannot run, never block the app
+
+
 def main():
     """Create the window, wire up the API bridge, and run the event loop."""
+    if not _is_only_instance():
+        try:
+            ctypes.windll.user32.MessageBoxW(
+                None,
+                "Tresor läuft bereits. Bitte nutze das bereits offene Fenster.\n\n"
+                "Tresor is already running. Please use the window that is already open.",
+                "Tresor",
+                0x40,  # MB_ICONINFORMATION
+            )
+        except Exception:
+            pass
+        return
     api = Api()
     debug = os.environ.get("TRESOR_DEBUG") == "1"
     window = webview.create_window(

@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional light theme for the vault window (the current window ships with a dark theme by default).
 - Import of entries from a previously exported encrypted backup.
 
+## [1.1.1] - 2026-07-10
+
+### Fixed
+
+- Prevented possible data loss when two Tresor windows were open on the same vault at the same time: a stale window could overwrite entries added in the other. Tresor now allows only one window at a time, and every save first reloads any external change to the vault file instead of overwriting it.
+
 ## [1.1.0] - 2026-07-10
 
 ### Added
@@ -43,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Encrypted backup export to a separate file.
 - Packaged single-file Windows executable built with PyInstaller (`dist/Tresor.exe`), portable with no installer and no admin rights.
 
-[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Juri-Halveth/halveth-tresor/releases/tag/v1.0.0
