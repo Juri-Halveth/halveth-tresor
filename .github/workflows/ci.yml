@@ -59,7 +59,7 @@ jobs:
       - name: Compute SHA-256
         run: (Get-FileHash dist/Tresor.exe -Algorithm SHA256).Hash | Out-File -Encoding ascii dist/Tresor.exe.sha256
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Tresor-windows
           path: |
