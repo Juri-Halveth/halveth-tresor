@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ruff
+        run: pip install ruff
+      - name: Ruff check
+        run: ruff check .
+      - name: Ruff format check
+        run: ruff format --check .
+
+  test:
+    name: Test (Python ${{ matrix.python-version }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.10", "3.11", "3.12", "3.13" ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install (with dev extras)
+        run: pip install -e .[dev]
+      - name: Run tests
+        run: pytest --cov=tresor --cov-report=term-missing
+
+  build:
+    name: Build and release Windows executable
+    needs: [ lint, test ]
+    runs-on: windows-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install (with dev extras)
+        run: pip install -e .[dev]
+      - name: Build executable
+        run: python -m PyInstaller packaging/tresor.spec --clean --noconfirm
+      - name: Compute SHA-256
+        run: (Get-FileHash dist/Tresor.exe -Algorithm SHA256).Hash | Out-File -Encoding ascii dist/Tresor.exe.sha256
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Tresor-windows
+          path: |
+            dist/Tresor.exe
+            dist/Tresor.exe.sha256
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: RELEASE_NOTES_v1.0.0.md
+          files: |
+            dist/Tresor.exe
+            dist/Tresor.exe.sha256

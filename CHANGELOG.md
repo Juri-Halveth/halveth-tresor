@@ -1,0 +1,36 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+
+- Optional light theme for the vault window (the current window ships with a dark theme by default).
+- Import of entries from a previously exported encrypted backup.
+
+## [1.0.0] - 2026-07-10
+
+### Added
+
+- Local encrypted vault stored as a single file, ciphertext only, written atomically to `%APPDATA%\Tresor\vault.credvault`.
+- Envelope encryption: a master password and a separate PIN are combined (length prefixed, NFC normalized) and stretched with Scrypt into a Key Encryption Key (KEK) that wraps a random Data Encryption Key (DEK); the DEK encrypts all data with AES-256-GCM.
+- Per-save security hardening: a fresh random nonce for every encryption, the file header (KDF cost and salt) bound as AES-GCM associated data to block silent downgrades, and a SHA-256 checksum over the ciphertext to tell a corrupted file apart from a wrong password.
+- Machine-calibrated Scrypt cost chosen once at vault creation and stored in the file, so each vault adapts to its own hardware.
+- Fail-closed authentication: a wrong master password or PIN is indistinguishable from a bad authentication tag, so the vault never opens on doubt.
+- One-time Base32 recovery key that wraps the same DEK under a second random key, allowing a password reset when the master password is forgotten.
+- Tailored entry types with fields suited to each kind: logins and websites, email accounts (IMAP and SMTP server and port), FTP and SFTP, databases, API connections (connects from, connects to, endpoint, API key, public key, private key), SSH keys, cards, and free-form notes.
+- Organization of entries by place or purpose using groups the user names, for example Work, Servers, or Personal.
+- One-click copy on every field with a secure clipboard that auto-clears after 15 seconds and is excluded from Windows clipboard history (Win+V) and cloud clipboard.
+- Built-in password generator.
+- Live search across entries.
+- Detail view that reveals masked values on demand.
+- Auto-lock after a configurable period of inactivity, wiping the in-memory key on lock and on window close.
+- Encrypted backup export to a separate file.
+- Packaged single-file Windows executable built with PyInstaller (`dist/Tresor.exe`), portable with no installer and no admin rights.
+
+[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/Juri-Halveth/halveth-tresor/releases/tag/v1.0.0

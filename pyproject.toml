@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tresor"
+version = "1.0.0"
+description = "A local, offline credentials vault for Windows (Python + pywebview)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Juri Janovski" }]
+keywords = ["password-manager", "credentials", "vault", "encryption", "pywebview", "windows"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Environment :: Win32 (MS Windows)",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security :: Cryptography",
+    "Intended Audience :: End Users/Desktop",
+]
+dependencies = [
+    "pywebview>=5.0",
+    "cryptography>=42.0",
+    "pythonnet>=3.0; sys_platform == 'win32'",
+    "clr-loader>=0.2; sys_platform == 'win32'",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.5",
+    "pyinstaller>=6.0",
+    "pillow>=10.0",
+]
+
+[project.urls]
+Homepage = "https://halveth.de"
+Repository = "https://github.com/Juri-Halveth/halveth-tresor"
+Issues = "https://github.com/Juri-Halveth/halveth-tresor/issues"
+Changelog = "https://github.com/Juri-Halveth/halveth-tresor/blob/main/CHANGELOG.md"
+
+# GUI (windowed) entry point, so no console window appears on launch.
+[project.gui-scripts]
+tresor = "tresor.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+tresor = ["ui/*.html"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+ignore = ["E501"]  # line length is handled by the formatter, not enforced on strings/comments
+
+[tool.ruff.lint.per-file-ignores]
+"tests/e2e/native_smoke.py" = ["E402"]  # sys.path is adjusted before importing the package

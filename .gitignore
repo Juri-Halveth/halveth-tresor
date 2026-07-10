@@ -1,0 +1,56 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+*.egg
+.Python
+env/
+venv/
+.venv/
+ENV/
+pip-wheel-metadata/
+
+# ---- Test / coverage ----
+.pytest_cache/
+.cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# ---- PyInstaller ----
+build/
+dist/
+*.manifest
+# packaging/tresor.spec is intentionally COMMITTED (the build source of truth).
+# Ignore only stray auto-generated specs at the repo root:
+/*.spec
+
+# ---- Local runtime data (Tresor writes these) ----
+*.credvault
+error.log
+
+# ---- Windows ----
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ---- IDEs / editors ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# ---- Env ----
+.env
+.env.*
