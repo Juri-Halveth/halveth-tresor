@@ -9,7 +9,7 @@ A local, offline Desktop Credential Vault for Windows.
 [![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-0078D6.svg)](#requirements)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg)](https://www.python.org/)
 [![Built with pywebview](https://img.shields.io/badge/Built%20with-pywebview-8A2BE2.svg)](https://pywebview.flowrl.com/)
-[![Version 1.1.1](https://img.shields.io/badge/Version-1.1.1-blue.svg)](CHANGELOG.md)
+[![Version 1.1.2](https://img.shields.io/badge/Version-1.1.2-blue.svg)](CHANGELOG.md)
 
 Tresor is a fully offline vault for everything that gets you access: passwords, servers, keys, and secrets. It keeps them in a single encrypted file on your own machine, with no cloud, no account, and no telemetry.
 

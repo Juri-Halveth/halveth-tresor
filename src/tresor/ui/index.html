@@ -650,13 +650,29 @@ const MockAPI = (()=>{
   };
 })();
 
-let API=MockAPI;
+/* The MockAPI above is for local UI preview in a browser ONLY, and only when a developer
+   explicitly opts in with "?preview" (or "#preview") in the URL. The packaged desktop app
+   never has that flag and is loaded by pywebview with a real bridge, so the mock can never
+   activate there: it would keep secrets unencrypted in localStorage and "unlock" with any
+   credentials. If the real bridge never arrives in the app, we refuse to operate (boot
+   shows a hard error) instead of silently falling back to the mock. */
+const IS_HTTP = location.protocol==='http:'||location.protocol==='https:';
+const PREVIEW = /[?&#]preview\b/i.test(location.href);  // explicit dev opt-in for the browser mock
+let API=null;              // never default to the mock
+let bridgeFailed=false;
+function useBridge(){if(window.pywebview&&window.pywebview.api){API=window.pywebview.api;return true;}return false;}
 const apiReady=new Promise(res=>{
-  if(window.pywebview&&window.pywebview.api){API=window.pywebview.api;return res();}
-  window.addEventListener('pywebviewready',()=>{API=window.pywebview.api;res();});
-  setTimeout(res,900);
+  if(useBridge())return res();
+  window.addEventListener('pywebviewready',()=>{useBridge();res();});
+  setTimeout(()=>{
+    if(!useBridge()){
+      if(PREVIEW&&IS_HTTP&&!window.pywebview){API=MockAPI;}   // browser preview only, opt-in
+      else{bridgeFailed=true;}
+    }
+    res();
+  }, PREVIEW?900:6000);
 });
-function call(m,...a){return API[m]?API[m](...a):Promise.reject('no '+m);}
+function call(m,...a){return (API&&API[m])?API[m](...a):Promise.reject('no backend');}
 
 /* ================================================================
    Typen-Vorlagen (zweisprachig)
@@ -1062,10 +1078,26 @@ function wire(){
   ['mousemove','keydown','click','scroll','touchstart'].forEach(ev=>document.addEventListener(ev,resetIdle,{passive:true}));
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#settings').classList.contains('show'))closeSettings();else if($('#modal').classList.contains('show'))closeModal();else if($('#drawer').classList.contains('show'))closeDrawer();}});
 }
+function showBridgeError(){
+  const de=(typeof LANG==='undefined')||LANG!=='en';
+  const title=de?'Sicherer Kern nicht geladen':'Secure core not loaded';
+  const msg=de
+    ?'Tresor konnte seinen verschlüsselten Kern nicht starten. Aus Sicherheitsgründen wurde nichts geöffnet und nichts gespeichert. Bitte schließe Tresor komplett und starte es neu.'
+    :'Tresor could not start its encrypted core. For your safety nothing was opened and nothing was saved. Please close Tresor completely and start it again.';
+  document.body.innerHTML=
+    '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;'
+    +'background:#0a0c12;color:#e6e9f0;font-family:system-ui,Segoe UI,sans-serif;padding:32px;box-sizing:border-box;text-align:center">'
+    +'<div style="max-width:520px"><div style="font-size:46px;margin-bottom:18px">&#128274;</div>'
+    +'<h1 style="font-size:20px;margin:0 0 12px;font-weight:600"></h1>'
+    +'<p style="margin:0;opacity:.82;line-height:1.55;font-size:15px"></p></div></div>';
+  document.body.querySelector('h1').textContent=title;
+  document.body.querySelector('p').textContent=msg;
+}
 async function boot(){
   try{initGlyphs();bindLock();bindSetup();bindForgot();bindSettings();bindLang();wire();applyStatic();}
   catch(e){window.__diag.push('BIND-THREW: '+(e&&e.message||e));}
   await apiReady;
+  if(!API||bridgeFailed){showBridgeError();return;}
   let st=null;
   try{st=await call('get_state');window.__diag.push('get_state ok: '+JSON.stringify(st));}
   catch(e){window.__diag.push('get_state THREW: '+(e&&e.message||e));}

@@ -194,3 +194,20 @@ def test_concurrent_no_clobber(vault_path):
     assert len(final) == 13
     assert "b1" in ids
     assert all((f"a{i}") in ids for i in range(12))
+
+
+@pytest.mark.parametrize(
+    "tamper",
+    [
+        {"r": 100000},  # a single parameter out of range
+        {"n": 1 << 21, "r": 64},  # each in range, but the n*r product is far too large
+    ],
+)
+def test_absurd_scrypt_params_rejected(vault_path, tamper):
+    # A tampered Scrypt cost must be rejected up front (Corrupt), before any Scrypt work.
+    V.Session(vault_path).create("pw", "1234", n_exp=NEXP)
+    env = V.load_file(vault_path)
+    env["kdf"].update(tamper)
+    V.save_file(vault_path, env)
+    with pytest.raises((V.Corrupt, V.WrongCredentials)):
+        V.Session(vault_path).unlock("pw", "1234")

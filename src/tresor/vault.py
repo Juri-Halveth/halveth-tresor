@@ -211,7 +211,18 @@ def _structural_check(env: Envelope) -> None:
         assert isinstance(env.get("version"), int), "version"
         assert len(b64d(env["salt"])) == SALT_LEN, "salt length"
         kdf = env["kdf"]
-        assert kdf["name"] == "scrypt" and int(kdf["n"]) >= 2, "kdf"
+        assert kdf.get("name") == "scrypt", "kdf name"
+        n = int(kdf["n"])
+        r = int(kdf.get("r", SCRYPT_R))
+        p = int(kdf.get("p", SCRYPT_P))
+        # Bounds stop a tampered file from requesting absurd Scrypt memory/time.
+        # Calibration caps n at 2**19 and r/p are fixed small, so these ceilings are generous.
+        assert 2 <= n <= (1 << 24), "kdf n"
+        assert 1 <= r <= 64, "kdf r"
+        assert 1 <= p <= 64, "kdf p"
+        # Bound the memory product too (Scrypt uses ~128*n*r bytes); creation stays at
+        # n*r <= 2**22, so this ceiling cannot reject a real vault but caps a tampered one.
+        assert n * r <= (1 << 23), "kdf cost"
         for k in ("wrap", "recovery", "data"):
             assert len(b64d(env[k]["nonce"])) == NONCE, k + " nonce"
             assert len(b64d(env[k]["blob"])) >= 16, k + " blob"
@@ -343,13 +354,24 @@ def load_file(path: str) -> Envelope:
 
 
 def save_file(path: str, env: Envelope) -> None:
-    """Write to a temp file first (ciphertext only), fsync, then atomically replace."""
-    tmp = path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(env, f, separators=(",", ":"))
-        f.flush()
-        os.fsync(f.fileno())
-    os.replace(tmp, path)
+    """Write to a per-process temp file (ciphertext only), fsync, then atomically replace.
+
+    The temp name includes the pid so two processes can never interleave into the same
+    temp file, and a failed write is cleaned up instead of leaving a stray .tmp behind.
+    """
+    tmp = f"{path}.{os.getpid()}.tmp"
+    try:
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(env, f, separators=(",", ":"))
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
+        raise
 
 
 def _stat_sig(path: str):

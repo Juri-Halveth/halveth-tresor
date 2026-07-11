@@ -12,6 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional light theme for the vault window (the current window ships with a dark theme by default).
 - Import of entries from a previously exported encrypted backup.
 
+## [1.1.2] - 2026-07-11
+
+### Fixed
+
+- Encrypted backup export ("Sichern" / "Back up") could never complete: the Save dialog's file-type filter contained a hyphen, which pywebview rejects, so the call raised before a dialog could open. The filter is corrected, and the export now falls back to an unfiltered dialog if a filter is ever rejected, so a backup can always be saved.
+
+### Security
+
+- The packaged desktop app no longer falls back to the browser-preview mock backend. If the native bridge was slow to start, the interface could briefly use a mock that stored entries unencrypted in local storage and accepted any credentials. The desktop build now uses only the real encrypted backend and shows a clear error if it cannot load, instead of silently degrading.
+- Locking or closing the vault now clears any secret still on the clipboard immediately, rather than only cancelling the pending auto-clear.
+- Hardened the encrypted core against tampered files: Scrypt cost parameters are bounds-checked before use, and each save writes to a per-process temporary file that is removed on failure.
+
 ## [1.1.1] - 2026-07-10
 
 ### Fixed
@@ -49,7 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Encrypted backup export to a separate file.
 - Packaged single-file Windows executable built with PyInstaller (`dist/Tresor.exe`), portable with no installer and no admin rights.
 
-[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.2...HEAD
+[1.1.2]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Juri-Halveth/halveth-tresor/releases/tag/v1.0.0
