@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional light theme for the vault window (the current window ships with a dark theme by default).
 - Import of entries from a previously exported encrypted backup.
 
+## [1.1.3] - 2026-07-22
+
+### Fixed
+
+- Entry cards on the dashboard were clipped once the vault held enough entries to fill the view: the card grid's automatic row tracks collapsed (each card uses `overflow: hidden`, which makes a CSS grid item report a zero automatic minimum height), cutting off the type/group line and the one-click copy buttons so the cards looked compressed. Rows are now sized to each card's full content (`grid-auto-rows: max-content`), so every card shows its complete content at any window size.
+
 ## [1.1.2] - 2026-07-11
 
 ### Fixed
@@ -61,7 +67,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Encrypted backup export to a separate file.
 - Packaged single-file Windows executable built with PyInstaller (`dist/Tresor.exe`), portable with no installer and no admin rights.
 
-[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.2...HEAD
+[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.3...HEAD
+[1.1.3]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.0.0...v1.1.0

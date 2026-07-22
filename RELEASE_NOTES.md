@@ -1,8 +1,8 @@
-# Tresor v1.1.2
+# Tresor v1.1.3
 
 **A local, offline credential vault for Windows. Your complete access, encrypted in a single file, with no cloud and no account.**
 
-> New in 1.1.2: the encrypted backup ("Sichern" / "Back up") now works, a rejected file filter previously stopped the Save dialog from opening. This release also hardens the app: the desktop build never falls back to the browser-preview mock backend, locking or closing clears any secret left on the clipboard, and the encrypted core bounds-checks a tampered file's parameters. Version 1.1.1 fixed data loss when two windows were open at once; 1.1.0 added the bilingual German and English interface, switch any time with the DE/EN toggle in the top-right corner or in Settings.
+> New in 1.1.3: fixed the dashboard layout when the vault holds many entries. The entry cards could be clipped, cutting off the type/group line and the copy buttons so cards looked compressed; cards now always show their full content at any window size. Earlier releases: 1.1.2 fixed the encrypted backup export and hardened the encrypted core; 1.1.1 fixed data loss when two windows were open at once; 1.1.0 added the bilingual German and English interface, switch any time with the DE/EN toggle in the top-right corner or in Settings.
 
 Tresor is a desktop credential vault. It is more than a password manager: it stores complete access, not just passwords. Keep login credentials, websites, FTP, SFTP, SSH, API keys, databases, mail accounts (IMAP/SMTP), cards, notes, and any other secret in one place. Each entry type has fields tailored to it, entries are organized by place or purpose into groups you name (for example Work, Servers, or Personal), and every field is one click to copy. Everything is fully offline: no cloud, no account, no telemetry, and no network calls, all kept in one local encrypted file.
 

@@ -154,6 +154,10 @@ input,textarea,select{font-family:inherit; font-size:14px}
 .cards{
   flex:1;overflow-y:auto;min-height:0;padding:6px 26px 30px;
   display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px;align-content:start;
+  /* Size each row to its cards' full content. Without this the row track can collapse
+     (a grid item with overflow:hidden reports a 0 auto-minimum), which clipped the
+     type/group line and the copy buttons and made cards look "compressed". */
+  grid-auto-rows:max-content;
 }
 .card{
   background:linear-gradient(180deg,var(--bg-2),var(--bg-1));border:1px solid var(--line);
