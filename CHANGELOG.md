@@ -12,6 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional light theme for the vault window (the current window ships with a dark theme by default).
 - Import of entries from a previously exported encrypted backup.
 
+## [1.2.0] - 2026-07-23
+
+### Added
+
+- **Focus area** — a second section beside the passwords, switchable with a Passwords / Focus toggle in the sidebar. It holds checklists (lists of tasks you tick off, each with a progress bar), a free-form notepad, and a daily personalized motivation: on the first open of each day a welcome screen greets you by name with one of 200 hand-written sentences, and the sentence rotates every day. The name is asked once and can be changed any time. Designed to be calm and ADHD-friendly. All Focus data is stored **encrypted in the same vault** as the passwords, never in plain text.
+- **Automatic versioned backups** — every save now also writes a timestamped copy of the vault into a `backups` folder next to it and keeps the most recent 20. Any earlier state can be restored from there, so a bad save or an accidental change can always be rolled back.
+
+### Changed
+
+- The on-disk payload now carries both `entries` and `focus`. Vaults created by earlier versions (which stored only `entries`) keep opening unchanged; the missing `focus` simply starts empty.
+
 ## [1.1.3] - 2026-07-22
 
 ### Fixed
@@ -67,7 +78,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Encrypted backup export to a separate file.
 - Packaged single-file Windows executable built with PyInstaller (`dist/Tresor.exe`), portable with no installer and no admin rights.
 
-[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.3...HEAD
+[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.3...v1.2.0
 [1.1.3]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.0...v1.1.1

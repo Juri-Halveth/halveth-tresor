@@ -96,7 +96,7 @@ class Api:
         """Unlock with password + PIN; returns the decrypted entries on success."""
         try:
             entries = self._session.unlock(master, pin)
-            return {"ok": True, "entries": entries}
+            return {"ok": True, "entries": entries, "focus": self._session.focus or {}}
         except vault.WrongCredentials:
             return {"ok": False, "error": "wrong_credentials"}
         except vault.Corrupt:
@@ -109,7 +109,7 @@ class Api:
         """Unlock with the recovery key."""
         try:
             entries = self._session.unlock_recovery(recovery_key)
-            return {"ok": True, "entries": entries}
+            return {"ok": True, "entries": entries, "focus": self._session.focus or {}}
         except vault.WrongCredentials:
             return {"ok": False, "error": "recovery_wrong"}
         except vault.Corrupt:
@@ -157,6 +157,24 @@ class Api:
         except Exception as e:
             _log_error("change_master", e)
             return {"ok": False, "error": "change_failed"}
+
+    # ---------------------------------------------------------------- Focus area
+    def get_focus(self):
+        """Return the Focus-area data (checklists, notes, name) of the open vault."""
+        if not self._session.is_open():
+            return {"ok": False, "error": "locked"}
+        return {"ok": True, "focus": self._session.focus or {}}
+
+    def save_focus(self, focus):
+        """Replace and persist the Focus-area data. Entries are left untouched."""
+        if not self._session.is_open():
+            return {"ok": False, "error": "locked"}
+        try:
+            saved = self._session.set_focus(focus if isinstance(focus, dict) else {})
+            return {"ok": True, "focus": saved}
+        except Exception as e:
+            _log_error("save_focus", e)
+            return {"ok": False, "error": "save_failed"}
 
     # ---------------------------------------------------------------- Tools
     def generate_password(self, length, opts=None):

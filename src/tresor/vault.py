@@ -28,6 +28,7 @@ import hmac
 import json
 import os
 import secrets
+import shutil
 import time
 import unicodedata
 from typing import Any
@@ -48,6 +49,7 @@ SCRYPT_P = 1
 KEYLEN = 32  # 256 bit
 NONCE = 12  # 96 bit, the standard for AES-GCM
 SALT_LEN = 16
+BACKUP_KEEP = 20  # how many timestamped auto-backups to keep next to the vault
 
 
 # ------------------------------------------------------------------ Error types
@@ -170,13 +172,17 @@ def _decrypt(key: bytes, part: dict[str, str], aad: bytes) -> bytes:
     return AESGCM(key).decrypt(b64d(part["nonce"]), b64d(part["blob"]), aad)
 
 
-def _payload_bytes(entries: list[Entry]) -> bytes:
-    """Serialize the entry list to the UTF-8 JSON payload that gets encrypted."""
-    return json.dumps({"entries": entries}, ensure_ascii=False).encode("utf-8")
+def _payload_bytes(data: dict[str, Any]) -> bytes:
+    """Serialize the vault payload ({entries, focus}) to the UTF-8 JSON that gets encrypted."""
+    return json.dumps(data, ensure_ascii=False).encode("utf-8")
 
 
 def create_envelope(
-    master: str, pin: str, entries: list[Entry] | None = None, n_exp: int | None = None
+    master: str,
+    pin: str,
+    entries: list[Entry] | None = None,
+    n_exp: int | None = None,
+    focus: dict[str, Any] | None = None,
 ) -> tuple[Envelope, bytes]:
     """Build a brand new encrypted vault. Returns (envelope, recovery_key_bytes)."""
     n = 1 << (n_exp if n_exp is not None else calibrate_n())
@@ -197,7 +203,9 @@ def create_envelope(
         env: Envelope = dict(hdr)
         env["wrap"] = _encrypt(kek, dek, _aad("wrap", hdr))
         env["recovery"] = _encrypt(recovery_key, dek, _aad("recovery", hdr))
-        env["data"] = _encrypt(dek, _payload_bytes(entries or []), _aad("data", hdr))
+        env["data"] = _encrypt(
+            dek, _payload_bytes({"entries": entries or [], "focus": focus or {}}), _aad("data", hdr)
+        )
         env["checksum"] = _checksum(env)
     finally:
         wipe(bytearray(kek))
@@ -238,17 +246,26 @@ def _verify_checksum(env: Envelope) -> None:
         raise Corrupt("Checksum does not match, the file is damaged.")
 
 
-def _open_data(env: Envelope, dek: bytes, hdr: dict[str, Any]) -> list[Entry]:
-    """Decrypt the data block with the DEK and return the entry list."""
+def _open_data(env: Envelope, dek: bytes, hdr: dict[str, Any]) -> dict[str, Any]:
+    """Decrypt the data block with the DEK and return the payload dict {entries, focus}.
+
+    Older vaults stored only {entries}; the missing keys are filled in with empty defaults,
+    so a vault created before the Focus feature keeps opening unchanged.
+    """
     try:
         payload = _decrypt(dek, env["data"], _aad("data", hdr))
     except InvalidTag as e:
         raise Corrupt("The data block is damaged.") from e
-    return json.loads(payload.decode("utf-8"))["entries"]
+    obj = json.loads(payload.decode("utf-8"))
+    if not isinstance(obj, dict):
+        raise Corrupt("The data block has an unexpected shape.")
+    obj.setdefault("entries", [])
+    obj.setdefault("focus", {})
+    return obj
 
 
-def unlock_envelope(env: Envelope, master: str, pin: str) -> tuple[bytes, list[Entry]]:
-    """Open with password + PIN. Returns (dek_bytes, entries) or raises WrongCredentials/Corrupt."""
+def unlock_envelope(env: Envelope, master: str, pin: str) -> tuple[bytes, dict[str, Any]]:
+    """Open with password + PIN. Returns (dek_bytes, payload) or raises WrongCredentials/Corrupt."""
     _structural_check(env)
     _verify_checksum(env)
     hdr = _hdr_of(env)
@@ -269,8 +286,8 @@ def unlock_envelope(env: Envelope, master: str, pin: str) -> tuple[bytes, list[E
     return dek, _open_data(env, dek, hdr)
 
 
-def unlock_with_recovery(env: Envelope, recovery_display: str) -> tuple[bytes, list[Entry]]:
-    """Open with the recovery key (Base32). Returns (dek_bytes, entries)."""
+def unlock_with_recovery(env: Envelope, recovery_display: str) -> tuple[bytes, dict[str, Any]]:
+    """Open with the recovery key (Base32). Returns (dek_bytes, payload)."""
     _structural_check(env)
     _verify_checksum(env)
     hdr = _hdr_of(env)
@@ -287,11 +304,11 @@ def unlock_with_recovery(env: Envelope, recovery_display: str) -> tuple[bytes, l
     return dek, _open_data(env, dek, hdr)
 
 
-def reseal_data(env: Envelope, dek: bytes, entries: list[Entry]) -> Envelope:
-    """Re-encrypt only the data block with the DEK (the standard save path)."""
+def reseal_data(env: Envelope, dek: bytes, data: dict[str, Any]) -> Envelope:
+    """Re-encrypt only the data block ({entries, focus}) with the DEK (the standard save path)."""
     hdr = _hdr_of(env)
     env = dict(env)
-    env["data"] = _encrypt(dek, _payload_bytes(entries), _aad("data", hdr))
+    env["data"] = _encrypt(dek, _payload_bytes(data), _aad("data", hdr))
     env["checksum"] = _checksum(env)
     return env
 
@@ -419,6 +436,7 @@ class Session:
         self.env: Envelope | None = None
         self._dek: bytearray | None = None  # bytearray while the vault is open
         self.entries: list[Entry] | None = None
+        self.focus: dict[str, Any] | None = None  # Focus area data (checklists, notes, name)
         self.fail = 0
         self._sig: tuple | None = None  # on-disk state we last read/wrote (change detection)
 
@@ -437,6 +455,7 @@ class Session:
         env, rk = create_envelope(master, pin, [], n_exp=n_exp)
         save_file(self.path, env)
         self._sig = _stat_sig(self.path)
+        self._backup()
         return b32_display(rk)
 
     # --- Open ---
@@ -444,7 +463,7 @@ class Session:
         """Unlock with password + PIN. Applies a small backoff after repeated failures."""
         env = load_file(self.path)
         try:
-            dek, entries = unlock_envelope(env, master, pin)
+            dek, data = unlock_envelope(env, master, pin)
         except WrongCredentials:
             self.fail += 1
             if self.fail > 3:
@@ -452,28 +471,55 @@ class Session:
             raise
         self.env = env
         self._dek = bytearray(dek)
-        self.entries = entries
+        self.entries = data["entries"]
+        self.focus = data["focus"]
         self.fail = 0
         self._sig = _stat_sig(self.path)
-        return entries
+        return self.entries
 
     def unlock_recovery(self, recovery_display: str) -> list[Entry]:
         """Unlock with the recovery key."""
         env = load_file(self.path)
-        dek, entries = unlock_with_recovery(env, recovery_display)
+        dek, data = unlock_with_recovery(env, recovery_display)
         self.env = env
         self._dek = bytearray(dek)
-        self.entries = entries
+        self.entries = data["entries"]
+        self.focus = data["focus"]
         self.fail = 0
         self._sig = _stat_sig(self.path)
-        return entries
+        return self.entries
 
     # --- Save ---
     def _persist(self) -> None:
         """Re-seal the data block with the current DEK and write it to disk atomically."""
-        self.env = reseal_data(self.env, bytes(self._dek), self.entries)
+        self.env = reseal_data(
+            self.env, bytes(self._dek), {"entries": self.entries, "focus": self.focus or {}}
+        )
         save_file(self.path, self.env)
         self._sig = _stat_sig(self.path)
+        self._backup()
+
+    def _backup(self) -> None:
+        """Best-effort: after every successful save, copy the vault into a `backups` folder
+        under a timestamped name and keep the most recent BACKUP_KEEP of them. This is the
+        safety net: any earlier state can be restored from a backup. A backup problem must
+        never break saving, so everything here is wrapped and swallowed."""
+        try:
+            folder = os.path.join(os.path.dirname(self.path) or ".", "backups")
+            os.makedirs(folder, exist_ok=True)
+            dst = os.path.join(folder, f"vault-{time.strftime('%Y%m%d-%H%M%S')}.credvault")
+            if not os.path.exists(dst):
+                shutil.copy2(self.path, dst)
+            kept = sorted(
+                f for f in os.listdir(folder) if f.startswith("vault-") and f.endswith(".credvault")
+            )
+            for old in kept[:-BACKUP_KEEP]:
+                try:
+                    os.remove(os.path.join(folder, old))
+                except OSError:
+                    pass
+        except Exception:
+            pass  # a backup must never crash a save
 
     def _reload_if_changed(self) -> None:
         """If another process wrote the vault since we last read it, reload the current
@@ -486,7 +532,9 @@ class Session:
         _structural_check(env)
         _verify_checksum(env)
         hdr = _hdr_of(env)
-        self.entries = _open_data(env, bytes(self._dek), hdr)
+        data = _open_data(env, bytes(self._dek), hdr)
+        self.entries = data["entries"]
+        self.focus = data["focus"]
         self.env = env
         self._sig = _stat_sig(self.path)
 
@@ -512,12 +560,22 @@ class Session:
         self.entries = [e for e in self.entries if e.get("id") != entry_id]
         self._persist()
 
+    def set_focus(self, focus: dict[str, Any]) -> dict[str, Any]:
+        """Replace the Focus-area data (checklists, notes, name) and persist. The password
+        entries are untouched: _reload_if_changed first pulls in any change made elsewhere,
+        so saving Focus never overwrites entries added in another window."""
+        self._reload_if_changed()
+        self.focus = focus
+        self._persist()
+        return self.focus
+
     def change_credentials(self, new_master: str, new_pin: str) -> None:
         """Change the master password/PIN of the currently open vault."""
         self._reload_if_changed()
         self.env = rewrap_credentials(self.env, bytes(self._dek), new_master, new_pin)
         save_file(self.path, self.env)
         self._sig = _stat_sig(self.path)
+        self._backup()
 
     # --- Close ---
     def lock(self) -> None:
@@ -526,5 +584,6 @@ class Session:
             wipe(self._dek)
         self._dek = None
         self.entries = None
+        self.focus = None
         # The env holds ciphertext only; reset it too for cleanliness.
         self.env = None

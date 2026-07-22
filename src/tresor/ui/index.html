@@ -10,7 +10,7 @@
   --bg-0:#0a0c12; --bg-1:#0f131c; --bg-2:#151b27; --bg-3:#1b2332;
   --line:#232c3d; --line-soft:#1a2130;
   --tx-hi:#eef2f8; --tx:#aeb9cd; --tx-dim:#66738b;
-  --accent:#5b8cff; --accent-2:#2ee6a6; --gold:#e7b24a;
+  --accent:#5b8cff; --accent-2:#2ee6a6; --gold:#e7b24a; --coral:#ff7ea8;
   --danger:#ff5c72; --warn:#ffb454;
   --shadow:0 18px 50px -12px rgba(0,0,0,.65);
   --radius:16px;
@@ -307,6 +307,110 @@ input,textarea,select{font-family:inherit; font-size:14px}
 @keyframes toastin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @keyframes toastout{to{opacity:0;transform:translateY(8px)}}
 .toast.out{animation:toastout .2s forwards}
+
+/* ===================== FOKUS-BEREICH ===================== */
+@keyframes fkrise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fkpop{40%{transform:scale(1.25)}70%{transform:scale(.92)}100%{transform:scale(1)}}
+@keyframes fkfade{from{opacity:0}to{opacity:1}}
+@keyframes fkfadeout{to{opacity:0;visibility:hidden}}
+#modeToggle{display:flex;gap:4px;background:var(--bg-0);border:1px solid var(--line);border-radius:12px;padding:4px}
+#modeToggle button{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:9px 6px;border-radius:9px;font-size:13px;font-weight:600;color:var(--tx-dim);transition:.13s}
+#modeToggle button:hover{color:var(--tx-hi)}
+#modeToggle button.on{background:var(--bg-2);color:var(--tx-hi)}
+#modeToggle button.on[data-mode="fokus"]{color:var(--gold)}
+#modeToggle svg{width:15px;height:15px}
+#fokusView{flex:1;overflow-y:auto;min-height:0;padding:22px 26px 50px;display:none;flex-direction:column}
+#fokusView.show{display:flex}
+.fk-head{margin-bottom:18px}
+.fk-head h2{font-size:22px;display:flex;align-items:center;gap:9px}
+.fk-head .sub{color:var(--tx-dim);font-size:13.5px;margin-top:4px}
+.fk-daily{position:relative;overflow:hidden;border-radius:18px;padding:20px 22px;margin-bottom:20px;background:linear-gradient(135deg,#1d1a2e,#141826 62%);border:1px solid #322c48;box-shadow:var(--shadow)}
+.fk-daily::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(600px 220px at 100% 0,rgba(231,178,74,.15),transparent 60%),radial-gradient(520px 240px at 0 100%,rgba(255,126,168,.11),transparent 60%)}
+.fk-daily .in{position:relative;z-index:1}
+.fk-daily .col{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.fk-daily .spark{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;font-size:23px;flex:none;background:radial-gradient(120% 120% at 30% 20%,#3a2f1e,#1c1a2e);border:1px solid #4a3d1f}
+.fk-daily .ct{flex:1;min-width:160px}
+.fk-daily .ct b{font-size:15.5px;display:block}
+.fk-daily .ct span{font-size:12.5px;color:var(--tx-dim)}
+.fk-collect{padding:11px 18px;border-radius:12px;font-weight:650;font-size:13.5px;color:#20160a;background:linear-gradient(180deg,#f0c96a,#e7b24a);box-shadow:0 10px 24px -10px rgba(231,178,74,.6);transition:.14s}
+.fk-collect:hover{filter:brightness(1.05)}
+.fk-daily .opened{display:none}
+.fk-daily.isopen .col{display:none}
+.fk-daily.isopen .opened{display:block}
+.fk-daily .eyebrow{font-size:10.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.fk-daily .quote{font-size:22px;line-height:1.5;font-weight:350;color:var(--tx-hi);max-width:34ch}
+.fk-daily .quote em{font-style:normal;color:var(--gold);font-weight:650}
+.fk-daily .f2{margin-top:14px;font-size:12px;color:var(--tx-dim);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.fk-daily.reveal .quote{animation:fkrise .6s cubic-bezier(.2,.8,.2,1)}
+.fk-namechg{background:none;border:none;color:var(--tx-dim);font-size:12px;text-decoration:underline;cursor:pointer}
+.fk-namechg:hover{color:var(--tx)}
+.fk-hero{background:linear-gradient(135deg,#171d2b,#11151f);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:20px 22px;display:grid;grid-template-columns:auto 1fr;gap:22px;margin-bottom:20px;align-items:center}
+.fk-ring{position:relative;width:110px;height:110px;flex:none}
+.fk-ring svg{transform:rotate(-90deg)}
+.fk-ring .pct{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.fk-ring .pct b{font-size:24px;font-weight:750;font-variant-numeric:tabular-nums;line-height:1}
+.fk-ring .pct span{font-size:10px;color:var(--tx-dim);display:block;margin-top:2px}
+.fk-hero .htxt h3{font-size:16.5px;margin-bottom:3px}
+.fk-hero .htxt p{font-size:13px;color:var(--tx-dim);line-height:1.5;max-width:46ch}
+.fk-hero .today{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.fk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;align-content:start;grid-auto-rows:max-content}
+.fk-card{background:linear-gradient(180deg,var(--bg-2),var(--bg-1));border:1px solid var(--line);border-radius:16px;padding:17px;display:flex;flex-direction:column}
+.fk-card .top{display:flex;align-items:center;gap:11px;margin-bottom:4px}
+.fk-card .em{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:19px;flex:none;background:var(--bg-3);border:1px solid var(--line)}
+.fk-card .ti{flex:1;min-width:0}
+.fk-card .ti b{font-size:15px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fk-card .ti .meta{font-size:11.5px;color:var(--tx-dim);font-variant-numeric:tabular-nums}
+.fk-bar{height:7px;border-radius:6px;background:var(--bg-0);overflow:hidden;margin:9px 2px 12px}
+.fk-bar>i{display:block;height:100%;width:0;border-radius:6px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.fk-items{display:flex;flex-direction:column;gap:2px}
+.fk-row{display:flex;align-items:center;gap:11px;padding:8px;border-radius:10px;transition:background .12s;cursor:pointer}
+.fk-row:hover{background:var(--bg-3)}
+.fk-box{width:21px;height:21px;border-radius:7px;border:2px solid #37435b;flex:none;display:grid;place-items:center;transition:.18s}
+.fk-box svg{width:12px;height:12px;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .22s .04s;color:#08131f}
+.fk-row .lbl{flex:1;font-size:13.5px;line-height:1.35;transition:.2s;word-break:break-word}
+.fk-row.done .fk-box{background:var(--_c,var(--accent-2));border-color:var(--_c,var(--accent-2))}
+.fk-row.done .fk-box svg{stroke-dashoffset:0}
+.fk-row.done .lbl{color:var(--tx-dim);text-decoration:line-through;text-decoration-color:rgba(174,185,205,.5)}
+.fk-row.pop .fk-box{animation:fkpop .32s ease}
+.fk-del{opacity:0;color:var(--tx-dim);width:25px;height:25px;border-radius:8px;display:grid;place-items:center;flex:none;transition:.12s}
+.fk-row:hover .fk-del{opacity:1}
+.fk-del:hover{color:var(--danger);background:rgba(255,92,114,.1)}
+.fk-del svg{width:13px;height:13px}
+.fk-add{display:flex;align-items:center;gap:9px;margin-top:9px;padding:9px 11px;border-radius:10px;border:1px dashed var(--line)}
+.fk-add:focus-within{border-color:var(--_c,var(--accent));border-style:solid}
+.fk-add .plus{color:var(--tx-dim);font-size:16px}
+.fk-add input{flex:1;background:none;border:none;outline:none;color:var(--tx-hi);font-size:13px;user-select:text}
+.fk-add input::placeholder{color:var(--tx-dim)}
+.fk-notes{grid-column:1/-1;background:linear-gradient(180deg,var(--bg-2),var(--bg-1));border:1px solid var(--line);border-radius:16px;padding:17px}
+.fk-notes .top{display:flex;align-items:center;gap:11px;margin-bottom:11px}
+.fk-notes .em{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:19px;background:var(--bg-3);border:1px solid var(--line)}
+.fk-notes textarea{width:100%;min-height:110px;resize:vertical;background:var(--bg-0);border:1px solid var(--line-soft);border-radius:12px;padding:13px 14px;color:var(--tx-hi);font-size:14px;line-height:1.65;outline:none;user-select:text}
+.fk-notes textarea:focus{border-color:var(--gold)}
+.fk-addlist{display:flex;align-items:center;justify-content:center;gap:9px;min-height:110px;border:1.5px dashed var(--line);border-radius:16px;color:var(--tx-dim);font-size:13.5px;font-weight:600;transition:.14s}
+.fk-addlist:hover{border-color:var(--gold);color:var(--gold)}
+.fk-welcome{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;padding:28px;background:radial-gradient(1000px 700px at 15% -10%,rgba(91,140,255,.18),transparent 60%),radial-gradient(900px 800px at 110% 10%,rgba(255,126,168,.14),transparent 55%),radial-gradient(820px 820px at 55% 120%,rgba(231,178,74,.10),transparent 60%),#0a0c12}
+.fk-welcome.show{display:flex;animation:fkfade .5s}
+.fk-welcome.hide{animation:fkfadeout .45s forwards}
+.fk-welcome .wbox{max-width:600px;text-align:center;animation:fkrise .7s cubic-bezier(.2,.8,.2,1)}
+.fk-welcome .wbrand{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--tx-dim);margin-bottom:26px}
+.fk-welcome .wgreet{font-size:21px;color:var(--tx);margin-bottom:32px;font-weight:400}
+.fk-welcome .eyebrow{font-size:10.5px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.fk-welcome .wquote{font-size:30px;line-height:1.45;font-weight:350;color:var(--tx-hi);margin-bottom:38px;text-wrap:balance}
+.fk-welcome .wquote em{font-style:normal;color:var(--gold);font-weight:650}
+.fk-wgo{padding:15px 34px;border-radius:14px;font-weight:650;font-size:15px;color:#08131f;background:linear-gradient(180deg,#6f9bff,#4d7cff);box-shadow:0 14px 30px -10px rgba(91,140,255,.6);transition:.14s}
+.fk-wgo:hover{filter:brightness(1.06)}
+.fk-welcome .fk-namechg{display:block;margin:18px auto 0}
+.fk-onb{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(6,8,12,.72);backdrop-filter:blur(6px)}
+.fk-onb.show{display:flex}
+.fk-onb .box{width:100%;max-width:400px;background:linear-gradient(180deg,var(--bg-2),var(--bg-1));border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:32px 28px;text-align:center;animation:fkrise .4s}
+.fk-onb .em{font-size:38px;margin-bottom:10px}
+.fk-onb h3{font-size:20px;margin-bottom:6px}
+.fk-onb p{font-size:13px;color:var(--tx-dim);margin-bottom:18px;line-height:1.5}
+.fk-onb input{width:100%;background:var(--bg-0);border:1px solid var(--line);border-radius:13px;padding:12px 14px;color:var(--tx-hi);font-size:16px;text-align:center;outline:none;margin-bottom:13px;user-select:text}
+.fk-onb input:focus{border-color:var(--gold)}
+.fk-onb .go{width:100%;padding:12px;border-radius:13px;font-weight:650;font-size:15px;color:#08131f;background:linear-gradient(180deg,#6f9bff,#4d7cff)}
+#fkConfetti{position:fixed;inset:0;pointer-events:none;z-index:75}
+@media (max-width:820px){.fk-hero{grid-template-columns:1fr;text-align:center}.fk-ring{margin:0 auto}.fk-welcome .wquote{font-size:24px}}
 </style>
 </head>
 <body>
@@ -410,7 +514,11 @@ input,textarea,select{font-family:inherit; font-size:14px}
       <div class="mk" id="sideGlyph"></div>
       <div><b>Tresor</b><span data-i18n="side.tagline"></span></div>
     </div>
-    <div class="search">
+    <div id="modeToggle">
+      <button data-mode="pw" class="on">🔐 <span data-i18n="mode.pw"></span></button>
+      <button data-mode="fokus">✨ <span data-i18n="mode.fokus"></span></button>
+    </div>
+    <div class="search" id="pwSearch">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       <input id="searchBox" data-i18n-ph="side.search">
     </div>
@@ -426,6 +534,7 @@ input,textarea,select{font-family:inherit; font-size:14px}
   </aside>
 
   <main id="main">
+    <div id="pwView" style="flex:1;min-height:0;display:flex;flex-direction:column">
     <div class="topbar">
       <div class="tt">
         <h2 id="viewTitle"><span id="viewIcon"></span><span id="viewName"></span></h2>
@@ -435,6 +544,26 @@ input,textarea,select{font-family:inherit; font-size:14px}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="app.new"></span></button>
     </div>
     <div class="cards" id="cards"></div>
+    </div><!-- /pwView -->
+    <div id="fokusView">
+      <div class="fk-head">
+        <h2>✨ Fokus</h2>
+        <div class="sub">Dein Tag, klar und Schritt für Schritt. Kein Druck – einfach abhaken.</div>
+      </div>
+      <section class="fk-daily" id="fkDaily"></section>
+      <section class="fk-hero">
+        <div class="fk-ring">
+          <svg width="110" height="110" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#1b2332" stroke-width="12"/>
+            <circle id="fkRingFg" cx="60" cy="60" r="52" fill="none" stroke="url(#fkg)" stroke-width="12" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+            <defs><linearGradient id="fkg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2ee6a6"/><stop offset="1" stop-color="#5b8cff"/></linearGradient></defs>
+          </svg>
+          <div class="pct"><div><b id="fkRingPct">0%</b><span>heute</span></div></div>
+        </div>
+        <div class="htxt"><h3 id="fkHeroTitle"></h3><p id="fkHeroMsg"></p><div class="today" id="fkTodayList"></div></div>
+      </section>
+      <div class="fk-grid" id="fkGrid"></div>
+    </div>
   </main>
 </div>
 
@@ -515,6 +644,24 @@ input,textarea,select{font-family:inherit; font-size:14px}
   </div>
 </div>
 
+<!-- ===================== FOKUS: Willkommen + Name ===================== -->
+<div class="fk-welcome" id="fkWelcome"><div class="wbox">
+  <div class="wbrand">🌱 Tresor · Fokus</div>
+  <div class="wgreet" id="fkWgreet"></div>
+  <div class="eyebrow">Deine Motivation für heute</div>
+  <div class="wquote" id="fkWquote"></div>
+  <button class="fk-wgo" id="fkWgo">Los geht's ✨</button>
+  <button class="fk-namechg" data-chg>Name ändern</button>
+</div></div>
+<div class="fk-onb" id="fkOnb"><div class="box">
+  <div class="em">🌱</div>
+  <h3>Wie heißt du?</h3>
+  <p>Dann hol ich dich jeden Tag persönlich ab. Du kannst den Namen jederzeit ändern.</p>
+  <input id="fkOnbInput" placeholder="Dein Name" maxlength="24" autocomplete="off">
+  <button class="go" id="fkOnbGo">Los geht's ✨</button>
+</div></div>
+<canvas id="fkConfetti"></canvas>
+
 <div id="toast-wrap"></div>
 
 <script>
@@ -545,7 +692,8 @@ const I18N={
   'rec.copy':'Notfall-Schlüssel kopieren','rec.confirm':'Ich habe den Notfall-Schlüssel abgeschrieben und sicher aufbewahrt.','rec.done':'Fertig, Tresor öffnen','rec.none':'(kein Schlüssel)',
   'fg.title':'Vergessen?','fg.sub':'Gib deinen Notfall-Schlüssel ein und setze ein neues<br>Master-Passwort samt PIN. Deine Einträge bleiben erhalten.',
   'fg.key':'Notfall-Schlüssel','fg.newMaster':'Neues Master-Passwort','fg.newPin':'Neue PIN (4 bis 8 Ziffern)','fg.submit':'Entsperren und neu setzen','fg.back':'Zurück zum Anmelden','fg.enterKey':'Bitte den Notfall-Schlüssel eingeben.',
-  'side.tagline':'Zugänge & Schlüssel','side.search':'Suchen ...','side.backup':'Sichern','side.backupTitle':'Verschlüsselte Sicherung speichern','side.lock':'Sperren','side.lockTitle':'Tresor sofort abschließen','side.settingsTitle':'Einstellungen',
+  'side.tagline':'Zugänge & Fokus','side.search':'Suchen ...','side.backup':'Sichern','side.backupTitle':'Verschlüsselte Sicherung speichern','side.lock':'Sperren','side.lockTitle':'Tresor sofort abschließen','side.settingsTitle':'Einstellungen',
+  'mode.pw':'Passwörter','mode.fokus':'Fokus',
   'app.new':'Neu anlegen','app.all':'Alle Einträge','app.groups':'Orte / Wofür','app.ungrouped':'Ohne Zuordnung','app.untitled':'Ohne Titel','app.open':'Öffnen',
   'app.one':'Eintrag','app.many':'Einträge','app.found':'gefunden',
   'app.emptyReadyTitle':'Dein Tresor ist bereit','app.emptyReadyBody':'Leg deinen ersten Zugang an. Wähle eine Art, gib ihm einen Namen, fertig. Danach kopierst du jedes Feld mit einem Klick.',
@@ -574,7 +722,8 @@ const I18N={
   'rec.copy':'Copy recovery key','rec.confirm':'I have written down the recovery key and stored it safely.','rec.done':'Done, open the vault','rec.none':'(no key)',
   'fg.title':'Forgot?','fg.sub':'Enter your recovery key and set a new<br>master password and PIN. Your entries are kept.',
   'fg.key':'Recovery key','fg.newMaster':'New master password','fg.newPin':'New PIN (4 to 8 digits)','fg.submit':'Unlock and reset','fg.back':'Back to sign in','fg.enterKey':'Please enter the recovery key.',
-  'side.tagline':'Access & keys','side.search':'Search ...','side.backup':'Back up','side.backupTitle':'Save an encrypted backup','side.lock':'Lock','side.lockTitle':'Lock the vault now','side.settingsTitle':'Settings',
+  'side.tagline':'Access & focus','side.search':'Search ...','side.backup':'Back up','side.backupTitle':'Save an encrypted backup','side.lock':'Lock','side.lockTitle':'Lock the vault now','side.settingsTitle':'Settings',
+  'mode.pw':'Passwords','mode.fokus':'Focus',
   'app.new':'New entry','app.all':'All entries','app.groups':'Places / Purpose','app.ungrouped':'Ungrouped','app.untitled':'Untitled','app.open':'Open',
   'app.one':'entry','app.many':'entries','app.found':'found',
   'app.emptyReadyTitle':'Your vault is ready','app.emptyReadyBody':'Add your first entry. Pick a type, give it a name, done. Then copy any field with a single click.',
@@ -636,11 +785,13 @@ const MockAPI = (()=>{
   let creds=null, data=load();
   return {
     get_state:()=>Promise.resolve({vault_exists:!!data}),
-    create_vault:(m,p)=>{data={entries:[]};creds={m,p};save(data);
+    create_vault:(m,p)=>{data={entries:[],focus:{}};creds={m,p};save(data);
       const rk=Array.from({length:11},()=>Math.random().toString(36).slice(2,7).toUpperCase()).join('-');
       return Promise.resolve({ok:true,recovery:rk})},
-    unlock:(m,p)=>{if(!data)return Promise.resolve({ok:false,error:'unknown'});creds={m,p};return Promise.resolve({ok:true,entries:data.entries})},
-    unlock_recovery:(rk)=>{if(!data)return Promise.resolve({ok:false,error:'unknown'});return Promise.resolve({ok:true,entries:data.entries})},
+    unlock:(m,p)=>{if(!data)return Promise.resolve({ok:false,error:'unknown'});creds={m,p};return Promise.resolve({ok:true,entries:data.entries,focus:data.focus||{}})},
+    unlock_recovery:(rk)=>{if(!data)return Promise.resolve({ok:false,error:'unknown'});return Promise.resolve({ok:true,entries:data.entries,focus:data.focus||{}})},
+    get_focus:()=>Promise.resolve({ok:true,focus:(data&&data.focus)||{}}),
+    save_focus:(f)=>{if(data){data.focus=f;save(data);}return Promise.resolve({ok:true,focus:f})},
     change_master:(m,p)=>{creds={m,p};return Promise.resolve({ok:true})},
     lock:()=>{creds=null;return Promise.resolve({ok:true})},
     save_entry:(e)=>{if(!e.id){e.id='id'+Math.random().toString(36).slice(2)}
@@ -733,7 +884,7 @@ function bindLock(){
     $('#lkBtn').disabled=true;$('#lkMsg').textContent='';
     const r=await call('unlock',p,pin);
     $('#lkBtn').disabled=false;
-    if(r&&r.ok){S.entries=r.entries||[];$('#lkPass').value='';$('#lkPin').value='';openApp();}
+    if(r&&r.ok){S.entries=r.entries||[];FK=fkNorm(r.focus);$('#lkPass').value='';$('#lkPin').value='';openApp();}
     else{$('#lkMsg').textContent=errText(r);$('#lkPin').value='';$('#lkPin').focus();}
   };
   $('#lkBtn').onclick=go;
@@ -769,7 +920,7 @@ function showRecovery(key,pass,pin){
   $('#rvBtn').onclick=async()=>{
     $('#rvBtn').disabled=true;
     const u=await call('unlock',pass,pin);
-    S.entries=(u&&u.entries)||[];openApp();
+    S.entries=(u&&u.entries)||[];FK=fkNorm(u&&u.focus);openApp();
   };
 }
 function bindForgot(){
@@ -783,7 +934,7 @@ function bindForgot(){
     if(!(r&&r.ok)){$('#fgBtn').disabled=false;m.textContent=errText(r);return;}
     const c=await call('change_master',p,pin);
     $('#fgBtn').disabled=false;
-    if(c&&c.ok){S.entries=r.entries||[];$('#fgKey').value='';$('#fgPass').value='';$('#fgPin').value='';openApp();toast(t('toast.newPwSet'));}
+    if(c&&c.ok){S.entries=r.entries||[];FK=fkNorm(r.focus);$('#fgKey').value='';$('#fgPass').value='';$('#fgPin').value='';openApp();toast(t('toast.newPwSet'));}
     else{m.textContent=errText(c);}
   };
   $('#fgBtn').onclick=go;
@@ -1015,6 +1166,7 @@ async function delEntry(){
 }
 async function lockNow(){
   await call('lock');S.entries=[];S.group='__all';S.query='';
+  FK=null;$('#fkWelcome').classList.remove('show');$('#fkOnb').classList.remove('show');
   closeDrawer();closeModal();$('#searchBox').value='';
   show('screen-lock');$('#lkPass').focus();
 }
@@ -1069,7 +1221,7 @@ function bindLang(){
 /* ================================================================
    Start
    ================================================================ */
-function openApp(){show('screen-app');S.group='__all';S.query='';renderApp();resetIdle();}
+function openApp(){show('screen-app');S.group='__all';S.query='';renderApp();fkInitAfterUnlock();resetIdle();}
 function wire(){
   $('#btnAdd').onclick=()=>openEditor();
   $('#btnLock').onclick=lockNow;
@@ -1110,6 +1262,168 @@ async function boot(){
     else{show('screen-setup');setTimeout(()=>$('#stPass').focus(),100);}
   }catch(e){window.__diag.push('SHOW-THREW: '+(e&&e.message||e));}
 }
+/* ================================================================
+   Fokus-Bereich: Checklisten, Notizblock, tägliche Motivation
+   ================================================================ */
+const FK_CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+const FK_X='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+const FK_MANTRAS=["{name}, du musst nicht bereit sein – du musst nur anfangen.","Der erste Schritt ist der schwerste, {name}. Und du machst ihn heute.","Alles, was du bewunderst, hat mal klein angefangen. Genau wie du, {name}.","{name}, warte nicht auf den perfekten Moment. Mach ihn perfekt.","Angst heißt oft nur: Hier wächst du gerade, {name}.","Du brauchst keinen Mut ohne Angst, {name} – nur den Mut, trotzdem loszugehen.","Ein kleiner Anfang ist mehr wert als ein großer Plan, {name}.","{name}, das, was du dir nicht traust, ist oft genau dein Weg.","Fang ruhig unperfekt an, {name}. Gut wirst du unterwegs.","Die beste Zeit war gestern. Die zweitbeste ist jetzt, {name}.","{name}, du wächst nicht dort, wo es bequem ist.","Trau dich, sichtbar zu sein, {name}. Die Welt darf dich kennenlernen.","Jeder, den du bewunderst, hatte auch einen ersten, wackeligen Tag, {name}.","{name}, dein Zukunfts-Ich winkt dir zu: danke, dass du angefangen hast.","Nicht perfekt. Nicht fertig. Nur angefangen. Das reicht heute, {name}.","{name}, Türen öffnen sich für die, die anklopfen.","Du bist näher dran, als du denkst, {name}.","Mut ist ein Muskel, {name}. Heute machst du eine Wiederholung.","{name}, lass die Zweifel reden – und geh trotzdem los.","Es muss nicht groß sein. Es muss nur ehrlich sein, {name}.","{name}, du darfst Dinge tun, in denen du noch nicht gut bist.","Der Weg entsteht, während du gehst, {name}.","{name}, dein Traum wurde dir gegeben, weil du ihn tragen kannst.","Sei heute mutiger als deine Ausreden, {name}.","{name}, das Leben belohnt Bewegung, nicht Warten.","Du musst nicht wissen, wie. Du musst nur wollen, {name}.","{name}, eine Idee wird erst echt, wenn du sie anfässt.","Heute ein bisschen unbequem, {name} – morgen ein bisschen stolzer.","{name}, du bist genau die Richtige für deinen eigenen Weg.","Spring, {name}. Das Netz spannt sich unterwegs.","{name}, du bist genug – schon bevor du irgendetwas geschafft hast.","Dein Wert hängt nicht an deiner To-do-Liste, {name}.","{name}, die Welt braucht genau das, was nur du hast.","Du musst dich nicht beweisen, {name}. Du darfst dich einfach zeigen.","{name}, es gibt niemanden auf der Welt wie dich. Das ist deine Kraft.","Sei stolz auf dich, {name} – für all das, was keiner sieht.","{name}, du bist kein Entwurf, der noch fertig werden muss. Du bist schon echt.","Dein Tempo ist genau richtig, {name}.","{name}, vergleich deinen Anfang nicht mit dem Kapitel 20 von anderen.","Du darfst Platz einnehmen, {name}. Diese Welt ist auch für dich da.","{name}, deine Empfindsamkeit ist keine Schwäche – sie ist deine Superkraft.","Sprich mit dir wie mit einer guten Freundin, {name}.","{name}, du bist nicht „zu viel“. Du bist genau richtig.","Was du heute schaffst, zählt – auch wenn es klein aussieht, {name}.","{name}, dein Kopf funktioniert anders, nicht schlechter.","Du musst nicht alles auf einmal können, {name}. Niemand kann das.","{name}, sei sanft mit dir. Du gibst dein Bestes, und das sieht man.","Deine Ideen sind es wert, gehört zu werden, {name}.","{name}, du schuldest niemandem Perfektion.","An manchen Tagen ist Aufstehen schon der Sieg, {name}. Zähl ihn.","{name}, du bist der Beweis, dass Anfangen möglich ist.","Dein Wert ist keine Frage von Produktivität, {name}.","{name}, du darfst stolz sein, ohne fertig zu sein.","Die Welt wird ein bisschen heller, weil es dich gibt, {name}.","{name}, dein „langsam“ ist immer noch vorwärts.","Vertrau deiner Stimme, {name}. Sie ist echt.","{name}, du bist keine Aufgabe, die man lösen muss – ein Mensch, den man feiern darf.","Auch heute bist du genau da, wo du sein sollst, {name}.","{name}, sei geduldig mit der Person, die du gerade wirst.","Du bist mehr als deine schwersten Tage, {name}.","{name}, ein Schritt am Tag ist in einem Jahr ein ganzer Weg.","Kleine Häkchen bauen große Träume, {name}.","{name}, Dranbleiben schlägt Talent. Jeden einzelnen Tag.","Nicht schneller, {name} – nur nicht stehen bleiben.","{name}, jeder Tag, an dem du weitermachst, ist eine Investition in dich.","Fortschritt ist selten laut, {name}. Aber er ist da.","{name}, die Summe kleiner Tage ist ein großes Leben.","Du musst es heute nicht fertigmachen. Nur weitermachen, {name}.","{name}, dranbleiben heißt nicht rennen – es heißt zurückkommen.","Ein schlechter Tag löscht keinen Fortschritt, {name}.","{name}, du sammelst gerade Beweise, dass du es kannst.","Heute wieder ein bisschen. Morgen wieder. So gewinnt man, {name}.","{name}, das Geheimnis ist einfach: aufhören ist keine Option.","Jedes Häkchen sagt: Ich hab mein Wort gehalten, {name}.","{name}, Konsequenz ist Liebe zu deinem Zukunfts-Ich.","Du bist unaufhaltsam, wenn du einfach weitergehst, {name}.","{name}, Rückschritte gehören zum Weg. Steh auf und geh weiter.","Momentum kommt durch Bewegung, nicht durch Warten, {name}.","{name}, du musst nicht motiviert sein, um anzufangen. Anfangen macht motiviert.","Kleine Schritte sind auch dann Schritte, wenn keiner klatscht, {name}.","{name}, dein zukünftiges Ich lebt von dem, was du heute tust.","Bleib dran, {name}. Genau da beginnt der Unterschied.","{name}, was leicht aussieht, ist meistens oft geübt.","Fang klein an, bleib dran, werde groß, {name}.","{name}, jeder Profi war mal ein Anfänger, der nicht aufgehört hat.","Ein Prozent besser heute reicht völlig, {name}.","{name}, du baust gerade eine Gewohnheit, die dein Leben trägt.","Weitermachen ist die leiseste Form von Mut, {name}.","{name}, du hast schon so viel überstanden. Heute schaffst du auch.","Der Weg wird leichter, während du stärker wirst, {name}.","{name}, die Menschen warten auf genau deine Stimme.","Poste es, {name}. Irgendjemand da draußen braucht das heute.","{name}, du musst nicht viral gehen – nur echt sein.","Sichtbarkeit ist Mut in Bildern, {name}. Du hast beides.","{name}, deine Geschichte ist wertvoll, weil sie deine ist.","Nicht die Lauteste gewinnt, {name} – die Ehrlichste bleibt.","{name}, dein erster Beitrag muss nicht dein bester sein. Nur dein erster.","Zeig dich, {name}. Perfektion ist langweilig, echt ist magnetisch.","{name}, jeder große Kanal hatte mal null Follower.","Du sprichst zu einem Menschen, nicht zu einer Menge, {name}.","{name}, dein Content ist ein Geschenk, kein Wettbewerb.","Trau dich, deine Meinung zu haben, {name}. Sie zieht die Richtigen an.","{name}, Wiederholung schlägt Perfektion. Zeig dich einfach immer wieder.","Deine Ecken und Kanten sind dein Wiedererkennungswert, {name}.","{name}, poste für die eine Person, der du helfen willst.","Reichweite folgt der Regelmäßigkeit, {name}, nicht dem Zufall.","{name}, du darfst anfangen, bevor du dich „bereit“ fühlst.","Die Kamera liebt Menschen, die sich trauen, {name}.","{name}, dein Wachstum beginnt außerhalb deiner Bequemzone.","Sei du – alle anderen sind schon vergeben, {name}.","{name}, jeder Klick ist ein Mensch, den du berührt hast.","Deine Nische ist das, was nur du so erzählst, {name}.","{name}, hör nicht auf, kurz bevor es losgeht.","Konstanz baut Vertrauen, {name}. Vertrauen baut alles.","{name}, deine Community entsteht aus Ehrlichkeit, nicht aus Perfektion.","Ein Beitrag heute ist besser als zehn perfekte im Kopf, {name}.","{name}, sei die Stimme, die du früher selbst gebraucht hättest.","Deine Zahlen sind nicht dein Wert, {name}. Deine Wirkung schon.","{name}, trau dich, groß zu denken und klein anzufangen.","Du bist deine beste Marke, {name}. Zeig sie.","{name}, du baust dir gerade ein Leben nach deinen Regeln.","Selbstständig heißt: dein Tag gehört dir, {name}. Nutze ihn mutig.","{name}, niemand hat deinen Weg schon gemacht – deshalb ist er deiner.","Du bist Chefin deiner eigenen Zukunft, {name}.","{name}, jede große Firma war mal eine Idee und eine mutige Person.","Dein Business wächst in dem Tempo, in dem du dranbleibst, {name}.","{name}, Freiheit ist die Belohnung für deinen Mut heute.","Du musst nicht alles wissen, {name} – nur den nächsten Schritt.","{name}, Fehler sind die Studiengebühren deiner Selbstständigkeit.","Bau etwas auf, das dir gehört, {name}. Stein für Stein.","{name}, dein eigener Weg fühlt sich unsicher an, weil er neu ist – nicht falsch.","Investiere in die Person, die du wirst, {name}.","{name}, du bist der Beweis, dass man seinen eigenen Weg gehen kann.","Verdiene mit dem, was dich lebendig macht, {name}.","{name}, jede E-Mail, jeder kleine Schritt zählt.","Du wächst an der Verantwortung, {name}, nicht trotz ihr.","{name}, das Unbekannte ist der Ort, an dem dein Leben passiert.","Sei stolz, dass du dich traust, was andere nur träumen, {name}.","{name}, dein Chef-Ich glaubt an dich. Hör auf es.","Ein eigenes Ding aufzubauen ist Mut in Alltagsform, {name}.","{name}, du darfst groß träumen und klein starten.","Deine Freiheit ist es wert, {name} – halte durch.","{name}, du lernst gerade Dinge, die dir keiner mehr nimmt.","Jeder Kunde beginnt mit einem mutigen ersten Angebot, {name}.","{name}, du machst das nicht perfekt – du machst es echt.","Dein Weg muss nicht wie der von anderen aussehen, {name}.","{name}, du baust dir gerade genau das Leben, von dem du erzählen wirst.","Selbst gemacht schlägt vorgegeben, {name}.","{name}, du bist mutiger als die, die dich kritisieren.","Der Aufwand von heute ist die Freiheit von morgen, {name}.","Guten Morgen, {name}. Heute ist ein Blatt, das du beschreibst.","{name}, ein neuer Tag, eine neue Chance, dir selbst näherzukommen.","Steh auf und zeig dem Tag, wer du bist, {name}.","{name}, heute musst du nichts beweisen – nur da sein und dein Bestes geben.","Der Morgen gehört den Mutigen, {name}. Also dir.","{name}, atme tief durch. Du schaffst diesen Tag, Schritt für Schritt.","Heute ist ein guter Tag, um stolz auf dich zu werden, {name}.","{name}, mach dir den Tag zum Verbündeten, nicht zum Gegner.","Ein Schritt reicht, {name}. Fang mit dem an.","{name}, du wachst nicht auf, um perfekt zu sein, sondern um zu leben.","Neuer Tag, {name} – dieselbe starke Person, ein bisschen weiter.","{name}, was du heute säst, erntest du bald.","Lächle dich einmal an, {name}. Der Tag kann kommen.","{name}, heute zählt nicht, wie viel – sondern dass du anfängst.","Jeder Morgen ist ein leises „Du darfst es nochmal versuchen“, {name}.","{name}, gib dem Tag deine Energie, nicht deine Zweifel.","Heute ein kleines Ziel, {name} – und dann feier es.","{name}, dein Tag wird so gut, wie der erste Schritt mutig ist.","Wach auf und wähle dich selbst, {name}.","{name}, dieser Tag hat auf dich gewartet.","Ein ruhiger Kopf und ein Häkchen nach dem anderen, {name}.","{name}, du musst den Berg nicht heute besteigen. Nur den ersten Stein.","Heute bist du deiner Zukunft einen Tag näher, {name}.","{name}, mach heute etwas, wofür dein Morgen-Ich dir dankt.","Der beste Start in den Tag bist du selbst, {name}.","{name}, wenn heute nur eine Sache klappt, ist das ein voller Erfolg.","Dein Kopf ist voller Ideen, {name} – das ist ein Geschenk, kein Fehler.","{name}, wenn du dich verloren hast, komm einfach sanft zurück.","Kein Alles-oder-nichts heute, {name}. Nur ein bisschen ist auch gut.","{name}, du musst nicht wie andere funktionieren, um wertvoll zu sein.","Sei stolz auf jedes einzelne Häkchen, {name}. Sie zählen alle.","{name}, an schweren Tagen reicht es, freundlich zu dir zu sein.","Dein Gehirn arbeitet in Farbe, {name}, nicht in grau.","{name}, überfordert? Dann nur der allernächste, winzige Schritt.","Vergessen ist menschlich, {name} – deshalb machst du dir Häkchen.","{name}, du bist nicht faul. Du brauchst nur deinen eigenen Weg.","Ein Neustart ist immer erlaubt, {name}. Auch mitten am Tag.","{name}, feier den Anfang, nicht nur das Ende.","Chaos im Kopf, Ordnung auf der Liste, {name}. So geht das.","{name}, du darfst Pause machen, ohne dich schuldig zu fühlen.","Ein Häkchen ist ein kleines „Ich hab an mich geglaubt“, {name}.","{name}, deine Energie kommt in Wellen – reit die guten aus.","Sei heute deine eigene beste Freundin, {name}.","{name}, du bist nicht hinterher. Du bist auf deinem eigenen Fahrplan.","Kleine Schritte sind für dich gemacht, {name}.","{name}, ein unperfekter Anfang ist immer noch ein Anfang.","Atme, {name}. Eine Sache nach der anderen.","{name}, du bist heute aufgestanden und hast es versucht. Das ist mutig.","Gib dir das, was du anderen so leicht gibst: Geduld, {name}.","{name}, du machst das gerade wirklich gut. Ehrlich."];
+const FK_SEED_LISTS=[
+ {id:'l1',emoji:'🚀',title:'Social-Media-Start',color:'#5b8cff',items:[
+   {id:'a1',text:'Instagram-Profil anlegen',done:false},{id:'a2',text:'Profilbild + Bio schreiben',done:false},
+   {id:'a3',text:'3 Reel-Ideen sammeln',done:false},{id:'a4',text:'Content-Plan für Woche 1',done:false},
+   {id:'a5',text:'Ersten Beitrag posten',done:false}]},
+ {id:'l2',emoji:'📋',title:'Business-Basics',color:'#2ee6a6',items:[
+   {id:'b1',text:'Marken-Namen festlegen',done:false},{id:'b2',text:'Logo entwerfen',done:false},
+   {id:'b3',text:'Business-E-Mail einrichten',done:false},{id:'b4',text:'Kleinunternehmer klären',done:false}]},
+ {id:'l3',emoji:'🌤️',title:'Heute',color:'#ff7ea8',items:[
+   {id:'c1',text:'20 Min Ideen brainstormen',done:false},{id:'c2',text:'1 Reel aufnehmen',done:false},
+   {id:'c3',text:'Wasser trinken 💧',done:false}]},
+];
+let FK=null, FK_MODE='pw', fkSaveTimer=null;
+const fkEpochDay=Math.floor(Date.now()/86400000);
+const fkIdx=Math.abs((fkEpochDay*1103515245+12345))%FK_MANTRAS.length;
+
+function fkNorm(f){
+  f=(f&&typeof f==='object')?f:{};
+  const hasLists=Array.isArray(f.lists)&&f.lists.length;
+  return {name:typeof f.name==='string'?f.name:'',
+    dailyDay:(typeof f.dailyDay==='number'&&isFinite(f.dailyDay))?f.dailyDay:-1,
+    notes:typeof f.notes==='string'?f.notes:'',
+    lists:hasLists?f.lists:JSON.parse(JSON.stringify(FK_SEED_LISTS))};
+}
+function fkSave(){if(fkSaveTimer)clearTimeout(fkSaveTimer);fkSaveTimer=setTimeout(()=>{if(FK)call('save_focus',FK).catch(()=>{});},600);}
+function fkMantra(){return FK_MANTRAS[fkIdx].split('{name}').join('<em>'+esc(FK&&FK.name||'du')+'</em>');}
+function fkCounts(l){const its=l.items||[];const d=its.filter(i=>i.done).length;return{d,t:its.length,p:its.length?d/its.length:0};}
+function fkAll(){let d=0,t=0;(FK.lists||[]).forEach(l=>(l.items||[]).forEach(i=>{t++;if(i.done)d++;}));return{d,t,p:t?d/t:0};}
+function fkTodayList(){const ls=FK.lists||[];return ls.find(l=>/heute/i.test(l.title||''))||ls[0]||null;}
+
+function fkRender(){
+  fkRenderDaily();
+  const grid=$('#fkGrid');if(!grid)return;grid.innerHTML='';
+  (FK.lists||[]).forEach(l=>grid.appendChild(fkCard(l)));
+  const al=el('button','fk-addlist');al.innerHTML='<span style="font-size:18px">＋</span> Neue Liste';al.onclick=fkAddList;grid.appendChild(al);
+  const n=el('div','fk-notes');
+  n.innerHTML='<div class="top"><div class="em">📝</div><div><b style="font-size:15px">Notizblock</b><div style="font-size:12px;color:var(--tx-dim)">Kopf frei machen – alles rein, was dir einfällt.</div></div></div>';
+  const ta=el('textarea');ta.placeholder='Schreib einfach los …';ta.value=FK.notes||'';
+  ta.addEventListener('input',e=>{FK.notes=e.target.value;fkSave();});
+  n.appendChild(ta);grid.appendChild(n);
+  fkRenderToday();fkUpdateHero();
+}
+function fkCard(l){
+  const c=fkCounts(l);const card=el('div','fk-card');card.id='fkcard-'+l.id;card.style.setProperty('--_c',l.color||'var(--accent)');
+  card.innerHTML='<div class="top"><div class="em">'+esc(l.emoji||'📌')+'</div><div class="ti"><b>'+esc(l.title||'Liste')+'</b><span class="meta"><b>'+c.d+'</b>/'+c.t+' erledigt</span></div></div>'
+    +'<div class="fk-bar"><i style="background:'+esc(l.color||'#5b8cff')+'"></i></div><div class="fk-items"></div>'
+    +'<div class="fk-add"><span class="plus">＋</span><input placeholder="Aufgabe hinzufügen …"></div>';
+  const items=card.querySelector('.fk-items');
+  (l.items||[]).forEach(it=>items.appendChild(fkRow(l,it)));
+  card.querySelector('.fk-bar>i').style.width=(c.p*100)+'%';
+  const inp=card.querySelector('.fk-add input');
+  inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&inp.value.trim()){l.items=l.items||[];l.items.push({id:'i'+Date.now().toString(36),text:inp.value.trim(),done:false});inp.value='';fkSave();fkRefreshCard(l);}});
+  return card;
+}
+function fkRow(l,it){
+  const row=el('div','fk-row'+(it.done?' done':''));row.style.setProperty('--_c',l.color||'var(--accent)');
+  row.innerHTML='<div class="fk-box">'+FK_CHECK+'</div><div class="lbl">'+esc(it.text)+'</div><button class="fk-del" title="Löschen">'+FK_X+'</button>';
+  row.addEventListener('click',ev=>{
+    if(ev.target.closest('.fk-del')){l.items=l.items.filter(x=>x!==it);fkSave();fkRefreshCard(l);return;}
+    it.done=!it.done;fkSave();row.classList.toggle('done',it.done);
+    if(it.done){row.classList.add('pop');setTimeout(()=>row.classList.remove('pop'),340);}
+    fkRefreshCard(l,true);
+  });
+  return row;
+}
+function fkRefreshCard(l,celeb){
+  const old=$('#fkcard-'+l.id);if(!old)return;
+  old.replaceWith(fkCard(l));fkUpdateHero();fkRenderToday();
+  if(celeb){const c=fkCounts(l);if(c.t>0&&c.d===c.t)fkCelebrate(l);}
+}
+function fkRenderToday(){
+  const box=$('#fkTodayList');if(!box)return;box.innerHTML='';
+  const t=fkTodayList();if(!t)return;
+  (t.items||[]).slice(0,3).forEach(it=>{
+    const r=el('div','fk-row'+(it.done?' done':''));r.style.setProperty('--_c',t.color||'var(--accent)');r.style.padding='6px 0';
+    r.innerHTML='<div class="fk-box">'+FK_CHECK+'</div><div class="lbl" style="font-size:13px">'+esc(it.text)+'</div>';
+    r.addEventListener('click',()=>{it.done=!it.done;fkSave();fkRefreshCard(t,true);});
+    box.appendChild(r);
+  });
+}
+function fkUpdateHero(){
+  const a=fkAll();const fg=$('#fkRingFg');if(fg)fg.style.strokeDashoffset=326.7*(1-a.p);
+  const rp=$('#fkRingPct');if(rp)rp.textContent=Math.round(a.p*100)+'%';
+  const h=$('#fkHeroTitle'),m=$('#fkHeroMsg');if(!h||!m)return;const nm=FK.name?(', '+FK.name):'';
+  if(a.t===0){h.textContent='Leg los'+nm+' ✨';m.innerHTML='Füg deine erste Aufgabe hinzu oder erstelle eine Liste.';}
+  else if(a.p===0){h.textContent='Bereit loszulegen'+nm+' ☀️';m.innerHTML='Such dir <b>eine</b> Sache aus und fang damit an.';}
+  else if(a.p<1){h.textContent='Du bist dran'+nm+' 💪';m.innerHTML='Schon <b>'+a.d+' von '+a.t+'</b> geschafft. Immer nur der nächste Schritt.';}
+  else{h.textContent='Alles erledigt'+nm+'! 🎉';m.innerHTML='Du hast heute <b>alles</b> abgehakt. Richtig stark.';}
+}
+function fkAddList(){
+  const em=['🎯','💡','🌟','📌','🔥','🎨','📈'];const cols=['#5b8cff','#2ee6a6','#ff7ea8','#e7b24a'];
+  FK.lists=FK.lists||[];
+  FK.lists.push({id:'l'+Date.now().toString(36),emoji:em[FK.lists.length%em.length],title:'Neue Liste',color:cols[FK.lists.length%cols.length],items:[{id:'i'+Date.now().toString(36),text:'Erste Aufgabe',done:false}]});
+  fkSave();fkRender();
+}
+function fkRenderDaily(){
+  const box=$('#fkDaily');if(!box)return;const nm=esc(FK.name||'du');const open=FK.dailyDay===fkEpochDay;
+  box.className='fk-daily'+(open?' isopen':'');
+  box.innerHTML='<div class="in">'
+    +'<div class="col"><div class="spark">✨</div><div class="ct"><b>Deine Motivation für heute</b><span>Ein Satz, nur für dich, '+nm+' 💛</span></div><button class="fk-collect">Abholen ✨</button></div>'
+    +'<div class="opened"><div class="eyebrow">Für dich, '+nm+'</div><div class="quote">'+fkMantra()+'</div><div class="f2"><span>Schön, dass du da bist. Morgen wartet der nächste ✨</span><button class="fk-namechg" data-chg>Name ändern</button></div></div>'
+    +'</div>';
+  const cb=box.querySelector('.fk-collect');if(cb)cb.onclick=()=>{FK.dailyDay=fkEpochDay;fkSave();box.classList.add('isopen','reveal');fkBurst('#e7b24a');};
+  box.querySelectorAll('[data-chg]').forEach(b=>b.onclick=fkOpenOnb);
+}
+function fkGreet(){const h=new Date().getHours();return h<11?'Guten Morgen':(h<18?'Schön, dass du da bist':'Guten Abend');}
+function fkGreetEmoji(){const h=new Date().getHours();return h<11?'☀️':(h<18?'✨':'🌙');}
+function fkShowWelcome(){
+  const w=$('#fkWelcome');if(!w)return;
+  $('#fkWgreet').textContent=fkGreet()+(FK.name?', '+FK.name:'')+' '+fkGreetEmoji();
+  $('#fkWquote').innerHTML=fkMantra();
+  w.classList.remove('hide');w.classList.add('show');
+}
+function fkEnterFromWelcome(){
+  FK.dailyDay=fkEpochDay;fkSave();fkRenderDaily();
+  const w=$('#fkWelcome');w.classList.add('hide');setTimeout(()=>w.classList.remove('show','hide'),460);
+}
+function fkOpenOnb(){const o=$('#fkOnb');o.classList.add('show');const i=$('#fkOnbInput');i.value=(FK&&FK.name)||'';setTimeout(()=>i.focus(),60);}
+function fkSubmitOnb(){const v=$('#fkOnbInput').value.trim();if(!v)return;FK.name=v;fkSave();$('#fkOnb').classList.remove('show');fkRender();if($('#fkWelcome').classList.contains('show'))fkShowWelcome();}
+function setMode(m){
+  FK_MODE=m;
+  $('#pwView').classList.toggle('hidden',m!=='pw');
+  $('#fokusView').classList.toggle('show',m==='fokus');
+  const ps=$('#pwSearch');if(ps)ps.style.display=(m==='pw')?'':'none';
+  const nav=$('#nav');if(nav)nav.style.display=(m==='pw')?'':'none';
+  document.querySelectorAll('#modeToggle button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  if(m==='fokus'){if(FK&&!FK.name){fkOpenOnb();}fkRender();}
+}
+function fkInitAfterUnlock(){
+  setMode('pw');
+  if(FK&&FK.name&&FK.dailyDay!==fkEpochDay){setMode('fokus');fkShowWelcome();}
+}
+const fkCv=$('#fkConfetti'),fkCx=fkCv?fkCv.getContext('2d'):null;let fkParts=[];
+function fkSize(){if(fkCv){fkCv.width=innerWidth;fkCv.height=innerHeight;}}fkSize();addEventListener('resize',fkSize);
+function fkBurst(color){
+  if(!fkCx||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  const cols=[color,'#2ee6a6','#5b8cff','#ffd479','#ff7ea8','#eef2f8'];
+  for(let i=0;i<80;i++)fkParts.push({x:innerWidth/2,y:innerHeight*.32,vx:(Math.cos(i)*6)+(i%7-3)*1.4,vy:-(6+(i%9))*1.1,r:3+(i%4),c:cols[i%cols.length],rot:i,vr:(i%5-2)*.3,life:0});
+  if(!fkBurst._run){fkBurst._run=true;requestAnimationFrame(fkTick);}
+}
+function fkTick(){
+  fkCx.clearRect(0,0,fkCv.width,fkCv.height);
+  fkParts.forEach(p=>{p.vy+=0.24;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;p.life++;fkCx.save();fkCx.translate(p.x,p.y);fkCx.rotate(p.rot);fkCx.fillStyle=p.c;fkCx.globalAlpha=Math.max(0,1-p.life/120);fkCx.fillRect(-p.r,-p.r,p.r*2,p.r*2.6);fkCx.restore();});
+  fkParts=fkParts.filter(p=>p.life<120&&p.y<fkCv.height+40);
+  if(fkParts.length)requestAnimationFrame(fkTick);else{fkBurst._run=false;fkCx.clearRect(0,0,fkCv.width,fkCv.height);}
+}
+function fkCelebrate(l){toast((l.title||'Liste')+' komplett – stark gemacht! 🎉');fkBurst(l.color||'#e7b24a');}
+function fkWire(){
+  document.querySelectorAll('#modeToggle button').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+  const wgo=$('#fkWgo');if(wgo)wgo.onclick=fkEnterFromWelcome;
+  const og=$('#fkOnbGo');if(og)og.onclick=fkSubmitOnb;
+  const oi=$('#fkOnbInput');if(oi)oi.addEventListener('keydown',e=>{if(e.key==='Enter')fkSubmitOnb();});
+  document.querySelectorAll('#fkWelcome [data-chg]').forEach(b=>b.onclick=fkOpenOnb);
+}
+fkWire();
+
 boot();
 </script>
 </body>

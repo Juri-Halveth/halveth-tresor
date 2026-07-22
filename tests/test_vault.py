@@ -6,6 +6,7 @@ higher cost. All sample data is generic (example.com), no real credentials.
 """
 
 import copy
+import json
 import os
 
 import pytest
@@ -211,3 +212,79 @@ def test_absurd_scrypt_params_rejected(vault_path, tamper):
     V.save_file(vault_path, env)
     with pytest.raises((V.Corrupt, V.WrongCredentials)):
         V.Session(vault_path).unlock("pw", "1234")
+
+
+# ---------------------------------------------------------------- Focus area + backups
+FOCUS = {
+    "name": "Alex",
+    "dailyDay": 20321,
+    "notes": "Ideen: einfach anfangen.",
+    "lists": [{"id": "l1", "title": "Heute", "items": [{"id": "i1", "text": "Posten", "done": True}]}],
+}
+
+
+def test_focus_roundtrip(vault_path):
+    s = V.Session(vault_path)
+    s.create("pw", "1234", n_exp=NEXP)
+    s.unlock("pw", "1234")
+    assert s.focus == {}  # a fresh vault starts with empty focus
+    s.set_focus(copy.deepcopy(FOCUS))
+
+    reopened = V.Session(vault_path)
+    reopened.unlock("pw", "1234")
+    assert reopened.focus == FOCUS
+    assert reopened.entries == []  # focus lives alongside entries, not instead of them
+
+
+def test_focus_and_entries_coexist(vault_path):
+    s = V.Session(vault_path)
+    s.create("pw", "1234", n_exp=NEXP)
+    s.unlock("pw", "1234")
+    s.upsert(copy.deepcopy(SAMPLE[0]))
+    s.set_focus(copy.deepcopy(FOCUS))
+    s.upsert(copy.deepcopy(SAMPLE[1]))  # saving an entry must not drop focus
+
+    got = V.Session(vault_path)
+    got.unlock("pw", "1234")
+    assert len(got.entries) == 2
+    assert got.focus["name"] == "Alex"
+
+
+def test_old_vault_without_focus_still_opens(vault_path):
+    # Simulate a vault written before the Focus feature: its data payload has only "entries".
+    s = V.Session(vault_path)
+    s.create("pw", "1234", n_exp=NEXP)
+    s.unlock("pw", "1234")
+    hdr = V._hdr_of(s.env)
+    old_payload = json.dumps({"entries": [copy.deepcopy(SAMPLE[0])]}).encode("utf-8")
+    s.env["data"] = V._encrypt(bytes(s._dek), old_payload, V._aad("data", hdr))
+    s.env["checksum"] = V._checksum(s.env)
+    V.save_file(vault_path, s.env)
+
+    got = V.Session(vault_path)
+    entries = got.unlock("pw", "1234")
+    assert len(entries) == 1  # entries load unchanged
+    assert got.focus == {}  # missing focus defaults to empty, no crash
+
+
+def test_focus_recovery_unlock(vault_path):
+    s = V.Session(vault_path)
+    recovery = s.create("pw", "1234", n_exp=NEXP)
+    s.unlock("pw", "1234")
+    s.set_focus(copy.deepcopy(FOCUS))
+
+    got = V.Session(vault_path)
+    got.unlock_recovery(recovery)
+    assert got.focus == FOCUS
+
+
+def test_autobackups_created_and_capped(vault_path):
+    s = V.Session(vault_path)
+    s.create("pw", "1234", n_exp=NEXP)
+    s.unlock("pw", "1234")
+    folder = os.path.join(os.path.dirname(vault_path), "backups")
+    assert os.path.isdir(folder)  # create() already made the first backup
+    for i in range(V.BACKUP_KEEP + 5):
+        s.upsert({"id": f"e{i}", "type": "note", "title": str(i), "group": "", "fields": []})
+    backups = [f for f in os.listdir(folder) if f.startswith("vault-")]
+    assert 1 <= len(backups) <= V.BACKUP_KEEP  # kept, and never grows without bound
