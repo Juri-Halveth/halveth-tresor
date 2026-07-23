@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional light theme for the vault window (the current window ships with a dark theme by default).
 - Import of entries from a previously exported encrypted backup.
 
+## [1.6.2] - 2026-07-23
+
+### Changed
+
+- Focus lists now show at most 4 columns side by side instead of squeezing in 5 on a wide window, so each list is wider and its task text has more room. The number of columns still adapts to the window width (4 → 3 → 2 → 1 as it gets narrower).
+
 ## [1.6.1] - 2026-07-23
 
 ### Fixed
@@ -132,7 +138,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Encrypted backup export to a separate file.
 - Packaged single-file Windows executable built with PyInstaller (`dist/Tresor.exe`), portable with no installer and no admin rights.
 
-[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.6.1...HEAD
+[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.6.2...HEAD
+[1.6.2]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.5.0...v1.5.1

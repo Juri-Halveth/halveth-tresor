@@ -1,8 +1,10 @@
-# Tresor v1.6.1
+# Tresor v1.6.2
 
 **A local, offline credential vault for Windows. Your complete access, encrypted in a single file, with no cloud and no account.**
 
-> New in 1.6.1: the sidebar's bottom bar (Back up / Lock / Settings) now stays pinned to the bottom in the Focus and Motivation areas too, just like in Passwords, instead of jumping up.
+> New in 1.6.2: Focus lists now show at most 4 columns on a wide window instead of squeezing in 5, so each list is wider and its task text has more room. The layout still adapts to the window width (4 → 3 → 2 → 1).
+>
+> In 1.6.1: the sidebar's bottom bar (Back up / Lock / Settings) stays pinned to the bottom in Focus and Motivation too.
 >
 > In 1.6.0: the **Text size** setting now scales only the text (which reflows), not the whole window — buttons and the Settings always stay reachable. And the motivational sayings were **rewritten** — 149 new, warmer, more personal lines.
 >

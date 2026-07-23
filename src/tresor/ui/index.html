@@ -381,7 +381,8 @@ input,textarea,select{font-family:inherit; font-size:14px}
 .fk-hero .htxt h3{font-size:16.5px;margin-bottom:3px}
 .fk-hero .htxt p{font-size:13px;color:var(--tx-dim);line-height:1.5;max-width:46ch}
 .fk-hero .today{margin-top:12px;display:flex;flex-direction:column;gap:6px}
-.fk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;align-content:start;grid-auto-rows:max-content}
+/* max. 4 Spalten (breitere Karten, mehr Text-Platz), dynamisch runter auf 3/2/1 */
+.fk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(max(340px,(100% - 48px)/4),1fr));gap:16px;align-content:start;grid-auto-rows:max-content}
 .fk-card{background:linear-gradient(180deg,var(--bg-2),var(--bg-1));border:1px solid var(--line);border-radius:16px;padding:17px;display:flex;flex-direction:column}
 .fk-card .top{display:flex;align-items:center;gap:11px;margin-bottom:4px}
 .fk-card .em{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:19px;flex:none;background:var(--bg-3);border:1px solid var(--line)}
