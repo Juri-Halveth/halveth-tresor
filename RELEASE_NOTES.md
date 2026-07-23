@@ -1,8 +1,10 @@
-# Tresor v1.2.0
+# Tresor v1.2.1
 
 **A local, offline credential vault for Windows. Your complete access, encrypted in a single file, with no cloud and no account.**
 
-> New in 1.2.0: a **Focus area** next to your passwords. Switch between Passwords and Focus in the sidebar. Focus holds checklists you tick off (with a progress bar), a free-form notepad, and a **daily personalized motivation**: each day a welcome screen greets you by name with one of 200 hand-written sentences. Everything in Focus is stored encrypted in the same vault. This release also adds **automatic versioned backups** on every save (the last 20 states are kept in a `backups` folder), so any change can be rolled back. Earlier releases: 1.1.3 fixed clipped dashboard cards; 1.1.2 fixed the encrypted backup export and hardened the core; 1.1.1 fixed data loss with two open windows; 1.1.0 added the bilingual German/English interface.
+> New in 1.2.1: polish for the Focus area — the daily-motivation card no longer appears compressed, and list titles are now editable (click a list's name to rename it).
+>
+> Introduced in 1.2.0: a **Focus area** next to your passwords. Switch between Passwords and Focus in the sidebar. Focus holds checklists you tick off (with a progress bar), a free-form notepad, and a **daily personalized motivation**: each day a welcome screen greets you by name with one of 200 hand-written sentences. Everything in Focus is stored encrypted in the same vault. This release also adds **automatic versioned backups** on every save (the last 20 states are kept in a `backups` folder), so any change can be rolled back. Earlier releases: 1.1.3 fixed clipped dashboard cards; 1.1.2 fixed the encrypted backup export and hardened the core; 1.1.1 fixed data loss with two open windows; 1.1.0 added the bilingual German/English interface.
 
 Tresor is a desktop credential vault. It is more than a password manager: it stores complete access, not just passwords. Keep login credentials, websites, FTP, SFTP, SSH, API keys, databases, mail accounts (IMAP/SMTP), cards, notes, and any other secret in one place. Each entry type has fields tailored to it, entries are organized by place or purpose into groups you name (for example Work, Servers, or Personal), and every field is one click to copy. Everything is fully offline: no cloud, no account, no telemetry, and no network calls, all kept in one local encrypted file.
 

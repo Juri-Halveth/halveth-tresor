@@ -12,6 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional light theme for the vault window (the current window ships with a dark theme by default).
 - Import of entries from a previously exported encrypted backup.
 
+## [1.2.1] - 2026-07-23
+
+### Fixed
+
+- Focus: the daily-motivation card could appear compressed with its sentence clipped — as a flex item with `overflow: hidden` it collapsed below its content. The Focus sections now keep their natural height (the view scrolls instead), so the full sentence always shows.
+
+### Changed
+
+- Focus: list titles are now editable. Click a list's name to rename it (for example rename "Neue Liste"); the new name is saved automatically.
+
 ## [1.2.0] - 2026-07-23
 
 ### Added
@@ -78,7 +88,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Encrypted backup export to a separate file.
 - Packaged single-file Windows executable built with PyInstaller (`dist/Tresor.exe`), portable with no installer and no admin rights.
 
-[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.3...v1.2.0
 [1.1.3]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.1...v1.1.2

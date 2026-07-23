@@ -321,6 +321,13 @@ input,textarea,select{font-family:inherit; font-size:14px}
 #modeToggle svg{width:15px;height:15px}
 #fokusView{flex:1;overflow-y:auto;min-height:0;padding:22px 26px 50px;display:none;flex-direction:column}
 #fokusView.show{display:flex}
+/* keep every section at its natural height; the view itself scrolls (stops the daily
+   card, which uses overflow:hidden, from collapsing below its content in the flex column) */
+#fokusView>*{flex-shrink:0}
+.fk-title{background:none;border:1px solid transparent;border-radius:7px;color:var(--tx-hi);font-size:15px;font-weight:700;font-family:inherit;width:100%;padding:2px 6px;margin:-2px -6px 0;outline:none;user-select:text;overflow:hidden;text-overflow:ellipsis}
+.fk-title:hover{border-color:var(--line)}
+.fk-title:focus{border-color:var(--_c,var(--accent));background:var(--bg-0)}
+.fk-title::placeholder{color:var(--tx-dim)}
 .fk-head{margin-bottom:18px}
 .fk-head h2{font-size:22px;display:flex;align-items:center;gap:9px}
 .fk-head .sub{color:var(--tx-dim);font-size:13.5px;margin-top:4px}
@@ -1312,9 +1319,11 @@ function fkRender(){
 }
 function fkCard(l){
   const c=fkCounts(l);const card=el('div','fk-card');card.id='fkcard-'+l.id;card.style.setProperty('--_c',l.color||'var(--accent)');
-  card.innerHTML='<div class="top"><div class="em">'+esc(l.emoji||'📌')+'</div><div class="ti"><b>'+esc(l.title||'Liste')+'</b><span class="meta"><b>'+c.d+'</b>/'+c.t+' erledigt</span></div></div>'
+  card.innerHTML='<div class="top"><div class="em">'+esc(l.emoji||'📌')+'</div><div class="ti"><input class="fk-title" value="'+esc(l.title||'')+'" placeholder="Listenname"><span class="meta"><b>'+c.d+'</b>/'+c.t+' erledigt</span></div></div>'
     +'<div class="fk-bar"><i style="background:'+esc(l.color||'#5b8cff')+'"></i></div><div class="fk-items"></div>'
     +'<div class="fk-add"><span class="plus">＋</span><input placeholder="Aufgabe hinzufügen …"></div>';
+  const tin=card.querySelector('.fk-title');
+  tin.addEventListener('input',()=>{l.title=tin.value;fkSave();});
   const items=card.querySelector('.fk-items');
   (l.items||[]).forEach(it=>items.appendChild(fkRow(l,it)));
   card.querySelector('.fk-bar>i').style.width=(c.p*100)+'%';
