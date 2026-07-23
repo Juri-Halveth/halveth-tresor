@@ -340,6 +340,17 @@ input,textarea,select{font-family:inherit; font-size:14px}
 .mo-boost-btn:active{transform:translateY(0)}
 .mo-count{font-size:12.5px;color:var(--tx-dim);margin-top:14px;min-height:1em}
 @media(max-width:820px){.mo-quote{font-size:22px}.mo-boost .bq{font-size:19px}}
+/* Tipps-Panel in der Seitenleiste (nur im Fokus-Bereich) */
+#fkTips{display:none;flex-direction:column;gap:10px;overflow-y:auto;min-height:0;padding-right:2px}
+#fkTips.show{display:flex}
+.fk-tips-box{background:var(--bg-2);border:1px solid var(--line);border-radius:13px;padding:12px 13px;flex:none}
+.fk-tips-box h4{font-size:11.5px;font-weight:700;letter-spacing:.3px;color:var(--tx-hi);margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.fk-tips-box ul{list-style:none;display:flex;flex-direction:column;gap:7px}
+.fk-tips-box li{font-size:11.5px;line-height:1.5;color:var(--tx-dim)}
+.fk-tips-box li b{color:var(--tx);font-weight:600}
+.fk-tips-ex{font-size:11px;line-height:1.6;color:var(--tx-dim);background:var(--bg-0);border:1px solid var(--line-soft);border-radius:9px;padding:9px 10px;margin-top:9px}
+.fk-tips-ex b{color:var(--tx)}
+kbd{display:inline-block;background:var(--bg-0);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px;font-size:10.5px;font-family:inherit;color:var(--tx);margin:0 1px}
 #fokusView{flex:1;overflow-y:auto;min-height:0;padding:22px 26px 50px;display:none;flex-direction:column}
 #fokusView.show{display:flex}
 /* keep every section at its natural height; the view itself scrolls (stops the daily
@@ -482,6 +493,9 @@ input,textarea,select{font-family:inherit; font-size:14px}
 /* Fokus / Notizen / Motivation */
 .fk-tinp{font-size:calc(13.5px*var(--ts))}
 .fk-notes textarea{font-size:calc(14px*var(--ts))}
+.fk-tips-box h4,.fk-tips-box li{font-size:calc(11.5px*var(--ts))}
+.fk-tips-ex{font-size:calc(11px*var(--ts))}
+kbd{font-size:calc(10.5px*var(--ts))}
 .fk-head h2{font-size:calc(22px*var(--ts))}
 .fk-daily .quote{font-size:calc(22px*var(--ts))}
 .mo-quote{font-size:calc(27px*var(--ts))}
@@ -600,6 +614,30 @@ input,textarea,select{font-family:inherit; font-size:14px}
       <input id="searchBox" data-i18n-ph="side.search">
     </div>
     <nav class="nav" id="nav"></nav>
+    <div id="fkTips">
+      <div class="fk-tips-box">
+        <h4>💡 So gehst du vor</h4>
+        <ul>
+          <li>Alles roh in den <b>Notizblock</b> – erstmal Kopf leer machen.</li>
+          <li>Dann nach <b>Themen</b> in Listen aufteilen.</li>
+          <li>Aufgaben klein halten: lieber <b>„Küche aufräumen"</b> als „Wohnung machen".</li>
+          <li>Kein Rechtsklick nötig – <b>anklicken und tippen</b> reicht. Zum Verschieben am ⠿ ziehen.</li>
+        </ul>
+        <div class="fk-tips-ex">
+          <b>Wohnung</b> · Küche · Bad · Wäsche<br>
+          <b>Projekt Video</b> · schneiden · Thumbnail · hochladen<br>
+          <b>Arbeit</b> · Angebot schreiben · Mails
+        </div>
+      </div>
+      <div class="fk-tips-box">
+        <h4>⌨️ Kleine Helfer</h4>
+        <ul>
+          <li><kbd>Strg</kbd>+<kbd>C</kbd> kopieren</li>
+          <li><kbd>Strg</kbd>+<kbd>V</kbd> einfügen</li>
+          <li><kbd>Alt</kbd>+<kbd>Tab</kbd> Fenster wechseln</li>
+        </ul>
+      </div>
+    </div>
     <div class="side-foot">
       <button class="side-btn" id="btnBackup" data-i18n-title="side.backupTitle">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span data-i18n="side.backup"></span></button>
@@ -1544,6 +1582,7 @@ function setMode(m){
   $('#motivationView').classList.toggle('show',m==='motivation');
   const ps=$('#pwSearch');if(ps)ps.style.display=(m==='pw')?'':'none';
   const nav=$('#nav');if(nav)nav.style.display=(m==='pw')?'':'none';
+  const tips=$('#fkTips');if(tips)tips.classList.toggle('show',m==='fokus');
   document.querySelectorAll('#modeToggle button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
   if(m==='fokus'){if(FK&&!FK.name){fkOpenOnb();}fkRender();}
   if(m==='motivation'){if(FK&&!FK.name){fkOpenOnb();}moRender();}

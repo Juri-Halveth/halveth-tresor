@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional light theme for the vault window (the current window ships with a dark theme by default).
 - Import of entries from a previously exported encrypted backup.
 
+## [1.7.0] - 2026-07-23
+
+### Added
+
+- A small **tips panel** in the sidebar of the Focus area, filling the space the groups list leaves empty. It explains the workflow in a few lines (brain-dump into the notepad first, then split by topic, keep tasks small, click to edit and drag the grip to move) with short concrete examples, plus the handy keyboard shortcuts (Ctrl+C, Ctrl+V, Alt+Tab). It scales with the Text size setting and is only shown in the Focus area.
+
 ## [1.6.2] - 2026-07-23
 
 ### Changed
@@ -138,7 +144,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Encrypted backup export to a separate file.
 - Packaged single-file Windows executable built with PyInstaller (`dist/Tresor.exe`), portable with no installer and no admin rights.
 
-[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.6.2...HEAD
+[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.6.2...v1.7.0
 [1.6.2]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.5.1...v1.6.0

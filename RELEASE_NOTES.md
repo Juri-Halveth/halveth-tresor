@@ -1,8 +1,10 @@
-# Tresor v1.6.2
+# Tresor v1.7.0
 
 **A local, offline credential vault for Windows. Your complete access, encrypted in a single file, with no cloud and no account.**
 
-> New in 1.6.2: Focus lists now show at most 4 columns on a wide window instead of squeezing in 5, so each list is wider and its task text has more room. The layout still adapts to the window width (4 → 3 → 2 → 1).
+> New in 1.7.0: a small **tips panel** in the Focus sidebar that shows how to get started — brain-dump into the notepad, split by topic, keep tasks small — with short examples and the handy keyboard shortcuts (Ctrl+C, Ctrl+V, Alt+Tab).
+>
+> In 1.6.2: Focus lists cap at 4 columns on a wide window so task text has more room (still adapting down to 3 / 2 / 1).
 >
 > In 1.6.1: the sidebar's bottom bar (Back up / Lock / Settings) stays pinned to the bottom in Focus and Motivation too.
 >
