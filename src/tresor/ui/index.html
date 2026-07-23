@@ -370,19 +370,38 @@ input,textarea,select{font-family:inherit; font-size:14px}
 .fk-bar{height:7px;border-radius:6px;background:var(--bg-0);overflow:hidden;margin:9px 2px 12px}
 .fk-bar>i{display:block;height:100%;width:0;border-radius:6px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
 .fk-items{display:flex;flex-direction:column;gap:2px}
-.fk-row{display:flex;align-items:center;gap:11px;padding:8px;border-radius:10px;transition:background .12s;cursor:pointer}
+.fk-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;transition:background .12s}
 .fk-row:hover{background:var(--bg-3)}
-.fk-box{width:21px;height:21px;border-radius:7px;border:2px solid #37435b;flex:none;display:grid;place-items:center;transition:.18s}
+.fk-grip{opacity:0;cursor:grab;color:var(--tx-dim);width:16px;flex:none;display:grid;place-items:center;transition:.12s}
+.fk-grip:active{cursor:grabbing}
+.fk-row:hover .fk-grip{opacity:.55}
+.fk-grip svg{width:15px;height:15px}
+.fk-box{width:21px;height:21px;border-radius:7px;border:2px solid #37435b;flex:none;display:grid;place-items:center;transition:.18s;cursor:pointer}
 .fk-box svg{width:12px;height:12px;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .22s .04s;color:#08131f}
-.fk-row .lbl{flex:1;font-size:13.5px;line-height:1.35;transition:.2s;word-break:break-word}
+.fk-tinp{flex:1;min-width:0;background:none;border:1px solid transparent;border-radius:7px;color:var(--tx-hi);font-size:13.5px;line-height:1.35;font-family:inherit;padding:4px 6px;outline:none;user-select:text}
+.fk-tinp:hover{border-color:var(--line-soft)}
+.fk-tinp:focus{border-color:var(--_c,var(--accent));background:var(--bg-0)}
+.fk-row .lbl{flex:1;font-size:13.5px;line-height:1.35;word-break:break-word}
 .fk-row.done .fk-box{background:var(--_c,var(--accent-2));border-color:var(--_c,var(--accent-2))}
 .fk-row.done .fk-box svg{stroke-dashoffset:0}
-.fk-row.done .lbl{color:var(--tx-dim);text-decoration:line-through;text-decoration-color:rgba(174,185,205,.5)}
+.fk-row.done .fk-tinp,.fk-row.done .lbl{color:var(--tx-dim);text-decoration:line-through;text-decoration-color:rgba(174,185,205,.45)}
 .fk-row.pop .fk-box{animation:fkpop .32s ease}
-.fk-del{opacity:0;color:var(--tx-dim);width:25px;height:25px;border-radius:8px;display:grid;place-items:center;flex:none;transition:.12s}
-.fk-row:hover .fk-del{opacity:1}
+.fk-row.fk-drop-above{box-shadow:inset 0 2px 0 var(--_c,var(--accent))}
+.fk-tools{display:flex;gap:2px;flex:none;opacity:0;transition:.12s}
+.fk-row:hover .fk-tools{opacity:1}
+.fk-cp,.fk-del{color:var(--tx-dim);width:25px;height:25px;border-radius:8px;display:grid;place-items:center;flex:none;transition:.12s}
+.fk-cp:hover{color:var(--accent);background:rgba(91,140,255,.1)}
 .fk-del:hover{color:var(--danger);background:rgba(255,92,114,.1)}
-.fk-del svg{width:13px;height:13px}
+.fk-cp svg,.fk-del svg{width:13px;height:13px}
+.fk-done{margin-top:10px;border-top:1px solid var(--line-soft);padding-top:6px}
+.fk-done-h{display:flex;align-items:center;gap:7px;width:100%;padding:6px;border-radius:8px;color:var(--tx-dim);font-size:12.5px;font-weight:600;transition:.12s}
+.fk-done-h:hover{color:var(--tx);background:var(--bg-3)}
+.fk-done-h .chev{font-size:9px;transition:transform .18s;display:inline-block}
+.fk-done.open .fk-done-h .chev{transform:rotate(90deg)}
+.fk-done-items{display:none;margin-top:2px}
+.fk-done.open .fk-done-items{display:block}
+.fk-done .fk-row{opacity:.6}
+.fk-done .fk-row:hover{opacity:1}
 .fk-add{display:flex;align-items:center;gap:9px;margin-top:9px;padding:9px 11px;border-radius:10px;border:1px dashed var(--line)}
 .fk-add:focus-within{border-color:var(--_c,var(--accent));border-style:solid}
 .fk-add .plus{color:var(--tx-dim);font-size:16px}
@@ -799,6 +818,7 @@ const MockAPI = (()=>{
     unlock_recovery:(rk)=>{if(!data)return Promise.resolve({ok:false,error:'unknown'});return Promise.resolve({ok:true,entries:data.entries,focus:data.focus||{}})},
     get_focus:()=>Promise.resolve({ok:true,focus:(data&&data.focus)||{}}),
     save_focus:(f)=>{if(data){data.focus=f;save(data);}return Promise.resolve({ok:true,focus:f})},
+    copy_plain:(t)=>{try{navigator.clipboard.writeText(t)}catch(e){}return Promise.resolve({ok:true})},
     change_master:(m,p)=>{creds={m,p};return Promise.resolve({ok:true})},
     lock:()=>{creds=null;return Promise.resolve({ok:true})},
     save_entry:(e)=>{if(!e.id){e.id='id'+Math.random().toString(36).slice(2)}
@@ -1274,6 +1294,9 @@ async function boot(){
    ================================================================ */
 const FK_CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
 const FK_X='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+const FK_GRIP='<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
+const FK_COPY='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 9h10a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+let fkDrag=null; const fkExpandedDone=new Set();
 const FK_MANTRAS=["{name}, du musst nicht bereit sein – du musst nur anfangen.","Der erste Schritt ist der schwerste, {name}. Und du machst ihn heute.","Alles, was du bewunderst, hat mal klein angefangen. Genau wie du, {name}.","{name}, warte nicht auf den perfekten Moment. Mach ihn perfekt.","Angst heißt oft nur: Hier wächst du gerade, {name}.","Du brauchst keinen Mut ohne Angst, {name} – nur den Mut, trotzdem loszugehen.","Ein kleiner Anfang ist mehr wert als ein großer Plan, {name}.","{name}, das, was du dir nicht traust, ist oft genau dein Weg.","Fang ruhig unperfekt an, {name}. Gut wirst du unterwegs.","Die beste Zeit war gestern. Die zweitbeste ist jetzt, {name}.","{name}, du wächst nicht dort, wo es bequem ist.","Trau dich, sichtbar zu sein, {name}. Die Welt darf dich kennenlernen.","Jeder, den du bewunderst, hatte auch einen ersten, wackeligen Tag, {name}.","{name}, dein Zukunfts-Ich winkt dir zu: danke, dass du angefangen hast.","Nicht perfekt. Nicht fertig. Nur angefangen. Das reicht heute, {name}.","{name}, Türen öffnen sich für die, die anklopfen.","Du bist näher dran, als du denkst, {name}.","Mut ist ein Muskel, {name}. Heute machst du eine Wiederholung.","{name}, lass die Zweifel reden – und geh trotzdem los.","Es muss nicht groß sein. Es muss nur ehrlich sein, {name}.","{name}, du darfst Dinge tun, in denen du noch nicht gut bist.","Der Weg entsteht, während du gehst, {name}.","{name}, dein Traum wurde dir gegeben, weil du ihn tragen kannst.","Sei heute mutiger als deine Ausreden, {name}.","{name}, das Leben belohnt Bewegung, nicht Warten.","Du musst nicht wissen, wie. Du musst nur wollen, {name}.","{name}, eine Idee wird erst echt, wenn du sie anfässt.","Heute ein bisschen unbequem, {name} – morgen ein bisschen stolzer.","{name}, du bist genau die Richtige für deinen eigenen Weg.","Spring, {name}. Das Netz spannt sich unterwegs.","{name}, du bist genug – schon bevor du irgendetwas geschafft hast.","Dein Wert hängt nicht an deiner To-do-Liste, {name}.","{name}, die Welt braucht genau das, was nur du hast.","Du musst dich nicht beweisen, {name}. Du darfst dich einfach zeigen.","{name}, es gibt niemanden auf der Welt wie dich. Das ist deine Kraft.","Sei stolz auf dich, {name} – für all das, was keiner sieht.","{name}, du bist kein Entwurf, der noch fertig werden muss. Du bist schon echt.","Dein Tempo ist genau richtig, {name}.","{name}, vergleich deinen Anfang nicht mit dem Kapitel 20 von anderen.","Du darfst Platz einnehmen, {name}. Diese Welt ist auch für dich da.","{name}, deine Empfindsamkeit ist keine Schwäche – sie ist deine Superkraft.","Sprich mit dir wie mit einer guten Freundin, {name}.","{name}, du bist nicht „zu viel“. Du bist genau richtig.","Was du heute schaffst, zählt – auch wenn es klein aussieht, {name}.","{name}, dein Kopf funktioniert anders, nicht schlechter.","Du musst nicht alles auf einmal können, {name}. Niemand kann das.","{name}, sei sanft mit dir. Du gibst dein Bestes, und das sieht man.","Deine Ideen sind es wert, gehört zu werden, {name}.","{name}, du schuldest niemandem Perfektion.","An manchen Tagen ist Aufstehen schon der Sieg, {name}. Zähl ihn.","{name}, du bist der Beweis, dass Anfangen möglich ist.","Dein Wert ist keine Frage von Produktivität, {name}.","{name}, du darfst stolz sein, ohne fertig zu sein.","Die Welt wird ein bisschen heller, weil es dich gibt, {name}.","{name}, dein „langsam“ ist immer noch vorwärts.","Vertrau deiner Stimme, {name}. Sie ist echt.","{name}, du bist keine Aufgabe, die man lösen muss – ein Mensch, den man feiern darf.","Auch heute bist du genau da, wo du sein sollst, {name}.","{name}, sei geduldig mit der Person, die du gerade wirst.","Du bist mehr als deine schwersten Tage, {name}.","{name}, ein Schritt am Tag ist in einem Jahr ein ganzer Weg.","Kleine Häkchen bauen große Träume, {name}.","{name}, Dranbleiben schlägt Talent. Jeden einzelnen Tag.","Nicht schneller, {name} – nur nicht stehen bleiben.","{name}, jeder Tag, an dem du weitermachst, ist eine Investition in dich.","Fortschritt ist selten laut, {name}. Aber er ist da.","{name}, die Summe kleiner Tage ist ein großes Leben.","Du musst es heute nicht fertigmachen. Nur weitermachen, {name}.","{name}, dranbleiben heißt nicht rennen – es heißt zurückkommen.","Ein schlechter Tag löscht keinen Fortschritt, {name}.","{name}, du sammelst gerade Beweise, dass du es kannst.","Heute wieder ein bisschen. Morgen wieder. So gewinnt man, {name}.","{name}, das Geheimnis ist einfach: aufhören ist keine Option.","Jedes Häkchen sagt: Ich hab mein Wort gehalten, {name}.","{name}, Konsequenz ist Liebe zu deinem Zukunfts-Ich.","Du bist unaufhaltsam, wenn du einfach weitergehst, {name}.","{name}, Rückschritte gehören zum Weg. Steh auf und geh weiter.","Momentum kommt durch Bewegung, nicht durch Warten, {name}.","{name}, du musst nicht motiviert sein, um anzufangen. Anfangen macht motiviert.","Kleine Schritte sind auch dann Schritte, wenn keiner klatscht, {name}.","{name}, dein zukünftiges Ich lebt von dem, was du heute tust.","Bleib dran, {name}. Genau da beginnt der Unterschied.","{name}, was leicht aussieht, ist meistens oft geübt.","Fang klein an, bleib dran, werde groß, {name}.","{name}, jeder Profi war mal ein Anfänger, der nicht aufgehört hat.","Ein Prozent besser heute reicht völlig, {name}.","{name}, du baust gerade eine Gewohnheit, die dein Leben trägt.","Weitermachen ist die leiseste Form von Mut, {name}.","{name}, du hast schon so viel überstanden. Heute schaffst du auch.","Der Weg wird leichter, während du stärker wirst, {name}.","{name}, die Menschen warten auf genau deine Stimme.","Poste es, {name}. Irgendjemand da draußen braucht das heute.","{name}, du musst nicht viral gehen – nur echt sein.","Sichtbarkeit ist Mut in Bildern, {name}. Du hast beides.","{name}, deine Geschichte ist wertvoll, weil sie deine ist.","Nicht die Lauteste gewinnt, {name} – die Ehrlichste bleibt.","{name}, dein erster Beitrag muss nicht dein bester sein. Nur dein erster.","Zeig dich, {name}. Perfektion ist langweilig, echt ist magnetisch.","{name}, jeder große Kanal hatte mal null Follower.","Du sprichst zu einem Menschen, nicht zu einer Menge, {name}.","{name}, dein Content ist ein Geschenk, kein Wettbewerb.","Trau dich, deine Meinung zu haben, {name}. Sie zieht die Richtigen an.","{name}, Wiederholung schlägt Perfektion. Zeig dich einfach immer wieder.","Deine Ecken und Kanten sind dein Wiedererkennungswert, {name}.","{name}, poste für die eine Person, der du helfen willst.","Reichweite folgt der Regelmäßigkeit, {name}, nicht dem Zufall.","{name}, du darfst anfangen, bevor du dich „bereit“ fühlst.","Die Kamera liebt Menschen, die sich trauen, {name}.","{name}, dein Wachstum beginnt außerhalb deiner Bequemzone.","Sei du – alle anderen sind schon vergeben, {name}.","{name}, jeder Klick ist ein Mensch, den du berührt hast.","Deine Nische ist das, was nur du so erzählst, {name}.","{name}, hör nicht auf, kurz bevor es losgeht.","Konstanz baut Vertrauen, {name}. Vertrauen baut alles.","{name}, deine Community entsteht aus Ehrlichkeit, nicht aus Perfektion.","Ein Beitrag heute ist besser als zehn perfekte im Kopf, {name}.","{name}, sei die Stimme, die du früher selbst gebraucht hättest.","Deine Zahlen sind nicht dein Wert, {name}. Deine Wirkung schon.","{name}, trau dich, groß zu denken und klein anzufangen.","Du bist deine beste Marke, {name}. Zeig sie.","{name}, du baust dir gerade ein Leben nach deinen Regeln.","Selbstständig heißt: dein Tag gehört dir, {name}. Nutze ihn mutig.","{name}, niemand hat deinen Weg schon gemacht – deshalb ist er deiner.","Du bist Chefin deiner eigenen Zukunft, {name}.","{name}, jede große Firma war mal eine Idee und eine mutige Person.","Dein Business wächst in dem Tempo, in dem du dranbleibst, {name}.","{name}, Freiheit ist die Belohnung für deinen Mut heute.","Du musst nicht alles wissen, {name} – nur den nächsten Schritt.","{name}, Fehler sind die Studiengebühren deiner Selbstständigkeit.","Bau etwas auf, das dir gehört, {name}. Stein für Stein.","{name}, dein eigener Weg fühlt sich unsicher an, weil er neu ist – nicht falsch.","Investiere in die Person, die du wirst, {name}.","{name}, du bist der Beweis, dass man seinen eigenen Weg gehen kann.","Verdiene mit dem, was dich lebendig macht, {name}.","{name}, jede E-Mail, jeder kleine Schritt zählt.","Du wächst an der Verantwortung, {name}, nicht trotz ihr.","{name}, das Unbekannte ist der Ort, an dem dein Leben passiert.","Sei stolz, dass du dich traust, was andere nur träumen, {name}.","{name}, dein Chef-Ich glaubt an dich. Hör auf es.","Ein eigenes Ding aufzubauen ist Mut in Alltagsform, {name}.","{name}, du darfst groß träumen und klein starten.","Deine Freiheit ist es wert, {name} – halte durch.","{name}, du lernst gerade Dinge, die dir keiner mehr nimmt.","Jeder Kunde beginnt mit einem mutigen ersten Angebot, {name}.","{name}, du machst das nicht perfekt – du machst es echt.","Dein Weg muss nicht wie der von anderen aussehen, {name}.","{name}, du baust dir gerade genau das Leben, von dem du erzählen wirst.","Selbst gemacht schlägt vorgegeben, {name}.","{name}, du bist mutiger als die, die dich kritisieren.","Der Aufwand von heute ist die Freiheit von morgen, {name}.","Guten Morgen, {name}. Heute ist ein Blatt, das du beschreibst.","{name}, ein neuer Tag, eine neue Chance, dir selbst näherzukommen.","Steh auf und zeig dem Tag, wer du bist, {name}.","{name}, heute musst du nichts beweisen – nur da sein und dein Bestes geben.","Der Morgen gehört den Mutigen, {name}. Also dir.","{name}, atme tief durch. Du schaffst diesen Tag, Schritt für Schritt.","Heute ist ein guter Tag, um stolz auf dich zu werden, {name}.","{name}, mach dir den Tag zum Verbündeten, nicht zum Gegner.","Ein Schritt reicht, {name}. Fang mit dem an.","{name}, du wachst nicht auf, um perfekt zu sein, sondern um zu leben.","Neuer Tag, {name} – dieselbe starke Person, ein bisschen weiter.","{name}, was du heute säst, erntest du bald.","Lächle dich einmal an, {name}. Der Tag kann kommen.","{name}, heute zählt nicht, wie viel – sondern dass du anfängst.","Jeder Morgen ist ein leises „Du darfst es nochmal versuchen“, {name}.","{name}, gib dem Tag deine Energie, nicht deine Zweifel.","Heute ein kleines Ziel, {name} – und dann feier es.","{name}, dein Tag wird so gut, wie der erste Schritt mutig ist.","Wach auf und wähle dich selbst, {name}.","{name}, dieser Tag hat auf dich gewartet.","Ein ruhiger Kopf und ein Häkchen nach dem anderen, {name}.","{name}, du musst den Berg nicht heute besteigen. Nur den ersten Stein.","Heute bist du deiner Zukunft einen Tag näher, {name}.","{name}, mach heute etwas, wofür dein Morgen-Ich dir dankt.","Der beste Start in den Tag bist du selbst, {name}.","{name}, wenn heute nur eine Sache klappt, ist das ein voller Erfolg.","Dein Kopf ist voller Ideen, {name} – das ist ein Geschenk, kein Fehler.","{name}, wenn du dich verloren hast, komm einfach sanft zurück.","Kein Alles-oder-nichts heute, {name}. Nur ein bisschen ist auch gut.","{name}, du musst nicht wie andere funktionieren, um wertvoll zu sein.","Sei stolz auf jedes einzelne Häkchen, {name}. Sie zählen alle.","{name}, an schweren Tagen reicht es, freundlich zu dir zu sein.","Dein Gehirn arbeitet in Farbe, {name}, nicht in grau.","{name}, überfordert? Dann nur der allernächste, winzige Schritt.","Vergessen ist menschlich, {name} – deshalb machst du dir Häkchen.","{name}, du bist nicht faul. Du brauchst nur deinen eigenen Weg.","Ein Neustart ist immer erlaubt, {name}. Auch mitten am Tag.","{name}, feier den Anfang, nicht nur das Ende.","Chaos im Kopf, Ordnung auf der Liste, {name}. So geht das.","{name}, du darfst Pause machen, ohne dich schuldig zu fühlen.","Ein Häkchen ist ein kleines „Ich hab an mich geglaubt“, {name}.","{name}, deine Energie kommt in Wellen – reit die guten aus.","Sei heute deine eigene beste Freundin, {name}.","{name}, du bist nicht hinterher. Du bist auf deinem eigenen Fahrplan.","Kleine Schritte sind für dich gemacht, {name}.","{name}, ein unperfekter Anfang ist immer noch ein Anfang.","Atme, {name}. Eine Sache nach der anderen.","{name}, du bist heute aufgestanden und hast es versucht. Das ist mutig.","Gib dir das, was du anderen so leicht gibst: Geduld, {name}.","{name}, du machst das gerade wirklich gut. Ehrlich."];
 const FK_SEED_LISTS=[
  {id:'l1',emoji:'🚀',title:'Social-Media-Start',color:'#5b8cff',items:[
@@ -1317,29 +1340,69 @@ function fkRender(){
   n.appendChild(ta);grid.appendChild(n);
   fkRenderToday();fkUpdateHero();
 }
+function fkNewId(){return 'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 function fkCard(l){
   const c=fkCounts(l);const card=el('div','fk-card');card.id='fkcard-'+l.id;card.style.setProperty('--_c',l.color||'var(--accent)');
+  const active=(l.items||[]).filter(i=>!i.done), done=(l.items||[]).filter(i=>i.done);
   card.innerHTML='<div class="top"><div class="em">'+esc(l.emoji||'📌')+'</div><div class="ti"><input class="fk-title" value="'+esc(l.title||'')+'" placeholder="Listenname"><span class="meta"><b>'+c.d+'</b>/'+c.t+' erledigt</span></div></div>'
-    +'<div class="fk-bar"><i style="background:'+esc(l.color||'#5b8cff')+'"></i></div><div class="fk-items"></div>'
-    +'<div class="fk-add"><span class="plus">＋</span><input placeholder="Aufgabe hinzufügen …"></div>';
+    +'<div class="fk-bar"><i style="background:'+esc(l.color||'#5b8cff')+'"></i></div>'
+    +'<div class="fk-items"></div>'
+    +'<div class="fk-add"><span class="plus">＋</span><input placeholder="Aufgabe hinzufügen …"></div>'
+    +'<div class="fk-done-wrap"></div>';
   const tin=card.querySelector('.fk-title');
   tin.addEventListener('input',()=>{l.title=tin.value;fkSave();});
   const items=card.querySelector('.fk-items');
-  (l.items||[]).forEach(it=>items.appendChild(fkRow(l,it)));
+  active.forEach(it=>items.appendChild(fkRow(l,it)));
+  items.addEventListener('dragover',e=>{if(fkDrag)e.preventDefault();});
+  items.addEventListener('drop',e=>{if(fkDrag){e.preventDefault();fkMoveItem(fkDrag.listId,fkDrag.itemId,l.id,null);}});
   card.querySelector('.fk-bar>i').style.width=(c.p*100)+'%';
   const inp=card.querySelector('.fk-add input');
-  inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&inp.value.trim()){l.items=l.items||[];l.items.push({id:'i'+Date.now().toString(36),text:inp.value.trim(),done:false});inp.value='';fkSave();fkRefreshCard(l);}});
+  inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&inp.value.trim()){l.items=l.items||[];l.items.push({id:fkNewId(),text:inp.value.trim(),done:false});inp.value='';fkSave();fkRefreshCard(l);}});
+  if(done.length){
+    const dd=el('div','fk-done'+(fkExpandedDone.has(l.id)?' open':''));
+    dd.innerHTML='<button class="fk-done-h"><span class="chev">▶</span> Erledigt (<b>'+done.length+'</b>)</button><div class="fk-done-items"></div>';
+    const di=dd.querySelector('.fk-done-items');
+    done.forEach(it=>di.appendChild(fkRow(l,it)));
+    dd.querySelector('.fk-done-h').onclick=()=>{const op=dd.classList.toggle('open');if(op)fkExpandedDone.add(l.id);else fkExpandedDone.delete(l.id);};
+    card.querySelector('.fk-done-wrap').appendChild(dd);
+  }
   return card;
+}
+function fkMoveItem(srcListId,itemId,dstListId,beforeItemId){
+  const src=(FK.lists||[]).find(x=>x.id===srcListId), dst=(FK.lists||[]).find(x=>x.id===dstListId);
+  if(!src||!dst||!Array.isArray(src.items)||!Array.isArray(dst.items))return;
+  const idx=src.items.findIndex(i=>i.id===itemId);if(idx<0)return;
+  const item=src.items.splice(idx,1)[0];
+  let at=dst.items.length;
+  if(beforeItemId){const bi=dst.items.findIndex(i=>i.id===beforeItemId);if(bi>=0)at=bi;}
+  dst.items.splice(at,0,item);
+  fkSave();fkRender();
 }
 function fkRow(l,it){
   const row=el('div','fk-row'+(it.done?' done':''));row.style.setProperty('--_c',l.color||'var(--accent)');
-  row.innerHTML='<div class="fk-box">'+FK_CHECK+'</div><div class="lbl">'+esc(it.text)+'</div><button class="fk-del" title="Löschen">'+FK_X+'</button>';
-  row.addEventListener('click',ev=>{
-    if(ev.target.closest('.fk-del')){l.items=l.items.filter(x=>x!==it);fkSave();fkRefreshCard(l);return;}
-    it.done=!it.done;fkSave();row.classList.toggle('done',it.done);
-    if(it.done){row.classList.add('pop');setTimeout(()=>row.classList.remove('pop'),340);}
-    fkRefreshCard(l,true);
-  });
+  row.innerHTML=
+    (it.done?'<span class="fk-grip" style="visibility:hidden"></span>':'<span class="fk-grip" draggable="true" title="Ziehen zum Verschieben">'+FK_GRIP+'</span>')
+    +'<span class="fk-box" title="Erledigt">'+FK_CHECK+'</span>'
+    +'<input class="fk-tinp" value="'+esc(it.text)+'">'
+    +'<span class="fk-tools"><button class="fk-cp" title="Kopieren">'+FK_COPY+'</button><button class="fk-del" title="Löschen">'+FK_X+'</button></span>';
+  row.querySelector('.fk-box').onclick=()=>{
+    it.done=!it.done;fkSave();
+    if(it.done){row.classList.add('done','pop');setTimeout(()=>fkRefreshCard(l,true),320);}
+    else{fkRefreshCard(l);}
+  };
+  const tin=row.querySelector('.fk-tinp');
+  tin.addEventListener('input',()=>{it.text=tin.value;fkSave();});
+  tin.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();tin.blur();}});
+  row.querySelector('.fk-cp').onclick=()=>{call('copy_plain',it.text).catch(()=>{});toast('Kopiert');};
+  row.querySelector('.fk-del').onclick=()=>{l.items=l.items.filter(x=>x!==it);fkSave();fkRefreshCard(l);};
+  if(!it.done){
+    const grip=row.querySelector('.fk-grip');
+    grip.addEventListener('dragstart',e=>{fkDrag={listId:l.id,itemId:it.id};if(e.dataTransfer){e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',it.id);}catch(_){}}});
+    grip.addEventListener('dragend',()=>{fkDrag=null;});
+    row.addEventListener('dragover',e=>{if(fkDrag){e.preventDefault();e.stopPropagation();row.classList.add('fk-drop-above');}});
+    row.addEventListener('dragleave',()=>row.classList.remove('fk-drop-above'));
+    row.addEventListener('drop',e=>{e.preventDefault();e.stopPropagation();row.classList.remove('fk-drop-above');if(fkDrag)fkMoveItem(fkDrag.listId,fkDrag.itemId,l.id,it.id);});
+  }
   return row;
 }
 function fkRefreshCard(l,celeb){
@@ -1350,7 +1413,7 @@ function fkRefreshCard(l,celeb){
 function fkRenderToday(){
   const box=$('#fkTodayList');if(!box)return;box.innerHTML='';
   const t=fkTodayList();if(!t)return;
-  (t.items||[]).slice(0,3).forEach(it=>{
+  (t.items||[]).filter(i=>!i.done).slice(0,3).forEach(it=>{
     const r=el('div','fk-row'+(it.done?' done':''));r.style.setProperty('--_c',t.color||'var(--accent)');r.style.padding='6px 0';
     r.innerHTML='<div class="fk-box">'+FK_CHECK+'</div><div class="lbl" style="font-size:13px">'+esc(it.text)+'</div>';
     r.addEventListener('click',()=>{it.done=!it.done;fkSave();fkRefreshCard(t,true);});

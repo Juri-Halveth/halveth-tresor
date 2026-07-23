@@ -189,6 +189,20 @@ class Api:
         )
         return {"password": pw}
 
+    def copy_plain(self, text):
+        """Copy plain, non-secret text (e.g. a Focus task) to the clipboard.
+
+        Unlike copy_secret there is no auto-clear timer: a checklist item is not a secret,
+        and clearing it after a few seconds would be surprising when the user wants to paste
+        it wherever they like.
+        """
+        try:
+            clip.copy(str(text))
+            return {"ok": True}
+        except Exception as e:
+            _log_error("copy_plain", e)
+            return {"ok": False, "error": "copy_failed"}
+
     def copy_secret(self, text, clear_after=CLIPBOARD_SECONDS):
         """Copy a value to the clipboard and schedule an auto-clear."""
         clip.copy(text)

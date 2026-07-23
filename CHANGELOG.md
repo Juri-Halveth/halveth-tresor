@@ -12,6 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional light theme for the vault window (the current window ships with a dark theme by default).
 - Import of entries from a previously exported encrypted backup.
 
+## [1.3.0] - 2026-07-23
+
+### Added
+
+- Focus checklists are now fully editable. Each task's text can be corrected in place (click it and type) instead of deleting and re-adding it. A copy button copies a task's text to the clipboard (without the secret auto-clear, since a task is not a secret). Tasks can be reordered by dragging the grip handle, within a list or across lists. And ticked-off tasks move out of the active list into a collapsible "Erledigt" (Done) section per list, so a long list no longer overloads — reopen the section to see or un-tick them.
+
+### Added (backend)
+
+- `copy_plain(text)` on the API bridge: copies plain, non-secret text to the clipboard with no auto-clear timer.
+
 ## [1.2.1] - 2026-07-23
 
 ### Fixed
@@ -88,7 +98,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Encrypted backup export to a separate file.
 - Packaged single-file Windows executable built with PyInstaller (`dist/Tresor.exe`), portable with no installer and no admin rights.
 
-[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.3...v1.2.0
 [1.1.3]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.1.2...v1.1.3
