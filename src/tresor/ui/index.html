@@ -344,10 +344,10 @@ input,textarea,select{font-family:inherit; font-size:14px}
 /* keep every section at its natural height; the view itself scrolls (stops the daily
    card, which uses overflow:hidden, from collapsing below its content in the flex column) */
 #fokusView>*{flex-shrink:0}
-.fk-title{background:none;border:1px solid transparent;border-radius:7px;color:var(--tx-hi);font-size:15px;font-weight:700;font-family:inherit;width:100%;padding:2px 6px;margin:-2px -6px 0;outline:none;user-select:text;overflow:hidden;text-overflow:ellipsis}
+.fk-title{background:none;border:1px solid transparent;border-radius:7px;color:var(--tx-hi);font-size:15px;font-weight:700;font-family:inherit;width:100%;padding:2px 6px;margin:-2px -6px 0;outline:none;user-select:text;word-break:break-word;overflow-wrap:anywhere}
 .fk-title:hover{border-color:var(--line)}
 .fk-title:focus{border-color:var(--_c,var(--accent));background:var(--bg-0)}
-.fk-title::placeholder{color:var(--tx-dim)}
+.fk-title:empty:before{content:attr(data-ph);color:var(--tx-dim)}
 .fk-head{margin-bottom:18px}
 .fk-head h2{font-size:22px;display:flex;align-items:center;gap:9px}
 .fk-head .sub{color:var(--tx-dim);font-size:13.5px;margin-top:4px}
@@ -390,24 +390,25 @@ input,textarea,select{font-family:inherit; font-size:14px}
 .fk-bar{height:7px;border-radius:6px;background:var(--bg-0);overflow:hidden;margin:9px 2px 12px}
 .fk-bar>i{display:block;height:100%;width:0;border-radius:6px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
 .fk-items{display:flex;flex-direction:column;gap:2px}
-.fk-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;transition:background .12s}
+.fk-row{display:flex;align-items:flex-start;gap:8px;padding:6px 8px;border-radius:10px;transition:background .12s}
 .fk-row:hover{background:var(--bg-3)}
-.fk-grip{opacity:0;cursor:grab;color:var(--tx-dim);width:16px;flex:none;display:grid;place-items:center;transition:.12s}
+.fk-grip{opacity:0;cursor:grab;color:var(--tx-dim);width:16px;flex:none;display:grid;place-items:center;transition:.12s;margin-top:3px}
 .fk-grip:active{cursor:grabbing}
 .fk-row:hover .fk-grip{opacity:.55}
 .fk-grip svg{width:15px;height:15px}
-.fk-box{width:21px;height:21px;border-radius:7px;border:2px solid #37435b;flex:none;display:grid;place-items:center;transition:.18s;cursor:pointer}
+.fk-box{width:21px;height:21px;border-radius:7px;border:2px solid #37435b;flex:none;display:grid;place-items:center;transition:.18s;cursor:pointer;margin-top:3px}
 .fk-box svg{width:12px;height:12px;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .22s .04s;color:#08131f}
-.fk-tinp{flex:1;min-width:0;background:none;border:1px solid transparent;border-radius:7px;color:var(--tx-hi);font-size:13.5px;line-height:1.35;font-family:inherit;padding:4px 6px;outline:none;user-select:text}
+.fk-tinp{flex:1;min-width:0;background:none;border:1px solid transparent;border-radius:7px;color:var(--tx-hi);font-size:13.5px;line-height:1.4;font-family:inherit;padding:4px 6px;outline:none;user-select:text;word-break:break-word;overflow-wrap:anywhere;white-space:pre-wrap}
 .fk-tinp:hover{border-color:var(--line-soft)}
 .fk-tinp:focus{border-color:var(--_c,var(--accent));background:var(--bg-0)}
+.fk-tinp:empty:before{content:attr(data-ph);color:var(--tx-dim)}
 .fk-row .lbl{flex:1;font-size:13.5px;line-height:1.35;word-break:break-word}
 .fk-row.done .fk-box{background:var(--_c,var(--accent-2));border-color:var(--_c,var(--accent-2))}
 .fk-row.done .fk-box svg{stroke-dashoffset:0}
 .fk-row.done .fk-tinp,.fk-row.done .lbl{color:var(--tx-dim);text-decoration:line-through;text-decoration-color:rgba(174,185,205,.45)}
 .fk-row.pop .fk-box{animation:fkpop .32s ease}
 .fk-row.fk-drop-above{box-shadow:inset 0 2px 0 var(--_c,var(--accent))}
-.fk-tools{display:flex;gap:2px;flex:none;opacity:0;transition:.12s}
+.fk-tools{display:flex;gap:2px;flex:none;opacity:0;transition:.12s;margin-top:2px}
 .fk-row:hover .fk-tools{opacity:1}
 .fk-cp,.fk-del{color:var(--tx-dim);width:25px;height:25px;border-radius:8px;display:grid;place-items:center;flex:none;transition:.12s}
 .fk-cp:hover{color:var(--accent);background:rgba(91,140,255,.1)}
@@ -1390,13 +1391,14 @@ function fkNewId(){return 'i'+Date.now().toString(36)+Math.random().toString(36)
 function fkCard(l){
   const c=fkCounts(l);const card=el('div','fk-card');card.id='fkcard-'+l.id;card.style.setProperty('--_c',l.color||'var(--accent)');
   const active=(l.items||[]).filter(i=>!i.done), done=(l.items||[]).filter(i=>i.done);
-  card.innerHTML='<div class="top"><div class="em">'+esc(l.emoji||'📌')+'</div><div class="ti"><input class="fk-title" value="'+esc(l.title||'')+'" placeholder="Listenname"><span class="meta"><b>'+c.d+'</b>/'+c.t+' erledigt</span></div></div>'
+  card.innerHTML='<div class="top"><div class="em">'+esc(l.emoji||'📌')+'</div><div class="ti"><div class="fk-title" contenteditable="true" data-ph="Listenname"></div><span class="meta"><b>'+c.d+'</b>/'+c.t+' erledigt</span></div></div>'
     +'<div class="fk-bar"><i style="background:'+esc(l.color||'#5b8cff')+'"></i></div>'
     +'<div class="fk-items"></div>'
     +'<div class="fk-add"><span class="plus">＋</span><input placeholder="Aufgabe hinzufügen …"></div>'
     +'<div class="fk-done-wrap"></div>';
   const tin=card.querySelector('.fk-title');
-  tin.addEventListener('input',()=>{l.title=tin.value;fkSave();});
+  tin.textContent=l.title||'';
+  tin.addEventListener('input',()=>{l.title=tin.textContent;fkSave();});
   const items=card.querySelector('.fk-items');
   active.forEach(it=>items.appendChild(fkRow(l,it)));
   items.addEventListener('dragover',e=>{if(fkDrag)e.preventDefault();});
@@ -1429,7 +1431,7 @@ function fkRow(l,it){
   row.innerHTML=
     (it.done?'<span class="fk-grip" style="visibility:hidden"></span>':'<span class="fk-grip" draggable="true" title="Ziehen zum Verschieben">'+FK_GRIP+'</span>')
     +'<span class="fk-box" title="Erledigt">'+FK_CHECK+'</span>'
-    +'<input class="fk-tinp" value="'+esc(it.text)+'">'
+    +'<div class="fk-tinp" contenteditable="true" data-ph="Aufgabe …"></div>'
     +'<span class="fk-tools"><button class="fk-cp" title="Kopieren">'+FK_COPY+'</button><button class="fk-del" title="Löschen">'+FK_X+'</button></span>';
   row.querySelector('.fk-box').onclick=()=>{
     it.done=!it.done;fkSave();
@@ -1437,7 +1439,8 @@ function fkRow(l,it){
     else{fkRefreshCard(l);}
   };
   const tin=row.querySelector('.fk-tinp');
-  tin.addEventListener('input',()=>{it.text=tin.value;fkSave();});
+  tin.textContent=it.text||'';
+  tin.addEventListener('input',()=>{it.text=tin.textContent;fkSave();});
   tin.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();tin.blur();}});
   row.querySelector('.fk-cp').onclick=()=>{call('copy_plain',it.text).catch(()=>{});toast('Kopiert');};
   row.querySelector('.fk-del').onclick=()=>{l.items=l.items.filter(x=>x!==it);fkSave();fkRefreshCard(l);};

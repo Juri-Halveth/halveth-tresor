@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional light theme for the vault window (the current window ships with a dark theme by default).
 - Import of entries from a previously exported encrypted backup.
 
+## [1.5.1] - 2026-07-23
+
+### Fixed
+
+- Focus: long task text (and long list titles) was cut off on one line instead of wrapping, so the end was unreadable. Task text and list titles now wrap onto as many lines as needed and stay fully visible, while remaining editable in place.
+
 ## [1.5.0] - 2026-07-23
 
 ### Added
@@ -110,7 +116,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Encrypted backup export to a separate file.
 - Packaged single-file Windows executable built with PyInstaller (`dist/Tresor.exe`), portable with no installer and no admin rights.
 
-[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.5.1...HEAD
+[1.5.1]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.2.1...v1.3.0
