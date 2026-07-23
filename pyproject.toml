@@ -24,7 +24,7 @@ classifiers = [
     "Intended Audience :: End Users/Desktop",
 ]
 dependencies = [
-    "pywebview>=5.0",
+    "pywebview>=6.2.1",
     "cryptography>=42.0",
     "pythonnet>=3.0; sys_platform == 'win32'",
     "clr-loader>=0.2; sys_platform == 'win32'",
