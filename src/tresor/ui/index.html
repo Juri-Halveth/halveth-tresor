@@ -681,6 +681,15 @@ input,textarea,select{font-family:inherit; font-size:14px}
           <option value="0" data-i18n="set.never"></option>
         </select>
       </div>
+      <div>
+        <label class="form-lab" data-i18n="set.textsize"></label>
+        <select class="finp" id="setTextsize">
+          <option value="1" data-i18n="set.sizeNormal"></option>
+          <option value="1.15" data-i18n="set.sizeLarge"></option>
+          <option value="1.3" data-i18n="set.sizeXL"></option>
+          <option value="1.5" data-i18n="set.sizeXXL"></option>
+        </select>
+      </div>
       <div class="edit-field" style="border-color:var(--line)">
         <div class="ef-key" data-i18n="set.changeTitle" style="color:var(--tx-hi);margin-bottom:12px"></div>
         <input class="finp" id="setPass" type="password" data-i18n-ph="set.newMasterPh" style="margin-bottom:9px" autocomplete="off">
@@ -761,9 +770,10 @@ const I18N={
   'md.secret':'Geheim','md.valuePh':'Wert ...','md.newField':'Neues Feld','md.genTitle':'Passwort erzeugen','md.field':'Feld',
   'gen.length':'Länge','gen.upper':'GROSS','gen.lower':'klein','gen.apply':'Übernehmen',
   'set.title':'Einstellungen','set.language':'Sprache','set.autolock':'Automatisch sperren nach','set.min1':'1 Minute ohne Aktivität','set.min5':'5 Minuten ohne Aktivität','set.min15':'15 Minuten ohne Aktivität','set.never':'Nicht automatisch sperren',
+  'set.textsize':'Textgröße','set.sizeNormal':'Normal','set.sizeLarge':'Groß','set.sizeXL':'Sehr groß','set.sizeXXL':'Riesig',
   'set.changeTitle':'Master-Passwort und PIN ändern','set.newMasterPh':'Neues Master-Passwort','set.repeatPh':'Neues Passwort wiederholen','set.newPinPh':'Neue PIN','set.changeBtn':'Passwort und PIN ändern',
   'set.honestTitle':'Ehrlich gesagt','set.honestBody':'Dieser Tresor schützt deine Daten, wenn jemand die Datei stiehlt. Ohne dein Passwort und deine PIN ist sie wertlos für Fremde. Er schützt dich nicht vor Schadsoftware, die auf diesem PC mitliest, während du entsperrt bist. Und ohne Passwort, PIN oder Notfall-Schlüssel sind die Daten für immer verloren, auch für uns. Tipp: Aktiviere BitLocker für die Festplatte.',
-  'toast.copied':'Kopiert','toast.copiedSub':'Wird in {0} s automatisch aus der Zwischenablage gelöscht','toast.saved':'Gespeichert','toast.deleted':'Gelöscht','toast.newPwSet':'Neues Passwort gesetzt','toast.pwChanged':'Passwort und PIN geändert','toast.backupSaved':'Sicherung gespeichert','toast.backupSub':'Verschlüsselte Kopie deines Tresors','toast.autolockSet':'Sperrt nach {0} min','toast.autolockOff':'Auto-Sperre aus',
+  'toast.copied':'Kopiert','toast.copiedSub':'Wird in {0} s automatisch aus der Zwischenablage gelöscht','toast.saved':'Gespeichert','toast.deleted':'Gelöscht','toast.newPwSet':'Neues Passwort gesetzt','toast.pwChanged':'Passwort und PIN geändert','toast.backupSaved':'Sicherung gespeichert','toast.backupSub':'Verschlüsselte Kopie deines Tresors','toast.autolockSet':'Sperrt nach {0} min','toast.autolockOff':'Auto-Sperre aus','toast.textsizeSet':'Textgröße angepasst',
   'msg.enterBoth':'Bitte Passwort und PIN eingeben.','msg.min8':'Das Passwort braucht mindestens 8 Zeichen.','msg.min8new':'Das neue Passwort braucht mindestens 8 Zeichen.','msg.min8short':'Mindestens 8 Zeichen.','msg.mismatch':'Die beiden Passwörter sind nicht gleich.','msg.mismatch2':'Die Passwörter sind nicht gleich.','msg.pinFmt':'Die PIN muss 4 bis 8 Ziffern haben.','msg.pinFmtNew':'Die neue PIN muss 4 bis 8 Ziffern haben.','msg.pinFmtShort':'PIN: 4 bis 8 Ziffern.',
   'confirm.delete':'Eintrag "{0}" wirklich löschen? Das kann nicht rückgängig gemacht werden.',
   'err.vault_exists':'Es gibt bereits einen Tresor.','err.create_failed':'Der Tresor konnte nicht angelegt werden.','err.wrong_credentials':'Passwort oder PIN ist falsch.','err.corrupt':'Die Tresordatei ist beschädigt.','err.unlock_failed':'Der Tresor konnte nicht geöffnet werden.','err.recovery_wrong':'Der Notfall-Schlüssel ist falsch.','err.recovery_failed':'Öffnen mit Notfall-Schlüssel fehlgeschlagen.','err.locked':'Der Tresor ist gesperrt.','err.save_failed':'Speichern fehlgeschlagen.','err.delete_failed':'Löschen fehlgeschlagen.','err.change_failed':'Ändern fehlgeschlagen.','err.backup_failed':'Die Sicherung ist fehlgeschlagen.','err.no_vault_backup':'Es gibt noch keinen Tresor zum Sichern.','err.unknown':'Etwas ist schiefgelaufen.'
@@ -791,9 +801,10 @@ const I18N={
   'md.secret':'Secret','md.valuePh':'Value ...','md.newField':'New field','md.genTitle':'Generate password','md.field':'Field',
   'gen.length':'Length','gen.upper':'UPPER','gen.lower':'lower','gen.apply':'Apply',
   'set.title':'Settings','set.language':'Language','set.autolock':'Auto-lock after','set.min1':'1 minute of inactivity','set.min5':'5 minutes of inactivity','set.min15':'15 minutes of inactivity','set.never':'Do not auto-lock',
+  'set.textsize':'Text size','set.sizeNormal':'Normal','set.sizeLarge':'Large','set.sizeXL':'Very large','set.sizeXXL':'Huge',
   'set.changeTitle':'Change master password and PIN','set.newMasterPh':'New master password','set.repeatPh':'Repeat new password','set.newPinPh':'New PIN','set.changeBtn':'Change password and PIN',
   'set.honestTitle':'Honestly','set.honestBody':'This vault protects your data if someone steals the file. Without your password and PIN it is worthless to a stranger. It does not protect you from malware reading along on this PC while you are unlocked. And without the password, PIN, or recovery key the data is gone forever, even for us. Tip: enable BitLocker for your drive.',
-  'toast.copied':'Copied','toast.copiedSub':'Cleared from the clipboard automatically in {0} s','toast.saved':'Saved','toast.deleted':'Deleted','toast.newPwSet':'New password set','toast.pwChanged':'Password and PIN changed','toast.backupSaved':'Backup saved','toast.backupSub':'Encrypted copy of your vault','toast.autolockSet':'Locks after {0} min','toast.autolockOff':'Auto-lock off',
+  'toast.copied':'Copied','toast.copiedSub':'Cleared from the clipboard automatically in {0} s','toast.saved':'Saved','toast.deleted':'Deleted','toast.newPwSet':'New password set','toast.pwChanged':'Password and PIN changed','toast.backupSaved':'Backup saved','toast.backupSub':'Encrypted copy of your vault','toast.autolockSet':'Locks after {0} min','toast.autolockOff':'Auto-lock off','toast.textsizeSet':'Text size updated',
   'msg.enterBoth':'Please enter password and PIN.','msg.min8':'The password needs at least 8 characters.','msg.min8new':'The new password needs at least 8 characters.','msg.min8short':'At least 8 characters.','msg.mismatch':'The two passwords do not match.','msg.mismatch2':'The passwords do not match.','msg.pinFmt':'The PIN must be 4 to 8 digits.','msg.pinFmtNew':'The new PIN must be 4 to 8 digits.','msg.pinFmtShort':'PIN: 4 to 8 digits.',
   'confirm.delete':'Really delete "{0}"? This cannot be undone.',
   'err.vault_exists':'A vault already exists.','err.create_failed':'The vault could not be created.','err.wrong_credentials':'Password or PIN is wrong.','err.corrupt':'The vault file is damaged.','err.unlock_failed':'The vault could not be opened.','err.recovery_wrong':'The recovery key is wrong.','err.recovery_failed':'Unlocking with the recovery key failed.','err.locked':'The vault is locked.','err.save_failed':'Saving failed.','err.delete_failed':'Deleting failed.','err.change_failed':'Changing failed.','err.backup_failed':'The backup failed.','err.no_vault_backup':'There is no vault to back up yet.','err.unknown':'Something went wrong.'
@@ -1237,6 +1248,8 @@ async function doBackup(){
    Einstellungen + Auto-Sperre
    ================================================================ */
 let autolockMin = (function(){const v=parseInt(store.get('tresor_autolock'),10);return isNaN(v)?5:v;})();
+let textScale = (function(){const v=parseFloat(store.get('tresor_textscale'));return (v>=1&&v<=2)?v:1;})();
+function applyTextScale(){try{document.body.style.zoom=textScale;}catch(e){}}
 let idleTimer=null, lastReset=0;
 function resetIdle(){
   const now=performance.now();
@@ -1248,6 +1261,7 @@ function resetIdle(){
 }
 function openSettings(){
   $('#setAutolock').value=String(autolockMin);
+  $('#setTextsize').value=String(textScale);
   $('#setLangSel').value=LANG;
   $('#setPass').value='';$('#setPass2').value='';$('#setPin').value='';$('#setMsg').textContent='';
   $('#settings').classList.add('show');
@@ -1259,6 +1273,7 @@ function bindSettings(){
   $('#setBackup').onclick=doBackup;
   $('#setLangSel').onchange=e=>{setLang(e.target.value);};
   $('#setAutolock').onchange=e=>{autolockMin=parseInt(e.target.value,10)||0;store.set('tresor_autolock',autolockMin);resetIdle();toast(autolockMin?t('toast.autolockSet',autolockMin):t('toast.autolockOff'));};
+  $('#setTextsize').onchange=e=>{textScale=parseFloat(e.target.value)||1;store.set('tresor_textscale',textScale);applyTextScale();toast(t('toast.textsizeSet'));};
   $('#setChangeBtn').onclick=async()=>{
     const p=$('#setPass').value,p2=$('#setPass2').value,pin=$('#setPin').value,m=$('#setMsg');
     if(p.length<8){m.textContent=t('msg.min8short');return;}
@@ -1307,7 +1322,7 @@ function showBridgeError(){
   document.body.querySelector('p').textContent=msg;
 }
 async function boot(){
-  try{initGlyphs();bindLock();bindSetup();bindForgot();bindSettings();bindLang();wire();applyStatic();}
+  try{initGlyphs();bindLock();bindSetup();bindForgot();bindSettings();bindLang();wire();applyStatic();applyTextScale();}
   catch(e){window.__diag.push('BIND-THREW: '+(e&&e.message||e));}
   await apiReady;
   if(!API||bridgeFailed){showBridgeError();return;}
