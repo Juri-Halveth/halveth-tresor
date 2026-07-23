@@ -1,10 +1,10 @@
-# Tresor v1.5.1
+# Tresor v1.6.0
 
 **A local, offline credential vault for Windows. Your complete access, encrypted in a single file, with no cloud and no account.**
 
-> New in 1.5.1: fixed long Focus task text (and long list titles) being cut off on one line — they now wrap onto as many lines as needed and stay fully readable, while still being editable in place.
+> New in 1.6.0: the **Text size** setting now scales only the text (which reflows), not the whole window — so buttons and the Settings always stay reachable; you can never zoom yourself out of Settings again. And the motivational sayings were **rewritten** — 149 new, warmer, more personal lines for the daily saying and the Motivation boosts.
 >
-> Recent: 1.5.0 added a **Text size** setting (Normal / Large / Very large / Huge) that enlarges the whole app at once and remembers your choice, for easier reading.
+> Recent: Focus checklists (editable, copyable, reorderable, wrapping long text, with a "Done" section), a dedicated **Motivation** area, and **automatic versioned backups** on every save.
 >
 > Recent: 1.4.0 added a dedicated **Motivation** section with a daily saying and extra boosts. 1.3.0 made Focus tasks editable, copyable, and reorderable with a collapsible "Done" section. 1.2.0 introduced the **Focus area** and **automatic versioned backups**. Switch between Passwords and Focus in the sidebar. Focus holds checklists you tick off (with a progress bar), a free-form notepad, and a **daily personalized motivation**: each day a welcome screen greets you by name with one of 200 hand-written sentences. Everything in Focus is stored encrypted in the same vault. This release also adds **automatic versioned backups** on every save (the last 20 states are kept in a `backups` folder), so any change can be rolled back. Earlier releases: 1.1.3 fixed clipped dashboard cards; 1.1.2 fixed the encrypted backup export and hardened the core; 1.1.1 fixed data loss with two open windows; 1.1.0 added the bilingual German/English interface.
 

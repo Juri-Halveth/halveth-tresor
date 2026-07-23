@@ -12,6 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional light theme for the vault window (the current window ships with a dark theme by default).
 - Import of entries from a previously exported encrypted backup.
 
+## [1.6.0] - 2026-07-23
+
+### Fixed
+
+- Text size no longer zooms the whole window. Enlarging the text used to scale the entire interface, which could push the Settings panel out of reach with no way back. Now only the **text** grows (and reflows) while buttons, layout and especially the Settings stay at their normal, always-reachable size — you can never lock yourself out of Settings again.
+
+### Changed
+
+- Rewrote the motivational sayings — 149 new lines that are warmer, more personal and human, replacing the previous set (used for both the daily saying and the Motivation boosts).
+
 ## [1.5.1] - 2026-07-23
 
 ### Fixed
@@ -116,7 +126,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Encrypted backup export to a separate file.
 - Packaged single-file Windows executable built with PyInstaller (`dist/Tresor.exe`), portable with no installer and no admin rights.
 
-[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.5.1...HEAD
+[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.3.0...v1.4.0
