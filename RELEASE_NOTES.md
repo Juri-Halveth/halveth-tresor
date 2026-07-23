@@ -1,8 +1,10 @@
-# Tresor v1.6.0
+# Tresor v1.6.1
 
 **A local, offline credential vault for Windows. Your complete access, encrypted in a single file, with no cloud and no account.**
 
-> New in 1.6.0: the **Text size** setting now scales only the text (which reflows), not the whole window — so buttons and the Settings always stay reachable; you can never zoom yourself out of Settings again. And the motivational sayings were **rewritten** — 149 new, warmer, more personal lines for the daily saying and the Motivation boosts.
+> New in 1.6.1: the sidebar's bottom bar (Back up / Lock / Settings) now stays pinned to the bottom in the Focus and Motivation areas too, just like in Passwords, instead of jumping up.
+>
+> In 1.6.0: the **Text size** setting now scales only the text (which reflows), not the whole window — buttons and the Settings always stay reachable. And the motivational sayings were **rewritten** — 149 new, warmer, more personal lines.
 >
 > Recent: Focus checklists (editable, copyable, reorderable, wrapping long text, with a "Done" section), a dedicated **Motivation** area, and **automatic versioned backups** on every save.
 >
