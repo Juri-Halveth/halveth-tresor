@@ -219,7 +219,9 @@ FOCUS = {
     "name": "Alex",
     "dailyDay": 20321,
     "notes": "Ideen: einfach anfangen.",
-    "lists": [{"id": "l1", "title": "Heute", "items": [{"id": "i1", "text": "Posten", "done": True}]}],
+    "lists": [
+        {"id": "l1", "title": "Heute", "items": [{"id": "i1", "text": "Posten", "done": True}]}
+    ],
 }
 
 
