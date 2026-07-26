@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional light theme for the vault window (the current window ships with a dark theme by default).
 - Import of entries from a previously exported encrypted backup.
 
+## [1.8.0] - 2026-07-26
+
+### Added
+
+- You can now **delete a whole list (topic)** in the Focus area. Each list card has a trash button in its top-right corner (visible on hover) that removes the entire list. Previously only individual tasks could be deleted, so duplicate or unwanted lists — including ones created with **New list** — could not be removed. Deleting an **empty** list happens right away; a list that still has tasks asks for confirmation first so nothing is lost by accident.
+
 ## [1.7.0] - 2026-07-23
 
 ### Added

@@ -1,8 +1,10 @@
-# Tresor v1.7.0
+# Tresor v1.8.0
 
 **A local, offline credential vault for Windows. Your complete access, encrypted in a single file, with no cloud and no account.**
 
-> New in 1.7.0: a small **tips panel** in the Focus sidebar that shows how to get started — brain-dump into the notepad, split by topic, keep tasks small — with short examples and the handy keyboard shortcuts (Ctrl+C, Ctrl+V, Alt+Tab).
+> New in 1.8.0: you can now **delete a whole list (topic)** in the Focus area. Each list card has a trash button in its top-right corner (on hover) — empty lists go instantly, lists with tasks ask first. Until now only individual tasks could be removed, so unwanted or duplicate lists were stuck.
+>
+> In 1.7.0: a small **tips panel** in the Focus sidebar that shows how to get started — brain-dump into the notepad, split by topic, keep tasks small — with short examples and the handy keyboard shortcuts (Ctrl+C, Ctrl+V, Alt+Tab).
 >
 > In 1.6.2: Focus lists cap at 4 columns on a wide window so task text has more room (still adapting down to 3 / 2 / 1).
 >
