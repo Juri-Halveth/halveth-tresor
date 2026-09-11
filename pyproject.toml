@@ -9,7 +9,7 @@ description = "A local, offline credentials vault for Windows (Python + pywebvie
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "Juri Janovski" }]
+authors = [{ name = "HALVETH!!!" }]
 keywords = ["password-manager", "credentials", "vault", "encryption", "pywebview", "windows"]
 classifiers = [
     "License :: OSI Approved :: MIT License",

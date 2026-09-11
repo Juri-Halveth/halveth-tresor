@@ -218,7 +218,7 @@ Modest and honest, in no fixed order:
 
 ## About the developer
 
-**Juri Janovski**, Germany. Founder of Halveth. Building modern software, desktop applications, and digital tools with a focus on simplicity, speed, and fair pricing.
+**HALVETH!!!**, Germany. Founder of Halveth. Building modern software, desktop applications, and digital tools with a focus on simplicity, speed, and fair pricing.
 
 - Website: https://halveth.de
 - GitHub: https://github.com/Juri-Halveth
