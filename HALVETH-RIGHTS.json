@@ -1,0 +1,47 @@
+{
+  "$schema": "https://juri-halveth.github.io/halveth-scarlet/halveth-rights.schema.json",
+  "schemaVersion": "1.0",
+  "declaration": "HALVETH authorship, rights and participation claim",
+  "rightsHolder": {
+    "legalName": "Juri Janovski",
+    "publishingName": "Juri Halveth",
+    "github": "https://github.com/Juri-Halveth"
+  },
+  "repository": "https://github.com/Juri-Halveth/halveth-tresor",
+  "historicalParentCommit": "e6cff6801106343832ca209c971a91abe7648916",
+  "scope": "New original HALVETH contributions as assigned by LICENSES.md",
+  "authorshipClaimedFor": [
+    "original theses",
+    "research questions",
+    "selection and arrangement",
+    "terminology",
+    "prose",
+    "analysis",
+    "models",
+    "diagrams",
+    "visual design",
+    "code contributions"
+  ],
+  "evidenceStatusIsRightsWaiver": false,
+  "license": {
+    "id": "LicenseRef-HALVETH-PIRL-2.0",
+    "file": "LICENSE-HALVETH-PIRL-2.0.md",
+    "nonCommercialPublicInterestUse": "GRANTED_WITH_CONDITIONS",
+    "commercialUse": "NOT_GRANTED",
+    "commercialPermission": "PRIOR_WRITTEN_LICENSE_AND_PARTICIPATION_AGREEMENT_REQUIRED"
+  },
+  "textAndDataMining": {
+    "reservation": true,
+    "legalReference": "German Copyright Act, Section 44b(3)",
+    "commercialAIUse": "NOT_GRANTED",
+    "limits": [
+      "statutory exceptions",
+      "prior effective licenses",
+      "hosting-provider terms"
+    ]
+  },
+  "thirdPartyMaterial": "EXCLUDED_AND_RETAINS_ITS_OWN_RIGHTS",
+  "peopleAndIndependentSystems": "NO_OWNERSHIP_OR_CONTROL_CLAIM",
+  "effectiveFrom": "first public commit containing this declaration",
+  "recordedDate": "2026-09-13"
+}

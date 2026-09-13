@@ -5,7 +5,7 @@
 A local, offline Desktop Credential Vault for Windows.
 
 [![CI](https://github.com/Juri-Halveth/halveth-tresor/actions/workflows/ci.yml/badge.svg)](https://github.com/Juri-Halveth/halveth-tresor/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License: versioned](https://img.shields.io/badge/License-versioned-7d5fff.svg)](LICENSES.md)
 [![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-0078D6.svg)](#requirements)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg)](https://www.python.org/)
 [![Built with pywebview](https://img.shields.io/badge/Built%20with-pywebview-8A2BE2.svg)](https://pywebview.flowrl.com/)
@@ -227,11 +227,11 @@ Modest and honest, in no fixed order:
 
 ## License
 
-Tresor is released under the **MIT License**. See [LICENSE](LICENSE).
+Tresor versions through commit `e6cff6801106343832ca209c971a91abe7648916` remain under the [MIT License](LICENSE). Distinguishable new original HALVETH contributions use [HALVETH Public-Interest Research License 2.0](LICENSE-HALVETH-PIRL-2.0.md). Commercial use of those protected new contributions requires a prior written license and participation agreement. See [HALVETH-RIGHTS.md](HALVETH-RIGHTS.md) and the binding [version map](LICENSES.md).
 
-Copyright (c) 2026 Juri Janovski.
+Copyright (c) 2026 Juri Janovski, publishing as Juri Halveth.
 
-Bundled dependencies are permissive and MIT-compatible. Their notices, including the OpenSSL attribution required by the statically linked `cryptography` wheel, are collected in [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md).
+Bundled dependencies retain their own permissive terms. Their notices, including the OpenSSL attribution required by the statically linked `cryptography` wheel, are collected in [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md).
 
 ---
 
