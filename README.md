@@ -1,5 +1,14 @@
 # 🔒 Tresor
 
+<!-- HALVETH_WORK_CERTIFICATES_V1_1 -->
+## Juri Janovski / Juri Halveth – Privates HALVETH-Werkzertifikat
+
+[Privates HALVETH-Werkzertifikat: Dokumentierter Desktop-Quellstand und Release-Prozess – HALVETH Tresor](https://juri-halveth.github.io/werkzertifikate/#werk-halveth-tresor).
+
+HALVETH VERACHEL STUDIOS · Quellstand, dokumentierte Ergebnisse und SHA-256-Belege stehen im Werkzertifikat. Private, mit Codex erstellte Werkdokumentation; keine ISTQB- oder sonstige Personenzertifizierung.
+<!-- /HALVETH_WORK_CERTIFICATES_V1_1 -->
+
+
 **Your complete access, sealed in one local vault.**
 
 A local, offline Desktop Credential Vault for Windows.
