@@ -1,6 +1,6 @@
 [Original / Deutsch](README.md) · [English](README.en.md) · [Русский](README.ru.md)
 
-# HALVETH Tresor
+# Tresor – local credential management for Windows
 
 **Concise project guide · EN / RU**
 
