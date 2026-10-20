@@ -1,6 +1,6 @@
 [Original / Deutsch](README.md) · [English](README.en.md) · [Русский](README.ru.md)
 
-# HALVETH Tresor
+# Tresor – локальное хранение учётных данных в Windows
 
 **Краткий путеводитель по проекту · EN / RU**
 

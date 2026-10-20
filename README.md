@@ -2,15 +2,11 @@
 [Original / Deutsch](README.md) · [English](README.en.md) · [Русский](README.ru.md)
 <!-- /HUB_LANGUAGES_V1 -->
 
-# 🔒 Tresor
+# Tresor – Zugangsdaten lokal auf Windows verwalten
 
-<!-- HALVETH_WORK_CERTIFICATES_V1_1 -->
-## Juri Janovski / Juri Halveth – Privates HALVETH-Werkzertifikat
+Ein Desktopprojekt zur lokalen Verwaltung von Zugangsdaten unter Windows. Einstieg, Quellcode und Release-Dokumentation zeigen, was die jeweilige Version enthält.
 
-[Privates HALVETH-Werkzertifikat: Dokumentierter Desktop-Quellstand und Release-Prozess – HALVETH Tresor](https://juri-halveth.github.io/werkzertifikate/#werk-halveth-tresor).
-
-HALVETH VERACHEL STUDIOS · Quellstand, dokumentierte Ergebnisse und SHA-256-Belege stehen im Werkzertifikat. Private, mit Codex erstellte Werkdokumentation; keine ISTQB- oder sonstige Personenzertifizierung.
-<!-- /HALVETH_WORK_CERTIFICATES_V1_1 -->
+[**Projekt öffnen →**](https://github.com/Juri-Halveth/halveth-tresor/releases) · [Arbeitsproben](https://juri-halveth.github.io/koennen/) · [Portfolio](https://juri-halveth.github.io/)
 
 
 **Your complete access, sealed in one local vault.**
