@@ -56,11 +56,11 @@ Not just passwords. Complete access.
 - **Live search.** Filter across everything as you type.
 - **Detail view with reveal.** Masked values stay hidden until you choose to show them.
 - **Master password plus PIN.** Two separate secrets are combined to unlock the vault.
-- **One-time recovery key.** A Base32 key lets you regain access if you forget the master password.
-- **Auto-lock.** The vault locks after inactivity, and the in-memory key is wiped on lock and on close.
+- **Recovery key displayed at creation.** A Base32 key lets you regain access if you forget the master password.
+- **Auto-lock.** The vault locks after inactivity, and the mutable session-key buffer is overwritten on lock and close as a best effort; managed-runtime copies can remain.
 - **Encrypted backup export.** Save an encrypted copy of your vault to any location you choose.
-- **Secure clipboard.** Copied secrets clear automatically after 15 seconds and are kept out of Windows clipboard history (Win+V) and cloud clipboard.
-- **Fully offline.** No cloud, no account, no telemetry, no network calls.
+- **Secure clipboard.** The normal UI requests conditional clearing after 20 seconds and asks Windows to exclude secrets from clipboard history and cloud sync. These controls are best effort; see the security model.
+- **Fully offline.** No application account, cloud-sync service or telemetry is implemented. Runtime/dependency network behavior has not been measured in this review.
 
 ---
 
@@ -94,16 +94,16 @@ Tresor uses a standard envelope-encryption design. It is self-reviewed and has n
 - The KEK only wraps a random **Data Encryption Key (DEK)**. The DEK encrypts your actual data with **AES-256-GCM**.
 - A fresh random nonce (`os.urandom`) is used for every encryption on every save.
 - The header (KDF cost and salt) is bound as AES-GCM associated data, so it cannot be silently downgraded.
-- A SHA-256 checksum over the ciphertext tells a corrupted file apart from a wrong password.
+- A SHA-256 checksum detects changes to the encoded ciphertext blobs. Authentication failure does not always distinguish wrong credentials from altered wrapping metadata.
 - The design is **fail-closed**: a wrong password or PIN is indistinguishable from a bad auth tag, so the vault never opens on doubt.
-- A one-time **Recovery Key** (Base32) is the same DEK wrapped a second time under a random key, so a forgotten password can be reset.
+- A separately held **Recovery Key** (Base32), displayed at creation, is the same DEK wrapped a second time under a random key, so a forgotten password can be reset.
 - The vault file lives at `%APPDATA%\Tresor\vault.credvault`, holds ciphertext only, and is written atomically.
 
 ### Honest limits
 
 Security claims should be plain, so here are the boundaries:
 
-- Tresor protects a **stolen or copied file**. Without the master password, PIN, or recovery key, that file is useless to an attacker.
+- Tresor protects a **stolen or copied file**. Access requires the master password plus PIN, or the recovery key. Resistance to offline guessing depends on secret strength and KDF cost.
 - Tresor does **not** protect against malware or a keylogger that is already running on your PC while the vault is unlocked. If the machine is compromised, the vault cannot save you.
 - If you lose the master password **and** the PIN **and** the recovery key, the data is gone forever, by design. There is no backdoor.
 - For defense in depth, enable **BitLocker** on your system drive.
@@ -245,3 +245,7 @@ Bundled dependencies retain their own permissive terms. Their notices, including
 ---
 
 Contributions are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). To report a security issue, see [SECURITY.md](SECURITY.md).
+
+## Dated review status
+
+[Source boundaries, 27 local synthetic tests and remaining checks — 20 October 2026](docs/review-status-2026-10-20.md). This is a project-led, AI-assisted review, not an independent audit.
