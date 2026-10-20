@@ -23,7 +23,7 @@ The goal here is to be rigorous and honest. Where a protection is strong, this d
 
 ## Overview
 
-Tresor stores all of your access, not only passwords. A single local file holds your login credentials, websites, FTP, SFTP, SSH, API keys, databases, mail accounts (IMAP/SMTP), cards, notes, and any other secret. That file is always encrypted on disk. There is no cloud, no account, no telemetry, and no network activity of any kind.
+Tresor stores all of your access, not only passwords. A single local file holds your login credentials, websites, FTP, SFTP, SSH, API keys, databases, mail accounts (IMAP/SMTP), cards, notes, and any other secret. That file is always encrypted on disk. There is no application account, cloud-sync service or telemetry in the inspected application code. Dependency/runtime network behavior requires a separate measurement.
 
 The cryptographic design is envelope encryption, which can be read as a short chain:
 
@@ -47,9 +47,9 @@ Tresor is built to protect the confidentiality of a **stolen or copied vault fil
 - Someone gains read access to the file on a powered-off or logged-out machine.
 - Someone tampers with the file and hopes Tresor will load the altered contents.
 
-In all of these cases an attacker holds ciphertext only. To recover anything they must derive the correct KEK, which requires both your master password and your PIN, run through Scrypt at the cost level stored in the file. There is no plaintext, no password hash, and no key material sitting in the file that shortcuts this work.
+In all of these cases an attacker holds ciphertext only. The password path derives a KEK from the master password and PIN through Scrypt at the cost stored in the file. Possession of the recovery key is an alternative access path. Offline guessing resistance depends on secret strength and KDF cost. There is no plaintext, no password hash, and no key material sitting in the file that shortcuts this work.
 
-Tamper resistance is covered too. Every ciphertext block carries an AES-GCM authentication tag, and the file header (the KDF cost and salt) is bound into that tag as associated data (see [Encryption at rest](#encryption-at-rest)). An attacker cannot flip bytes in your data, swap in a weaker Scrypt cost, or splice blocks from another file without the authentication tag failing. When it fails, Tresor treats the file as damaged and refuses to open it.
+Tamper resistance is covered too. Every ciphertext block carries an AES-GCM authentication tag, and the file header (the KDF cost and salt) is bound into that tag as associated data (see [Encryption at rest](#encryption-at-rest)). An attacker cannot flip bytes in your data, swap in a weaker Scrypt cost, or splice blocks from another file without the authentication tag failing. Authentication failure prevents opening. Its displayed error category can depend on which authentication step failed; it does not always identify the underlying cause.
 
 ## What Tresor does NOT protect against
 
@@ -115,7 +115,7 @@ This is what **fail-closed** means in practice: on any doubt, Tresor stops. It d
 
 ## Recovery key
 
-When you create a vault, Tresor generates a one-time **recovery key** and shows it to you exactly once. It is displayed as grouped Base32 so it can be written down or printed without ambiguity.
+When you create a vault, Tresor generates a **recovery key** and displays it at creation. The key is not consumed by recovery and remains an alternative access secret. It is displayed as grouped Base32 so it can be written down or printed without ambiguity.
 
 Mechanically, the recovery key is a second, independent 32-byte random key, and the `recovery` block is the **same DEK wrapped a second time** under it. That is why it works: unwrapping via the recovery key yields the identical DEK that the password path yields, so it decrypts exactly the same data. With it you can reopen the vault and set a new master password and PIN even if you have forgotten the old ones.
 
@@ -131,7 +131,7 @@ Copying a secret is the most common way sensitive values leak on Windows, becaus
 Tresor's copy is hardened against this:
 
 - **Excluded from history and cloud.** When Tresor places a value on the clipboard, it also sets the official Windows "sensitive content" clipboard formats that instruct the OS not to keep the value in clipboard history and not to upload it to the cloud clipboard. This is done directly against the Windows clipboard API, with no extra packages.
-- **Automatic clearing.** A copied secret is scheduled to be wiped from the clipboard after 15 seconds. The clear is conditional: it only empties the clipboard if the value is still the one Tresor copied. If you copied something else in the meantime, Tresor leaves your newer clipboard content alone. Copying a different secret resets the timer, and locking the vault cancels any pending clear.
+- **Automatic clearing.** The normal UI requests conditional clearing of a copied secret after 20 seconds (the backend default for callers that omit the duration is 15 seconds). The clear is conditional: it only empties the clipboard if the value is still the one Tresor copied. If you copied something else in the meantime, Tresor leaves your newer clipboard content alone. Copying a different secret resets the timer, and locking the vault cancels the pending timer and attempts immediate conditional clearing.
 
 The honest limit: these are cooperation signals to a well-behaved operating system and to well-behaved clipboard managers. A malicious clipboard monitor running on the machine can still read a value during the seconds it is on the clipboard. This is the same trust boundary as the rest of the app: it protects against the normal Windows clipboard surface, not against active malware.
 
@@ -140,7 +140,7 @@ The honest limit: these are cooperation signals to a well-behaved operating syst
 While the vault is open, the DEK is held in process memory so that saves and reads do not require your password each time. Tresor minimizes how long and how exposed that key is.
 
 - **Auto-lock on inactivity.** The vault locks itself after a period of no activity. This is configurable in the settings (1, 5, or 15 minutes, or off), and defaults to 5 minutes. Mouse movement, keystrokes, clicks, and scrolling reset the idle timer.
-- **Wiped on lock and on close.** When the vault locks, whether manually, by the idle timer, or by closing the window, the in-memory DEK buffer is overwritten with zeros and all decrypted entries are dropped. After that point the process holds ciphertext only again, exactly as it does before you unlock.
+- **Wiped on lock and on close.** When the vault locks, whether manually, by the idle timer, or by closing the window, the in-memory DEK buffer is overwritten with zeros and all decrypted entries are dropped. The Session drops its references to decrypted state. This does not establish complete erasure of process or renderer memory; see the limits below.
 
 **The realistic limit of zeroization in Python.** Tresor holds the DEK in a mutable byte buffer specifically so it can be overwritten on lock, and it does overwrite it. But Python is a managed, garbage-collected language and this cannot be a hard guarantee. Your master password and PIN arrive as ordinary Python strings, which are immutable and cannot be wiped in place; the runtime, the garbage collector, and the WebView bridge may keep transient copies of sensitive values that Tresor cannot reach to erase; and nothing prevents the operating system from paging process memory to disk. Overwriting the DEK is a genuine and worthwhile best effort that shrinks the window of exposure. It is not, and honestly cannot be, a promise that no secret byte lingers anywhere in memory. The strong protection remains the file at rest; in-memory hardening is defense in depth on top of it.
 
@@ -152,7 +152,7 @@ The vault lives at:
 %APPDATA%\Tresor\vault.credvault
 ```
 
-That file contains **ciphertext only**: the header, the three encrypted blocks, and the checksum. There is no plaintext copy written anywhere by design, and plaintext never touches the disk.
+That file contains **ciphertext only**: the header, the three encrypted blocks, and the checksum. The native vault-save path writes encrypted payloads. This is not a guarantee against OS paging, crash dumps or other host persistence. The explicitly enabled browser preview is a separate plaintext mock and must use synthetic data.
 
 Saves are **atomic**. When Tresor writes the vault, it writes the full new contents to a temporary file, flushes and fsyncs it to storage, and only then atomically replaces the real file. If power is lost or the process is killed mid-write, you are left with either the complete old file or the complete new file, never a half-written vault. A normal save only re-encrypts the small `data` block with the DEK already in memory; it does not touch the wrapped DEK or the recovery block, and it does not need your password again.
 
@@ -160,8 +160,8 @@ Saves are **atomic**. When Tresor writes the vault, it writes the full new conte
 
 Because the file is encrypted and self-contained, backing up Tresor is simple and safe.
 
-- **Copy the encrypted file.** You can copy `vault.credvault` anywhere: another drive, a USB stick, a backup system. The copy is just as encrypted as the original and is worthless without your master password and PIN. Tresor also offers an in-app export that writes an encrypted copy to a location you choose. Keeping an occasional copy protects you against disk failure and accidental deletion.
-- **Keep the recovery key.** Store the one-time recovery key offline and separate from the machine. It lets you regain access if you forget the master password and PIN.
+- **Copy the encrypted file.** You can copy `vault.credvault` anywhere: another drive, a USB stick, a backup system. The copy retains the original encryption and can be opened with its password plus PIN, or its recovery key. Historical copies retain their historical credential wrapping. Tresor also offers an in-app export that writes an encrypted copy to a location you choose. Keeping an occasional copy protects you against disk failure and accidental deletion.
+- **Keep the recovery key.** Store the recovery key offline and separate from the machine. It lets you regain access if you forget the master password and PIN.
 
 There is **no backdoor**. Recovery works only through secrets you hold: the master password plus PIN, or the recovery key. If all of them are lost, the data cannot be recovered by anyone. This is the price of there being no third party who can open your vault.
 
@@ -182,3 +182,6 @@ Tresor's promise is precise, and its precision is the point:
 - It **does not protect** a machine that is already compromised while the vault is open, and it **cannot recover** data if every secret you hold is lost.
 
 Everything in this document follows from those two lines. Where a stronger claim would be convenient, this document declines to make it.
+## Dated review and coverage
+
+See [20 October 2026 review status](review-status-2026-10-20.md) for exact source, local tests, CI links and remaining runtime questions.
