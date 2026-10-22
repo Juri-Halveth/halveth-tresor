@@ -96,7 +96,7 @@ The on-disk file is a small JSON envelope. At a high level it contains:
   - **`wrap`**: the DEK encrypted under the KEK (this is what your password and PIN unlock).
   - **`recovery`**: the same DEK encrypted under the recovery key.
   - **`data`**: your actual entries, encrypted under the DEK.
-- A SHA-256 checksum over the three ciphertext blocks, used only to tell corruption apart from a wrong password (see the next section).
+- A SHA-256 checksum over the three ciphertext blocks, used as a pre-decryption corruption signal over those blocks; it does not cover every authenticated header field or determine every failure cause (see the next section).
 
 Two properties are worth calling out:
 
@@ -106,10 +106,10 @@ Two properties are worth calling out:
 
 ## Wrong credentials vs a corrupted file, and fail-closed behavior
 
-A vault can fail to open for two very different reasons: you typed the wrong password or PIN, or the file itself is damaged or tampered with. Tresor distinguishes them so the message you see is truthful, and it never confuses one for the other.
+A vault may fail to open because credentials are wrong or because its file is damaged or modified. Structural and ciphertext-checksum failures are reported as damage. An authentication failure during key unwrapping is reported as wrong credentials, but that category cannot determine the cause: a valid-shaped change to authenticated header fields such as the salt or vault id can reach the same outcome. In each case opening fails closed.
 
 - **Corruption is detected first.** Before any key is derived, Tresor runs a structural check (are the fields present, are the salt and nonce the right lengths, is the wrapped block at least large enough to hold a key plus a tag) and then verifies the stored SHA-256 checksum against a freshly computed one using a constant-time comparison. If the structure is wrong or the checksum does not match, the file is reported as **damaged**. Note that this checksum is a corruption signal only; it is not what provides integrity. Real integrity comes from the AES-GCM authentication tags.
-- **Wrong credentials are a clean, separate outcome.** If the file is intact but unwrapping the DEK fails (the GCM tag does not verify), that is reported as a **wrong password or PIN**. Cryptographically, an incorrect password and an incorrect PIN are indistinguishable from a bad authentication tag, so the vault simply does not open. There is no oracle that says "the password was right but the PIN was wrong", and no way to tell how close a guess was.
+- **Unwrap authentication failure is an error category.** If structure and ciphertext checksum pass but unwrapping the DEK fails (the GCM tag does not verify), that is reported as a **wrong password or PIN**. Passing those earlier checks does not prove that the header or file is intact. Cryptographically, an incorrect password and an incorrect PIN are indistinguishable from a bad authentication tag, so the vault simply does not open. There is no oracle that says "the password was right but the PIN was wrong", and no way to tell how close a guess was.
 
 This is what **fail-closed** means in practice: on any doubt, Tresor stops. It does not attempt recovery, it does not return partial plaintext, and it does not fall back to a weaker check. To slow down automated guessing against the live application, repeated wrong attempts within a session add a short, growing backoff before the next try is allowed. (This in-app delay does not slow an attacker working offline against a copied file; the defense there is your master password strength combined with the Scrypt cost.)
 
