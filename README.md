@@ -4,6 +4,8 @@
 
 # Tresor – Zugangsdaten lokal auf Windows verwalten
 
+**Person: Juri. Projekt: HALVETH.** [Namenszuordnung](IDENTITY.md).
+
 Ein Desktopprojekt zur lokalen Verwaltung von Zugangsdaten unter Windows. Einstieg, Quellcode und Release-Dokumentation zeigen, was die jeweilige Version enthält.
 
 [**Projekt öffnen →**](https://github.com/Juri-Halveth/halveth-tresor/releases) · [Arbeitsproben](https://juri-halveth.github.io/koennen/) · [Portfolio](https://juri-halveth.github.io/)
@@ -238,7 +240,7 @@ Modest and honest, in no fixed order:
 
 Tresor versions through commit `e6cff6801106343832ca209c971a91abe7648916` remain under the [MIT License](LICENSE). Distinguishable new original HALVETH contributions use [HALVETH Public-Interest Research License 2.0](LICENSE-HALVETH-PIRL-2.0.md). Commercial use of those protected new contributions requires a prior written license and participation agreement. See [HALVETH-RIGHTS.md](HALVETH-RIGHTS.md) and the binding [version map](LICENSES.md).
 
-Copyright (c) 2026 Juri Janovski, publishing as Juri Halveth.
+Copyright (c) 2026 Juri Janovski, project HALVETH.
 
 Bundled dependencies retain their own permissive terms. Their notices, including the OpenSSL attribution required by the statically linked `cryptography` wheel, are collected in [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md).
 
