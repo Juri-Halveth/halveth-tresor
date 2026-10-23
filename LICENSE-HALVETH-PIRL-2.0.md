@@ -2,7 +2,7 @@
 
 SPDX-License-Identifier: LicenseRef-HALVETH-PIRL-2.0
 
-Copyright (c) 2026 Juri Janovski, publishing as Juri Halveth
+Copyright (c) 2026 Juri Janovski, project HALVETH
 ([@Juri-Halveth](https://github.com/Juri-Halveth)), to the extent that the
 applicable rights exist and are controlled by him.
 
@@ -19,11 +19,11 @@ education, independent research, criticism, non-commercial reporting,
 documentation, accessibility, public health education, environmental
 protection and peaceful civic participation, provided that the user:
 
-1. credits `Juri Halveth (Juri Janovski), @Juri-Halveth`;
+1. credits `Juri Janovski (Projekt HALVETH), @Juri-Halveth`;
 2. links to the repository and the exact version or commit used;
 3. clearly identifies every modification;
 4. keeps a link to this license; and
-5. does not imply endorsement, partnership, review or approval by Juri Halveth.
+5. does not imply endorsement, partnership, review or approval by Juri.
 
 ## Commercial license and participation
 
@@ -34,7 +34,7 @@ training, evaluation, fine-tuning, retrieval or embedding for a commercial AI
 or machine-learning system.
 
 A commercial use that legally requires permission needs a separate prior
-written license from Juri Halveth and a written participation agreement. That
+written license from Juri and a written participation agreement. That
 agreement must identify the material and version, parties, use, media,
 territory, duration, modifications, attribution, compensation or other
 participation, and acceptance by all parties. Access, a link, a download, a

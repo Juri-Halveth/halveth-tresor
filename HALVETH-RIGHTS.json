@@ -4,8 +4,9 @@
   "declaration": "HALVETH authorship, rights and participation claim",
   "rightsHolder": {
     "legalName": "Juri Janovski",
-    "publishingName": "Juri Halveth",
-    "github": "https://github.com/Juri-Halveth"
+    "publishingName": "Juri",
+    "github": "https://github.com/Juri-Halveth",
+    "projectName": "HALVETH"
   },
   "repository": "https://github.com/Juri-Halveth/halveth-tresor",
   "historicalParentCommit": "e6cff6801106343832ca209c971a91abe7648916",
@@ -43,5 +44,12 @@
   "thirdPartyMaterial": "EXCLUDED_AND_RETAINS_ITS_OWN_RIGHTS",
   "peopleAndIndependentSystems": "NO_OWNERSHIP_OR_CONTROL_CLAIM",
   "effectiveFrom": "first public commit containing this declaration",
-  "recordedDate": "2026-09-13"
+  "recordedDate": "2026-09-13",
+  "attributionClarification": {
+    "person": "Juri",
+    "projectName": "HALVETH",
+    "githubHandle": "Juri-Halveth",
+    "recordedDate": "2026-10-24",
+    "scope": "Name correction only; existing rights and grants unchanged"
+  }
 }
