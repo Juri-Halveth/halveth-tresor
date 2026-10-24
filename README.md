@@ -173,6 +173,11 @@ python -m PyInstaller packaging/tresor.spec --clean --noconfirm
 
 The test suite covers roundtrip encryption with no plaintext on disk, wrong password and PIN fail-closed, tamper detection, blocked Scrypt downgrade, recovery key, password change that keeps data, the key being wiped on lock, and helper functions.
 
+Regenerating the optional app icon with `python scripts/make_icon.py` needs
+Python 3.11 or newer and Pillow 13.0.0 or newer from the dev extra. The vault
+runtime, tests and packaging of the committed icon do not require Pillow;
+Python 3.10 does not install an obsolete Pillow fallback.
+
 ---
 
 ## Project structure

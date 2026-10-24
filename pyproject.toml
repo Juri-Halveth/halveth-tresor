@@ -36,7 +36,7 @@ dev = [
     "pytest-cov>=5.0",
     "ruff>=0.5",
     "pyinstaller>=6.0",
-    "pillow>=10.0",
+    "pillow>=13.0.0; python_version >= '3.11'",
 ]
 
 [project.urls]
