@@ -76,10 +76,20 @@ def test_parallel_save_calls_own_distinct_complete_temporary_files(vault_path, m
     replace = V.os.replace
     ready = threading.Barrier(2)
     temporary_paths = []
+    path_lock = threading.Lock()
+    seen_threads = set()
 
     def finish_together(source, destination):
-        temporary_paths.append(source)
-        ready.wait(timeout=5)
+        with path_lock:
+            thread_id = threading.get_ident()
+            first_attempt = thread_id not in seen_threads
+            if first_attempt:
+                seen_threads.add(thread_id)
+                temporary_paths.append(source)
+        # Both real writes overlap before their first replacement. A bounded
+        # Windows sharing retry must not wait for an already-finished peer again.
+        if first_attempt:
+            ready.wait(timeout=5)
         replace(source, destination)
 
     monkeypatch.setattr(V.os, "replace", finish_together)
@@ -111,6 +121,62 @@ def test_failed_save_preserves_existing_vault_and_removes_only_its_temp(vault_pa
         V.save_file(vault_path, env)
     assert open(vault_path, "rb").read() == before
     assert set(os.listdir(folder)) == {os.path.basename(vault_path), "unrelated.tmp"}
+
+
+@pytest.mark.parametrize("winerror", [5, 32, 33])
+def test_transient_windows_replace_denial_retries_the_same_complete_temp(
+    vault_path, monkeypatch, winerror
+):
+    env, _ = V.create_envelope(MASTER, "1234", n_exp=NEXP)
+    V.save_file(vault_path, env)
+    dek, _ = V.unlock_envelope(env, MASTER, "1234")
+    candidate = V.reseal_data(env, dek, {"entries": [SAMPLE[0]], "focus": {}})
+    replace = V.os.replace
+    sources, sleeps = [], []
+
+    def temporarily_denied(source, destination):
+        sources.append(source)
+        if len(sources) < 3:
+            error = PermissionError("Synthetic temporary Windows sharing conflict")
+            error.winerror = winerror
+            raise error
+        replace(source, destination)
+
+    monkeypatch.setattr(V.os, "replace", temporarily_denied)
+    monkeypatch.setattr(V.time, "sleep", sleeps.append)
+    V.save_file(vault_path, candidate)
+    assert len(sources) == 3 and len(set(sources)) == 1
+    assert sleeps == [0.05, 0.1]
+    assert not os.path.exists(sources[0])
+    _, opened = V.unlock_envelope(V.load_file(vault_path), MASTER, "1234")
+    assert opened["entries"] == [SAMPLE[0]]
+
+
+@pytest.mark.parametrize("winerror,attempts", [(5, 6), (None, 1)])
+def test_permanent_replace_denial_propagates_and_preserves_destination(
+    vault_path, monkeypatch, winerror, attempts
+):
+    env, _ = V.create_envelope(MASTER, "1234", n_exp=NEXP)
+    V.save_file(vault_path, env)
+    before = open(vault_path, "rb").read()
+    error = PermissionError("Synthetic permanent replacement denial")
+    if winerror is not None:
+        error.winerror = winerror
+    sources, sleeps = [], []
+
+    def denied(source, destination):
+        sources.append(source)
+        raise error
+
+    monkeypatch.setattr(V.os, "replace", denied)
+    monkeypatch.setattr(V.time, "sleep", sleeps.append)
+    with pytest.raises(PermissionError) as caught:
+        V.save_file(vault_path, env)
+    assert caught.value is error
+    assert len(sources) == attempts
+    assert len(sleeps) == attempts - 1 and sum(sleeps) <= 0.75
+    assert open(vault_path, "rb").read() == before
+    assert set(os.listdir(os.path.dirname(vault_path))) == {os.path.basename(vault_path)}
 
 
 @pytest.mark.parametrize(

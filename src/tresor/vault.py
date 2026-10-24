@@ -385,7 +385,17 @@ def save_file(path: str, env: Envelope) -> None:
             json.dump(env, f, separators=(",", ":"))
             f.flush()
             os.fsync(f.fileno())
-        os.replace(tmp, path)
+        for attempt in range(6):
+            try:
+                os.replace(tmp, path)
+                break
+            except PermissionError as error:
+                # Windows may briefly deny replacement while another writer or
+                # scanner holds the destination. Retry only these sharing/access
+                # errors for at most 750 ms; permanent failures still propagate.
+                if getattr(error, "winerror", None) not in (5, 32, 33) or attempt == 5:
+                    raise
+                time.sleep(0.05 * (attempt + 1))
     except BaseException:
         try:
             os.remove(tmp)

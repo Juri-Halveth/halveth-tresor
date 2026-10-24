@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Each encrypted save now uses its own exclusively created temporary file. Parallel saves in one process no longer share the same temporary pathname. This preserves complete-file replacement; it does not provide conflict merging for simultaneous logical edits.
+- Brief Windows replacement denials use a bounded retry. Permanent failures still raise an error, preserve the previous destination, and clean up only the failed save's temporary file.
 
 ### Added
 
