@@ -8,6 +8,8 @@ higher cost. All sample data is generic (example.com), no real credentials.
 import copy
 import json
 import os
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 
@@ -65,6 +67,116 @@ def test_roundtrip_and_persistence(vault_path):
     assert len(got) == 2
     hosts = [f["value"] for e in got for f in e["fields"] if f["key"] == "Host"]
     assert hosts == ["ftp.example.com"]
+
+
+def test_parallel_save_calls_own_distinct_complete_temporary_files(vault_path, monkeypatch):
+    env, _ = V.create_envelope(MASTER, "1234", n_exp=NEXP)
+    dek, _ = V.unlock_envelope(env, MASTER, "1234")
+    candidates = [V.reseal_data(env, dek, {"entries": [entry], "focus": {}}) for entry in SAMPLE]
+    replace = V.os.replace
+    ready = threading.Barrier(2)
+    temporary_paths = []
+    path_lock = threading.Lock()
+    seen_threads = set()
+
+    def finish_together(source, destination):
+        with path_lock:
+            thread_id = threading.get_ident()
+            first_attempt = thread_id not in seen_threads
+            if first_attempt:
+                seen_threads.add(thread_id)
+                temporary_paths.append(source)
+        # Both real writes overlap before their first replacement. A bounded
+        # Windows sharing retry must not wait for an already-finished peer again.
+        if first_attempt:
+            ready.wait(timeout=5)
+        replace(source, destination)
+
+    monkeypatch.setattr(V.os, "replace", finish_together)
+    with ThreadPoolExecutor(max_workers=2) as workers:
+        futures = [workers.submit(V.save_file, vault_path, candidate) for candidate in candidates]
+        for future in futures:
+            future.result(timeout=10)
+
+    assert len(set(temporary_paths)) == 2
+    assert not any(os.path.exists(path) for path in temporary_paths)
+    _, opened = V.unlock_envelope(V.load_file(vault_path), MASTER, "1234")
+    assert opened["entries"] in [[entry] for entry in SAMPLE]
+
+
+def test_failed_save_preserves_existing_vault_and_removes_only_its_temp(vault_path, monkeypatch):
+    env, _ = V.create_envelope(MASTER, "1234", n_exp=NEXP)
+    V.save_file(vault_path, env)
+    before = open(vault_path, "rb").read()
+    folder = os.path.dirname(vault_path)
+    unrelated = os.path.join(folder, "unrelated.tmp")
+    with open(unrelated, "w", encoding="utf-8") as stream:
+        stream.write("preserve")
+
+    def failed_dump(*args, **kwargs):
+        raise OSError("Synthetic interrupted write")
+
+    monkeypatch.setattr(V.json, "dump", failed_dump)
+    with pytest.raises(OSError, match="Synthetic interrupted write"):
+        V.save_file(vault_path, env)
+    assert open(vault_path, "rb").read() == before
+    assert set(os.listdir(folder)) == {os.path.basename(vault_path), "unrelated.tmp"}
+
+
+@pytest.mark.parametrize("winerror", [5, 32, 33])
+def test_transient_windows_replace_denial_retries_the_same_complete_temp(
+    vault_path, monkeypatch, winerror
+):
+    env, _ = V.create_envelope(MASTER, "1234", n_exp=NEXP)
+    V.save_file(vault_path, env)
+    dek, _ = V.unlock_envelope(env, MASTER, "1234")
+    candidate = V.reseal_data(env, dek, {"entries": [SAMPLE[0]], "focus": {}})
+    replace = V.os.replace
+    sources, sleeps = [], []
+
+    def temporarily_denied(source, destination):
+        sources.append(source)
+        if len(sources) < 3:
+            error = PermissionError("Synthetic temporary Windows sharing conflict")
+            error.winerror = winerror
+            raise error
+        replace(source, destination)
+
+    monkeypatch.setattr(V.os, "replace", temporarily_denied)
+    monkeypatch.setattr(V.time, "sleep", sleeps.append)
+    V.save_file(vault_path, candidate)
+    assert len(sources) == 3 and len(set(sources)) == 1
+    assert sleeps == [0.05, 0.1]
+    assert not os.path.exists(sources[0])
+    _, opened = V.unlock_envelope(V.load_file(vault_path), MASTER, "1234")
+    assert opened["entries"] == [SAMPLE[0]]
+
+
+@pytest.mark.parametrize("winerror,attempts", [(5, 6), (None, 1)])
+def test_permanent_replace_denial_propagates_and_preserves_destination(
+    vault_path, monkeypatch, winerror, attempts
+):
+    env, _ = V.create_envelope(MASTER, "1234", n_exp=NEXP)
+    V.save_file(vault_path, env)
+    before = open(vault_path, "rb").read()
+    error = PermissionError("Synthetic permanent replacement denial")
+    if winerror is not None:
+        error.winerror = winerror
+    sources, sleeps = [], []
+
+    def denied(source, destination):
+        sources.append(source)
+        raise error
+
+    monkeypatch.setattr(V.os, "replace", denied)
+    monkeypatch.setattr(V.time, "sleep", sleeps.append)
+    with pytest.raises(PermissionError) as caught:
+        V.save_file(vault_path, env)
+    assert caught.value is error
+    assert len(sources) == attempts
+    assert len(sleeps) == attempts - 1 and sum(sleeps) <= 0.75
+    assert open(vault_path, "rb").read() == before
+    assert set(os.listdir(os.path.dirname(vault_path))) == {os.path.basename(vault_path)}
 
 
 @pytest.mark.parametrize(
