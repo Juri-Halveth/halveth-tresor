@@ -154,7 +154,7 @@ The vault lives at:
 
 That file contains **ciphertext only**: the header, the three encrypted blocks, and the checksum. The native vault-save path writes encrypted payloads. This is not a guarantee against OS paging, crash dumps or other host persistence. The explicitly enabled browser preview is a separate plaintext mock and must use synthetic data.
 
-Saves are **atomic**. When Tresor writes the vault, it writes the full new contents to a temporary file, flushes and fsyncs it to storage, and only then atomically replaces the real file. If power is lost or the process is killed mid-write, you are left with either the complete old file or the complete new file, never a half-written vault. A normal save only re-encrypts the small `data` block with the DEK already in memory; it does not touch the wrapped DEK or the recovery block, and it does not need your password again.
+Saves use **atomic file replacement**. Each invocation creates its own exclusive temporary file in the vault directory, writes the complete encrypted envelope, flushes and fsyncs it, and then replaces the real file. Concurrent threads cannot share that temporary pathname. An interrupted write before replacement leaves the previous destination intact; final power-loss durability also depends on the operating system and filesystem. This file-level boundary does not merge simultaneous logical edits from different sessions: the last successful replacement wins. A normal save only re-encrypts the small `data` block with the DEK already in memory; it does not touch the wrapped DEK or the recovery block, and it does not need your password again.
 
 ## Backup and recovery
 

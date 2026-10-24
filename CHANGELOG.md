@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Each encrypted save now uses its own exclusively created temporary file. Parallel saves in one process no longer share the same temporary pathname. This preserves complete-file replacement; it does not provide conflict merging for simultaneous logical edits.
+
 ### Added
 
 - Optional light theme for the vault window (the current window ships with a dark theme by default).

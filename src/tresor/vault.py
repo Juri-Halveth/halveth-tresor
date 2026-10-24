@@ -29,6 +29,7 @@ import json
 import os
 import secrets
 import shutil
+import tempfile
 import time
 import unicodedata
 from typing import Any
@@ -371,14 +372,16 @@ def load_file(path: str) -> Envelope:
 
 
 def save_file(path: str, env: Envelope) -> None:
-    """Write to a per-process temp file (ciphertext only), fsync, then atomically replace.
+    """Write to an exclusive temp file (ciphertext only), fsync, then atomically replace.
 
-    The temp name includes the pid so two processes can never interleave into the same
-    temp file, and a failed write is cleaned up instead of leaving a stray .tmp behind.
+    Each invocation owns a distinct file, including concurrent threads in one process.
+    This preserves the complete-file replacement boundary; it does not serialize
+    logical updates from multiple sessions. A failed write cleans up only its own file.
     """
-    tmp = f"{path}.{os.getpid()}.tmp"
+    folder = os.path.dirname(os.path.abspath(path))
+    fd, tmp = tempfile.mkstemp(prefix=f".{os.path.basename(path)}.", suffix=".tmp", dir=folder)
     try:
-        with open(tmp, "w", encoding="utf-8") as f:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
             json.dump(env, f, separators=(",", ":"))
             f.flush()
             os.fsync(f.fileno())
