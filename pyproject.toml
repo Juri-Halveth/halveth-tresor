@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tresor"
-version = "1.8.0"
+dynamic = ["version"]
 description = "A local, offline credentials vault for Windows (Python + pywebview)."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -49,6 +49,9 @@ License = "https://github.com/Juri-Halveth/halveth-tresor/blob/main/LICENSES.md"
 # GUI (windowed) entry point, so no console window appears on launch.
 [project.gui-scripts]
 tresor = "tresor.app:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "tresor.__version__"}
 
 [tool.setuptools.packages.find]
 where = ["src"]

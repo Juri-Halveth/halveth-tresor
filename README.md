@@ -1,258 +1,79 @@
-<!-- HUB_LANGUAGES_V1 -->
-[Original / Deutsch](README.md) · [English](README.en.md) · [Русский](README.ru.md)
-<!-- /HUB_LANGUAGES_V1 -->
+[Deutsch](README.md) · [English](README.en.md) · [Русский](README.ru.md)
 
-# Tresor – Zugangsdaten lokal auf Windows verwalten
+# Tresor · Zugangsdaten bleiben auf deinem Windows-PC
 
-**Person: Juri. Projekt: HALVETH.** [Namenszuordnung](IDENTITY.md).
-
-Ein Desktopprojekt zur lokalen Verwaltung von Zugangsdaten unter Windows. Einstieg, Quellcode und Release-Dokumentation zeigen, was die jeweilige Version enthält.
-
-[**Projekt öffnen →**](https://github.com/Juri-Halveth/halveth-tresor/releases) · [Arbeitsproben](https://juri-halveth.github.io/koennen/) · [Portfolio](https://juri-halveth.github.io/)
-
-
-**Your complete access, sealed in one local vault.**
-
-A local, offline Desktop Credential Vault for Windows.
+Passwörter, Schlüssel und Verbindungsdaten in einer verschlüsselten lokalen Datei
+verwalten — mit Suche, Zwischenablage und einem gesondert aufzubewahrenden Recovery-Key.
 
 [![CI](https://github.com/Juri-Halveth/halveth-tresor/actions/workflows/ci.yml/badge.svg)](https://github.com/Juri-Halveth/halveth-tresor/actions/workflows/ci.yml)
-[![License: versioned](https://img.shields.io/badge/License-versioned-7d5fff.svg)](LICENSES.md)
-[![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-0078D6.svg)](#requirements)
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg)](https://www.python.org/)
-[![Built with pywebview](https://img.shields.io/badge/Built%20with-pywebview-8A2BE2.svg)](https://pywebview.flowrl.com/)
 [![Version 1.8.0](https://img.shields.io/badge/Version-1.8.0-blue.svg)](CHANGELOG.md)
 
-Tresor is a fully offline vault for everything that gets you access: passwords, servers, keys, and secrets. It keeps them in a single encrypted file on your own machine, with no cloud, no account, and no telemetry.
+[**Windows-Release ansehen**](https://github.com/Juri-Halveth/halveth-tresor/releases) ·
+[Technische Anleitung auf Englisch](README.en.md) · [Sicherheitsmodell](docs/security-model.md)
 
-![Tresor dashboard](assets/screenshots/dashboard.png)
+![Tresor: Kategorien, Suche und gespeicherte Zugangsdaten](assets/screenshots/dashboard.png)
 
----
+## Drei Dinge, die direkt helfen
 
-## More than a password manager
+- **Vollständige Zugänge:** Benutzername, Passwort, Host, Port, Schlüssel und weitere passende Felder zusammen speichern.
+- **Schnell finden und kopieren:** Kategorien und Suche statt verstreuter Textdateien.
+- **Lokale verschlüsselte Sicherung:** Eine Vault-Datei und einen getrennt aufzubewahrenden Recovery-Key erhalten.
 
-Most tools remember passwords. Tresor remembers **complete access**. A password is rarely enough to reach a system: you also need the host, the port, the protocol, the key, the endpoint. Tresor stores the whole picture in one place, so a credential is actually usable, not just remembered.
+## In einer Minute zum passenden Einstieg
 
-It manages:
+1. Den [Windows-Release](https://github.com/Juri-Halveth/halveth-tresor/releases) öffnen und EXE sowie zugehörigen SHA-256-Wert ansehen.
+2. Den Download prüfen: `Get-FileHash .\Tresor.exe -Algorithm SHA256`.
+3. Beim ersten Start einen Test-Tresor anlegen und den Recovery-Key getrennt sichern.
 
-- Login credentials (username and password pairs)
-- Websites and web logins
-- FTP and SFTP servers
-- SSH access
-- API keys and API connections
-- Databases
-- Mail accounts (IMAP and SMTP)
-- Cards
-- Notes
-- Any other secret information
+Windows 10/11 x64 und WebView2 werden benötigt. Die veröffentlichten EXE-Dateien
+sind derzeit **nicht code-signiert**. Ein passender Hash prüft die Übereinstimmung
+mit dem veröffentlichten Paket; eine unabhängige Herstellerprüfung entsteht daraus nicht.
 
-Not just passwords. Complete access.
-
----
-
-## Features
-
-- **Organized by place and purpose.** Group entries into categories you name yourself, for example Work, Servers, or Personal.
-- **One-click copy on every field.** Copy a username, a host, a port, or a key with a single click.
-- **Tailored fields per type.** Each entry type shows the fields that actually matter for it. A mail account has IMAP and SMTP server and port. An API connection has "connects from", "connects to", endpoint, API key, public key, and private key.
-- **Built-in password generator.** Create strong values without leaving the app.
-- **Live search.** Filter across everything as you type.
-- **Detail view with reveal.** Masked values stay hidden until you choose to show them.
-- **Master password plus PIN.** Two separate secrets are combined to unlock the vault.
-- **Recovery key displayed at creation.** A Base32 key lets you regain access if you forget the master password.
-- **Auto-lock.** The vault locks after inactivity, and the mutable session-key buffer is overwritten on lock and close as a best effort; managed-runtime copies can remain.
-- **Encrypted backup export.** Save an encrypted copy of your vault to any location you choose.
-- **Secure clipboard.** The normal UI requests conditional clearing after 20 seconds and asks Windows to exclude secrets from clipboard history and cloud sync. These controls are best effort; see the security model.
-- **Fully offline.** No application account, cloud-sync service or telemetry is implemented. Runtime/dependency network behavior has not been measured in this review.
-
----
-
-## Screenshots
-
-**Choose a type**
-
-![Choosing an entry type](assets/screenshots/add-type.png)
-
-Pick what you are storing, from a login to an SSH server to an API connection.
-
-**Tailored fields**
-
-![Tailored fields for the selected type](assets/screenshots/add-form.png)
-
-The form adapts to the type you chose and asks only for the fields that fit it.
-
-**Detail view**
-
-![Detail view with one-click copy and reveal](assets/screenshots/detail.png)
-
-Review an entry, reveal masked values on demand, and copy any field with one click.
-
----
-
-## Security
-
-Tresor uses a standard envelope-encryption design. It is self-reviewed and has not undergone an independent third-party audit.
-
-- Your **master password and a separate PIN** are combined (length-prefixed and NFC-normalized) and run through **Scrypt** to derive a Key Encryption Key (KEK). The Scrypt cost is calibrated to your machine when the vault is created and stored in the file.
-- The KEK only wraps a random **Data Encryption Key (DEK)**. The DEK encrypts your actual data with **AES-256-GCM**.
-- A fresh random nonce (`os.urandom`) is used for every encryption on every save.
-- The header (KDF cost and salt) is bound as AES-GCM associated data, so it cannot be silently downgraded.
-- A SHA-256 checksum detects changes to the encoded ciphertext blobs. Authentication failure does not always distinguish wrong credentials from altered wrapping metadata.
-- The design is **fail-closed**: a wrong password or PIN is indistinguishable from a bad auth tag, so the vault never opens on doubt.
-- A separately held **Recovery Key** (Base32), displayed at creation, is the same DEK wrapped a second time under a random key, so a forgotten password can be reset.
-- The vault file lives at `%APPDATA%\Tresor\vault.credvault`, holds ciphertext only, and is written atomically.
-
-### Honest limits
-
-Security claims should be plain, so here are the boundaries:
-
-- Tresor protects a **stolen or copied file**. Access requires the master password plus PIN, or the recovery key. Resistance to offline guessing depends on secret strength and KDF cost.
-- Tresor does **not** protect against malware or a keylogger that is already running on your PC while the vault is unlocked. If the machine is compromised, the vault cannot save you.
-- If you lose the master password **and** the PIN **and** the recovery key, the data is gone forever, by design. There is no backdoor.
-- For defense in depth, enable **BitLocker** on your system drive.
-
-Full details are in [docs/security-model.md](docs/security-model.md). To report a vulnerability, see [SECURITY.md](SECURITY.md).
-
----
-
-## Why Tresor exists
-
-Software should solve real problems. Not every small feature needs a monthly subscription. The goal is to build modern, fast, high-quality desktop programs that make people more productive.
-
-Some projects stay free, some become open source, and others are fair one-time purchases. Tresor is part of a growing line of tools under Halveth.
-
----
-
-## Download
-
-Tresor is distributed through **GitHub Releases**. Each release includes the Windows `.exe`, the changelog, the version, a SHA-256 hash of the exe, and a description.
-
-1. Download `Tresor.exe` from the Releases page: `https://github.com/Juri-Halveth/halveth-tresor/releases`
-2. Verify the SHA-256 hash against the value published with the release:
-
-   ```powershell
-   Get-FileHash .\Tresor.exe -Algorithm SHA256
-   ```
-
-   Compare the printed hash to the one in the release notes. Only run the file if they match.
-3. Put the exe anywhere you like and, optionally, create a desktop shortcut.
-
-It is a **portable single file**. No installer, no admin rights, nothing written outside your user profile.
-
-<a id="requirements"></a>
-
-### Requirements
-
-- Windows 10 or 11 (x64).
-- The WebView2 runtime, which is preinstalled on Windows 11 and on up-to-date Windows 10.
-
----
-
-## Build from source
-
-Requires Python 3.10 or newer (developed and tested on 3.13) on Windows.
-
-```powershell
-# Clone
-git clone https://github.com/Juri-Halveth/halveth-tresor.git
-cd halveth-tresor
-
-# Install in editable mode with dev dependencies
-pip install -e ".[dev]"
-
-# Run from source
-python -m tresor
-
-# Run the tests
-pytest
-
-# Build the single-file exe (output: dist/Tresor.exe)
-scripts\build.bat
-# or equivalently:
-python -m PyInstaller packaging/tresor.spec --clean --noconfirm
-```
-
-The test suite covers roundtrip encryption with no plaintext on disk, wrong password and PIN fail-closed, tamper detection, blocked Scrypt downgrade, recovery key, password change that keeps data, the key being wiped on lock, and helper functions.
-
-Regenerating the optional app icon with `python scripts/make_icon.py` needs
-Python 3.11 or newer and Pillow 13.0.0 or newer from the dev extra. The vault
-runtime, tests and packaging of the committed icon do not require Pillow;
-Python 3.10 does not install an obsolete Pillow fallback.
-
----
-
-## Project structure
+## Wie die Speicherung funktioniert
 
 ```text
-tresor/
-├─ src/tresor/
-│  ├─ __init__.py          # __version__ = "1.0.0"
-│  ├─ __main__.py          # entry point, enables python -m tresor
-│  ├─ app.py               # window and JS bridge
-│  ├─ vault.py             # encrypted core
-│  ├─ clipboard_win.py     # secure clipboard
-│  └─ ui/index.html        # the whole UI
-├─ tests/
-│  ├─ test_vault.py        # pytest suite
-│  └─ e2e/native_smoke.py  # manual native smoke test (not run in CI)
-├─ assets/
-│  ├─ icon.ico
-│  └─ screenshots/         # dashboard, add-type, add-form, detail
-├─ scripts/
-│  ├─ build.bat
-│  └─ make_icon.py
-├─ packaging/
-│  └─ tresor.spec          # committed PyInstaller spec
-├─ docs/
-│  └─ security-model.md
-├─ .github/
-│  ├─ workflows/ci.yml
-│  ├─ ISSUE_TEMPLATE/
-│  └─ PULL_REQUEST_TEMPLATE.md
-├─ README.md
-├─ LICENSE
-├─ SECURITY.md
-├─ CONTRIBUTING.md
-├─ CHANGELOG.md
-├─ THIRD-PARTY-LICENSES.md
-├─ pyproject.toml
-├─ requirements.txt
-├─ requirements-dev.txt
-└─ .gitignore
+Masterpasswort + PIN → Scrypt → Schlüssel zum Verpacken des Datenschlüssels
+                                      │
+Recovery-Key ─────── getrennte Route ──┤
+                                      ↓
+                           Datenschlüssel → AES-256-GCM → lokale Vault-Datei
 ```
 
----
+Masterpasswort und PIN sind **zwei kombinierte lokale Wissensgeheimnisse**.
+Die Kombination ist keine Zwei-Faktor-Authentisierung. Frische Nonces,
+Headerbindung und atomisches Speichern sind im Quellcode und im
+[Sicherheitsmodell](docs/security-model.md) dokumentiert.
 
-## Roadmap
+Der Schutz bezieht sich auf die verschlüsselte Datei. Ein bereits kompromittierter
+PC kann Eingaben und entsperrte Daten abgreifen. Ein unabhängiger externer Audit
+steht aus; die datierten Projektprüfungen sind [hier](docs/review-status-2026-10-20.md) erreichbar.
 
-Modest and honest, in no fixed order:
+## Aus dem Quellcode starten
 
-- Optional English UI and full internationalization (the UI ships in German today).
-- Code signing of the released exe.
-- Encrypted, cloud-agnostic backup helpers that keep the offline model intact.
+```powershell
+git clone https://github.com/Juri-Halveth/halveth-tresor.git
+cd halveth-tresor
+python -m pip install -e ".[dev]"
+python -m tresor
+pytest
+python scripts/check_release.py
+```
 
----
+[Build und Architektur](README.en.md#build-from-source) ·
+[Änderungen](CHANGELOG.md) · [Beiträge](CONTRIBUTING.md)
 
-## About the developer
+## Version und Rechte
 
-**HALVETH!!!**, Germany. Founder of Halveth. Building modern software, desktop applications, and digital tools with a focus on simplicity, speed, and fair pricing.
+Die kanonische Version steht in `src/tresor/__init__.py`. Python-Paket,
+README-Badges und Windows-Versionsressource werden daran gebunden.
+`scripts/check_release.py` stoppt Versionsdrift und einen abweichenden Release-Tag.
+Die CI prüft zusätzlich die Versionsinformationen der tatsächlich gebauten EXE.
 
-- Website: https://halveth.de
-- GitHub: https://github.com/Juri-Halveth
+Historische MIT-Fassungen und neuere HALVETH-PIRL-Beiträge sind in der
+[Lizenzkarte](LICENSES.md) nach Pfad und Version zugeordnet. Frühere Berechtigungen
+und die [Drittanbieterhinweise](THIRD-PARTY-LICENSES.md) bleiben erhalten.
 
----
+Zusammenarbeit: [juri@halveth.de](mailto:juri@halveth.de) ·
+Sicherheitsmeldungen: [security@halveth.de](mailto:security@halveth.de)
 
-## License
-
-Tresor versions through commit `e6cff6801106343832ca209c971a91abe7648916` remain under the [MIT License](LICENSE). Distinguishable new original HALVETH contributions use [HALVETH Public-Interest Research License 2.0](LICENSE-HALVETH-PIRL-2.0.md). Commercial use of those protected new contributions requires a prior written license and participation agreement. See [HALVETH-RIGHTS.md](HALVETH-RIGHTS.md) and the binding [version map](LICENSES.md).
-
-Copyright (c) 2026 Juri Janovski, project HALVETH.
-
-Bundled dependencies retain their own permissive terms. Their notices, including the OpenSSL attribution required by the statically linked `cryptography` wheel, are collected in [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md).
-
----
-
-Contributions are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). To report a security issue, see [SECURITY.md](SECURITY.md).
-
-## Dated review status
-
-[Source boundaries, 27 local synthetic tests and remaining checks — 20 October 2026](docs/review-status-2026-10-20.md). This is a project-led, AI-assisted review, not an independent audit.
+Projektleitung: Juri / HALVETH · Entwicklung mit KI-Unterstützung.
