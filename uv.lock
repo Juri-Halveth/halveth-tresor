@@ -900,7 +900,6 @@ wheels = [
 
 [[package]]
 name = "tresor"
-version = "1.8.0"
 source = { editable = "." }
 dependencies = [
     { name = "clr-loader", marker = "sys_platform == 'win32'" },
