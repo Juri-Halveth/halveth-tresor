@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-labelledby="title desc">
+  <title id="title">HALVETH / NETZ · TRESOR</title>
+  <desc id="desc">Tresor: geometrische Tresortür mit Schlüsselloch</desc>
+  <defs>
+    <linearGradient id="space" x2="1" y2="1">
+      <stop stop-color="#080e1b"/>
+      <stop offset="1" stop-color="#182638"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M36 0H0V36" fill="none" stroke="#abc3dd" stroke-opacity=".075"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="300" rx="22" fill="url(#space)"/>
+  <rect width="1200" height="300" rx="22" fill="url(#grid)"/>
+  <path d="M0 0h8v300H0" fill="#70e6d0"/>
+  <path d="M815 35v230" stroke="#70e6d0" stroke-opacity=".3"/>
+  <text x="68" y="64" fill="#70e6d0" font-size="23" font-weight="700" letter-spacing="4" font-family="Segoe UI,Arial,sans-serif">HALVETH / NETZ</text>
+  <text x="69" y="113" fill="#aec8d8" font-size="18" letter-spacing="3" font-family="Segoe UI,Arial,sans-serif">SOFTWARE &amp; SICHERHEIT</text>
+  <text x="66" y="190" fill="#f7fbff" font-size="51" font-weight="750" font-family="Segoe UI,Arial,sans-serif">TRESOR</text>
+  <text x="69" y="232" fill="#bfd1e2" font-size="22" font-family="Segoe UI,Arial,sans-serif">Lokale Zugangsdaten · Windows</text>
+  <path d="M68 257h322" stroke="#70e6d0" stroke-width="3" stroke-linecap="round"/>
+
+          <circle cx="971" cy="151" r="93" fill="none" stroke="#70e6d0" stroke-width="2" opacity=".8"/>
+          <circle cx="971" cy="151" r="69" fill="none" stroke="#70e6d0" stroke-width="12" opacity=".17"/>
+          <circle cx="971" cy="151" r="51" fill="#101d29" stroke="#70e6d0" stroke-width="2"/>
+          <path d="M971 126a17 17 0 0 0-8 32l-5 23h26l-5-23a17 17 0 0 0-8-32z" fill="#70e6d0"/>
+          <path d="M971 58v23m0 140v23m-93-93h23m140 0h23" stroke="#d4fff6" stroke-width="3" opacity=".8"/>
+
+</svg>
