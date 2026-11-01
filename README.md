@@ -2,6 +2,10 @@
 
 # Tresor · Zugangsdaten bleiben auf deinem Windows-PC
 
+![HALVETH / NETZ – Tresor: geometrische Tresortür mit Schlüsselloch](HALVETH_NETZ_HERO.svg)
+
+**HALVETH / NETZ · Software & Sicherheit.** [Starship Lab öffnen](https://juri-halveth.github.io/universum/) und dort die Projektkarte „TRESOR“ auswählen.
+
 Passwörter, Schlüssel und Verbindungsdaten in einer verschlüsselten lokalen Datei
 verwalten — mit Suche, Zwischenablage und einem gesondert aufzubewahrenden Recovery-Key.
 
