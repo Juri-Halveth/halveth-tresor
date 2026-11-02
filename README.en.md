@@ -2,6 +2,8 @@
 
 # Tresor · local credentials on Windows
 
+**Open the [Windows release v1.8.0](https://github.com/Juri-Halveth/halveth-tresor/releases/tag/v1.8.0).** The EXE is unsigned; check its published SHA-256 and the [security model](docs/security-model.md) before use.
+
 **Your complete access, sealed in one local vault.**
 
 A local, offline Desktop Credential Vault for Windows.
