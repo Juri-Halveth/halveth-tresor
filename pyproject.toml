@@ -39,6 +39,9 @@ dev = [
     "pillow>=13.0.0; python_version >= '3.11'",
 ]
 
+[dependency-groups]
+lint = ["ruff"]
+
 [project.urls]
 Homepage = "https://halveth.de"
 Repository = "https://github.com/Juri-Halveth/halveth-tresor"

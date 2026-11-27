@@ -918,6 +918,11 @@ dev = [
     { name = "ruff" },
 ]
 
+[package.dev-dependencies]
+lint = [
+    { name = "ruff" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "clr-loader", marker = "sys_platform == 'win32'", specifier = ">=0.2" },
@@ -931,6 +936,9 @@ requires-dist = [
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.17.3" },
 ]
 provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+lint = [{ name = "ruff" }]
 
 [[package]]
 name = "typing-extensions"
