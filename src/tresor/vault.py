@@ -213,30 +213,50 @@ def create_envelope(
     return env, recovery_key
 
 
-def _structural_check(env: Envelope) -> None:
-    """Validate the envelope shape and field sizes before any crypto is attempted."""
+def _kdf_integer(value: Any, field: str) -> int:
+    """Retain legacy integer strings but reject booleans and fractional numbers."""
+    result = int(value)
+    if isinstance(value, bool) or (isinstance(value, float) and value != result):
+        raise ValueError("kdf " + field)
+    return result
+
+
+def _structural_check(env: Envelope) -> tuple[int, int, int]:
+    """Validate the wire envelope and return the exact Scrypt costs that were checked."""
     try:
-        assert env.get("format") == FILE_FORMAT, "format"
-        assert isinstance(env.get("version"), int), "version"
-        assert len(b64d(env["salt"])) == SALT_LEN, "salt length"
+        if not isinstance(env, dict) or env.get("format") != FILE_FORMAT:
+            raise ValueError("format")
+        if type(env.get("version")) is not int:
+            raise ValueError("version")
+        if not isinstance(env.get("vault_id"), str):
+            raise ValueError("vault id")
+        if len(b64d(env["salt"])) != SALT_LEN:
+            raise ValueError("salt length")
         kdf = env["kdf"]
-        assert kdf.get("name") == "scrypt", "kdf name"
-        n = int(kdf["n"])
-        r = int(kdf.get("r", SCRYPT_R))
-        p = int(kdf.get("p", SCRYPT_P))
+        if not isinstance(kdf, dict) or kdf.get("name") != "scrypt":
+            raise ValueError("kdf name")
+        n = _kdf_integer(kdf["n"], "n")
+        r = _kdf_integer(kdf.get("r", SCRYPT_R), "r")
+        p = _kdf_integer(kdf.get("p", SCRYPT_P), "p")
         # Bounds stop a tampered file from requesting absurd Scrypt memory/time.
         # Calibration caps n at 2**19 and r/p are fixed small, so these ceilings are generous.
-        assert 2 <= n <= (1 << 24), "kdf n"
-        assert 1 <= r <= 64, "kdf r"
-        assert 1 <= p <= 64, "kdf p"
+        if not 2 <= n <= (1 << 24) or n & (n - 1):
+            raise ValueError("kdf n")
+        if not 1 <= r <= 64:
+            raise ValueError("kdf r")
+        if not 1 <= p <= 64:
+            raise ValueError("kdf p")
         # Bound the memory product too (Scrypt uses ~128*n*r bytes); creation stays at
         # n*r <= 2**22, so this ceiling cannot reject a real vault but caps a tampered one.
-        assert n * r <= (1 << 23), "kdf cost"
+        if n * r > (1 << 23):
+            raise ValueError("kdf cost")
         for k in ("wrap", "recovery", "data"):
-            assert len(b64d(env[k]["nonce"])) == NONCE, k + " nonce"
-            assert len(b64d(env[k]["blob"])) >= 16, k + " blob"
-        assert len(b64d(env["wrap"]["blob"])) >= KEYLEN + 16, "wrap blob"
-    except (KeyError, AssertionError, ValueError, TypeError) as e:
+            if len(b64d(env[k]["nonce"])) != NONCE:
+                raise ValueError(k + " nonce")
+            if len(b64d(env[k]["blob"])) < (KEYLEN + 16 if k == "wrap" else 16):
+                raise ValueError(k + " blob")
+        return n, r, p
+    except (AttributeError, KeyError, OverflowError, TypeError, ValueError) as e:
         raise Corrupt(f"The vault file is damaged ({e})") from e
 
 
@@ -267,17 +287,10 @@ def _open_data(env: Envelope, dek: bytes, hdr: dict[str, Any]) -> dict[str, Any]
 
 def unlock_envelope(env: Envelope, master: str, pin: str) -> tuple[bytes, dict[str, Any]]:
     """Open with password + PIN. Returns (dek_bytes, payload) or raises WrongCredentials/Corrupt."""
-    _structural_check(env)
+    n, r, p = _structural_check(env)
     _verify_checksum(env)
     hdr = _hdr_of(env)
-    kek = derive_kek(
-        master,
-        pin,
-        b64d(env["salt"]),
-        int(env["kdf"]["n"]),
-        int(env["kdf"]["r"]),
-        int(env["kdf"]["p"]),
-    )
+    kek = derive_kek(master, pin, b64d(env["salt"]), n, r, p)
     try:
         dek = _decrypt(kek, env["wrap"], _aad("wrap", hdr))
     except InvalidTag:
@@ -316,13 +329,11 @@ def reseal_data(env: Envelope, dek: bytes, data: dict[str, Any]) -> Envelope:
 
 def rewrap_credentials(env: Envelope, dek: bytes, new_master: str, new_pin: str) -> Envelope:
     """Change password/PIN: fresh salt, re-wrap the DEK under the new KEK."""
-    n = int(env["kdf"]["n"])
+    n, r, p = _structural_check(env)
     env = dict(env)
     env["salt"] = b64e(os.urandom(SALT_LEN))
     hdr = _hdr_of(env)
-    kek = derive_kek(
-        new_master, new_pin, b64d(env["salt"]), n, int(env["kdf"]["r"]), int(env["kdf"]["p"])
-    )
+    kek = derive_kek(new_master, new_pin, b64d(env["salt"]), n, r, p)
     try:
         env["wrap"] = _encrypt(kek, dek, _aad("wrap", hdr))
     finally:
