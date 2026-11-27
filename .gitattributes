@@ -9,3 +9,6 @@
 *.png binary
 *.exe binary
 *.credvault binary
+
+# Preserve bytes from the SDK package and the upstream proxy-tools notice.
+packaging/notices/*.txt -text whitespace=-blank-at-eol

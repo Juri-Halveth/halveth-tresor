@@ -7,15 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Planned
+
+- Optional light theme and importing individual entries from an encrypted backup.
+
+## 1.8.1
+
 ### Fixed
 
+- Locking saves the pending Focus edit before releasing the session.
+- Opening, recovering and changing credentials validate the encrypted file structure
+  and key-derivation settings in both normal and optimized Python.
 - Each encrypted save now uses its own exclusively created temporary file. Parallel saves in one process no longer share the same temporary pathname. This preserves complete-file replacement; it does not provide conflict merging for simultaneous logical edits.
 - Brief Windows replacement denials use a bounded retry. Permanent failures still raise an error, preserve the previous destination, and clean up only the failed save's temporary file.
 
 ### Added
 
-- Optional light theme for the vault window (the current window ships with a dark theme by default).
-- Import of entries from a previously exported encrypted backup.
+- Windows builds include a separate archive of the component versions and notices
+  collected during packaging.
 
 ## [1.8.0] - 2026-07-26
 
@@ -155,7 +164,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Encrypted backup export to a separate file.
 - Packaged single-file Windows executable built with PyInstaller (`dist/Tresor.exe`), portable with no installer and no admin rights.
 
-[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.6.2...v1.7.0
 [1.6.2]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/Juri-Halveth/halveth-tresor/compare/v1.6.0...v1.6.1

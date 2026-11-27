@@ -2,9 +2,9 @@
 
 Tresor's own contributions use the path- and version-specific terms in [LICENSES.md](LICENSES.md). This file records the separate terms of bundled third-party components; it does not change those components' permissions.
 
-The distributed Windows executable (`Tresor.exe`, built with PyInstaller) bundles the
-third-party components listed below. This file reproduces their separate license texts and required notices.
-The license texts are copied verbatim from each package as installed at build time.
+The locked Windows build includes the components below. Its accompanying
+`Tresor-notices.zip` contains the project license map, the notices from the
+installed runtime packages and a `versions.json` for that build.
 
 ---
 ## pywebview 6.2.1
@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 </details>
 
 ---
-## pythonnet 3.1.0
+## pythonnet 3.2.1 (Windows executable)
 _Python.NET / Python.Runtime.dll, .NET interop for the WebView2 host. MIT._
 
 <details><summary>LICENSE</summary>
@@ -111,7 +111,7 @@ SOFTWARE.
 </details>
 
 ---
-## cryptography 49.0.0
+## cryptography 50.0.2
 _Envelope encryption: Scrypt key derivation and AES-256-GCM. Apache-2.0 OR BSD-3-Clause. Statically links OpenSSL (see the OpenSSL note below)._
 
 <details><summary>LICENSE</summary>
@@ -388,13 +388,14 @@ the `cryptography` package license files). Required attribution:
 
 ---
 
-## Components NOT redistributed (informational)
+## Windows packaging components
 
-- **PyInstaller** (build tool only): GPL-2.0-or-later WITH a bootloader exception that
-  explicitly permits distributing the frozen executable under any license (here MIT). It
-  is not part of Tresor's source and triggers no notice obligation.
-- **Pillow** (icon tooling only, MIT-CMU): used at build time to generate the icon; it is
-  not imported at runtime and is not bundled into `Tresor.exe`.
-- **Microsoft Edge WebView2 Runtime** (Microsoft proprietary): Tresor uses the Evergreen
-  runtime already installed and serviced with Windows. No WebView2 binaries are
-  redistributed with Tresor, so no Microsoft distribution terms are triggered.
+- The [Microsoft WebView2 SDK 1.0.3856.49](https://www.nuget.org/packages/Microsoft.Web.WebView2/1.0.3856.49)
+  provides the Core and WinForms assemblies and the loader DLLs shipped by pywebview.
+  The SDK's original LICENSE and NOTICE are included with the build. The
+  separately installed Microsoft Edge WebView2 Runtime provides the browser engine.
+- PyInstaller contributes its bootloader. The build includes its COPYING file
+  with the bootloader exception. Pillow is used to generate the application icon.
+- The proxy-tools 0.1.0 wheel omits its license file. Its module credits its BSD
+  source, while its package metadata says MIT. The build preserves the
+  [upstream notice from the matching source](https://github.com/jtushman/proxy_tools/blob/77369e4d321ed7b10d7b6e4885d7fe7a7ec2dfb7/LICENSE.txt).

@@ -54,6 +54,9 @@ def check(root=ROOT, tag=None, write=False):
         raise ValueError("Packaging must read the canonical source version")
     if tag is not None and tag != "v" + version:
         raise ValueError(f"Tag must equal v{version}")
+    notes = (root / "RELEASE_NOTES.md").read_text(encoding="utf-8").splitlines()
+    if not notes or notes[0] != f"# Tresor v{version}":
+        raise ValueError("Release notes must describe the canonical source version")
     badge_pattern = (
         r"\[!\[Version [^\]]+\]\(https://img\.shields\.io/badge/Version-[^)]+\)\]\(CHANGELOG\.md\)"
     )

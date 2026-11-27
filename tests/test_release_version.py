@@ -20,6 +20,7 @@ def fixture_root(tmp_path):
         "pyproject.toml",
         "README.md",
         "README.en.md",
+        "RELEASE_NOTES.md",
         "packaging/version_info.txt",
     ):
         target = tmp_path / name
@@ -35,6 +36,13 @@ def test_current_release_and_matching_tag():
 def test_changed_tag_is_rejected():
     with pytest.raises(ValueError, match="Tag must equal"):
         release_check.check(tag="v999.0.0")
+
+
+def test_notes_from_an_older_build_are_rejected(tmp_path):
+    root = fixture_root(tmp_path)
+    (root / "RELEASE_NOTES.md").write_text("# Tresor v0.0.0\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="Release notes"):
+        release_check.check(root)
 
 
 def test_stale_readme_and_windows_resource_are_rejected(tmp_path):
