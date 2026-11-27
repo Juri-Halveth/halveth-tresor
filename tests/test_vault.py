@@ -314,16 +314,45 @@ def test_concurrent_no_clobber(vault_path):
     [
         {"r": 100000},  # a single parameter out of range
         {"n": 1 << 21, "r": 64},  # each in range, but the n*r product is far too large
+        {"n": 3},
+        {"p": 0},
+        {"r": 1.5},
+        {"p": True},
     ],
 )
-def test_absurd_scrypt_params_rejected(vault_path, tamper):
+def test_invalid_scrypt_params_rejected_before_derivation(vault_path, tamper, monkeypatch):
     # A tampered Scrypt cost must be rejected up front (Corrupt), before any Scrypt work.
     V.Session(vault_path).create("pw", "1234", n_exp=NEXP)
     env = V.load_file(vault_path)
     env["kdf"].update(tamper)
     V.save_file(vault_path, env)
-    with pytest.raises((V.Corrupt, V.WrongCredentials)):
+
+    def unexpected_kdf(*args):
+        pytest.fail("key derivation started before the envelope was validated")
+
+    monkeypatch.setattr(V, "derive_kek", unexpected_kdf)
+    with pytest.raises(V.Corrupt):
         V.Session(vault_path).unlock("pw", "1234")
+    with pytest.raises(V.Corrupt):
+        V.rewrap_credentials(env, bytes(V.KEYLEN), "pw", "1234")
+
+
+def test_invalid_envelope_block_rejected_before_crypto(vault_path, monkeypatch):
+    session = V.Session(vault_path)
+    recovery = session.create("pw", "1234", n_exp=4)
+    env = V.load_file(vault_path)
+    env["data"]["nonce"] = ""
+    V.save_file(vault_path, env)
+
+    def unexpected_crypto(*args):
+        pytest.fail("crypto started on a malformed block")
+
+    monkeypatch.setattr(V, "derive_kek", unexpected_crypto)
+    monkeypatch.setattr(V, "_decrypt", unexpected_crypto)
+    with pytest.raises(V.Corrupt):
+        session.unlock("pw", "1234")
+    with pytest.raises(V.Corrupt):
+        session.unlock_recovery(recovery)
 
 
 # ---------------------------------------------------------------- Focus area + backups
