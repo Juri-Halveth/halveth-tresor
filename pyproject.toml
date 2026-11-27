@@ -35,10 +35,13 @@ dependencies = [
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
-    "ruff>=0.5",
+    "ruff>=0.17.3",
     "pyinstaller>=6.0",
     "pillow>=13.0.0; python_version >= '3.11'",
 ]
+
+[dependency-groups]
+lint = ["ruff"]
 
 [project.urls]
 Homepage = "https://halveth.de"
