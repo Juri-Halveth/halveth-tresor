@@ -1306,10 +1306,24 @@ async function delEntry(){
   if(r&&r.ok){S.entries=S.entries.filter(x=>x.id!==id);closeDrawer();renderApp();toast(t('toast.deleted'));}
 }
 async function lockNow(){
-  await call('lock');S.entries=[];S.group='__all';S.query='';
-  FK=null;$('#fkWelcome').classList.remove('show');$('#fkOnb').classList.remove('show');
-  closeDrawer();closeModal();$('#searchBox').value='';
-  show('screen-lock');$('#lkPass').focus();
+  if(lockInProgress)return;
+  lockInProgress=true;
+  const gate=$('#screen-lock');
+  gate.inert=true;
+  show('screen-lock');
+  $('#fkWelcome').classList.remove('show');$('#fkOnb').classList.remove('show');
+  closeDrawer();closeModal();closeSettings();
+  try{
+    try{await flushFocus();}catch{$('#lkMsg').textContent=t('err.save_failed');}
+    const result=await call('lock');
+    if(!result?.ok)throw new Error('lock');
+  }catch{
+    $('#lkMsg').textContent=LANG==='en'?'Lock not confirmed. Close the vault window.':'Sperre nicht bestätigt. Schließe das Tresorfenster.';
+  }finally{
+    FK=null;fkSavedRevision=fkRevision;
+    S.entries=[];S.group='__all';S.query='';$('#searchBox').value='';
+    lockInProgress=false;gate.inert=false;$('#lkPass').focus();
+  }
 }
 async function doBackup(){
   const r=await call('export_backup');
@@ -1430,6 +1444,7 @@ const FK_SEED_LISTS=[
    {id:'c3',text:'Wasser trinken 💧',done:false}]},
 ];
 let FK=null, FK_MODE='pw', fkSaveTimer=null;
+let fkRevision=0, fkSavedRevision=0, fkWrite=Promise.resolve(), lockInProgress=false;
 const fkEpochDay=Math.floor(Date.now()/86400000);
 const fkIdx=Math.abs((fkEpochDay*1103515245+12345))%FK_MANTRAS.length;
 
@@ -1442,7 +1457,24 @@ function fkNorm(f){
     lists:hasLists?f.lists:JSON.parse(JSON.stringify(FK_SEED_LISTS)),
     motivBoosts:(f.motivBoosts&&typeof f.motivBoosts==='object')?f.motivBoosts:{d:-1,n:0}};
 }
-function fkSave(){if(fkSaveTimer)clearTimeout(fkSaveTimer);fkSaveTimer=setTimeout(()=>{if(FK)call('save_focus',FK).catch(()=>{});},600);}
+function flushFocus(){
+  clearTimeout(fkSaveTimer);
+  fkSaveTimer=null;
+  const revision=fkRevision, focus=FK;
+  // Serialize backend writes, including any older save still in flight at lock time.
+  fkWrite=fkWrite.catch(()=>{}).then(async()=>{
+    if(!focus || revision<=fkSavedRevision)return;
+    const result=await call('save_focus',JSON.parse(JSON.stringify(focus)));
+    if(!result?.ok)throw new Error(errText(result));
+    fkSavedRevision=revision;
+  });
+  return fkWrite;
+}
+function fkSave(){
+  fkRevision++;
+  clearTimeout(fkSaveTimer);
+  fkSaveTimer=setTimeout(()=>flushFocus().catch(()=>toast(t('err.save_failed'),null,true)),600);
+}
 function fkMantra(){return FK_MANTRAS[fkIdx].split('{name}').join('<em>'+esc(FK&&FK.name||'du')+'</em>');}
 function fkCounts(l){const its=l.items||[];const d=its.filter(i=>i.done).length;return{d,t:its.length,p:its.length?d/its.length:0};}
 function fkAll(){let d=0,t=0;(FK.lists||[]).forEach(l=>(l.items||[]).forEach(i=>{t++;if(i.done)d++;}));return{d,t,p:t?d/t:0};}
