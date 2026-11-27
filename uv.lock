@@ -931,7 +931,7 @@ requires-dist = [
     { name = "pyinstaller", marker = "extra == 'dev'", specifier = ">=6.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0" },
-    { name = "pythonnet", marker = "sys_platform == 'win32'", specifier = ">=3.0" },
+    { name = "pythonnet", marker = "sys_platform == 'win32'", specifier = ">=3.1.0" },
     { name = "pywebview", specifier = ">=6.2.1" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.17.3" },
 ]
