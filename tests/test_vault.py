@@ -6,7 +6,10 @@ higher cost. All sample data is generic (example.com), no real credentials.
 """
 
 import copy
+import json
 import os
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 
@@ -64,6 +67,116 @@ def test_roundtrip_and_persistence(vault_path):
     assert len(got) == 2
     hosts = [f["value"] for e in got for f in e["fields"] if f["key"] == "Host"]
     assert hosts == ["ftp.example.com"]
+
+
+def test_parallel_save_calls_own_distinct_complete_temporary_files(vault_path, monkeypatch):
+    env, _ = V.create_envelope(MASTER, "1234", n_exp=NEXP)
+    dek, _ = V.unlock_envelope(env, MASTER, "1234")
+    candidates = [V.reseal_data(env, dek, {"entries": [entry], "focus": {}}) for entry in SAMPLE]
+    replace = V.os.replace
+    ready = threading.Barrier(2)
+    temporary_paths = []
+    path_lock = threading.Lock()
+    seen_threads = set()
+
+    def finish_together(source, destination):
+        with path_lock:
+            thread_id = threading.get_ident()
+            first_attempt = thread_id not in seen_threads
+            if first_attempt:
+                seen_threads.add(thread_id)
+                temporary_paths.append(source)
+        # Both real writes overlap before their first replacement. A bounded
+        # Windows sharing retry must not wait for an already-finished peer again.
+        if first_attempt:
+            ready.wait(timeout=5)
+        replace(source, destination)
+
+    monkeypatch.setattr(V.os, "replace", finish_together)
+    with ThreadPoolExecutor(max_workers=2) as workers:
+        futures = [workers.submit(V.save_file, vault_path, candidate) for candidate in candidates]
+        for future in futures:
+            future.result(timeout=10)
+
+    assert len(set(temporary_paths)) == 2
+    assert not any(os.path.exists(path) for path in temporary_paths)
+    _, opened = V.unlock_envelope(V.load_file(vault_path), MASTER, "1234")
+    assert opened["entries"] in [[entry] for entry in SAMPLE]
+
+
+def test_failed_save_preserves_existing_vault_and_removes_only_its_temp(vault_path, monkeypatch):
+    env, _ = V.create_envelope(MASTER, "1234", n_exp=NEXP)
+    V.save_file(vault_path, env)
+    before = open(vault_path, "rb").read()
+    folder = os.path.dirname(vault_path)
+    unrelated = os.path.join(folder, "unrelated.tmp")
+    with open(unrelated, "w", encoding="utf-8") as stream:
+        stream.write("preserve")
+
+    def failed_dump(*args, **kwargs):
+        raise OSError("Synthetic interrupted write")
+
+    monkeypatch.setattr(V.json, "dump", failed_dump)
+    with pytest.raises(OSError, match="Synthetic interrupted write"):
+        V.save_file(vault_path, env)
+    assert open(vault_path, "rb").read() == before
+    assert set(os.listdir(folder)) == {os.path.basename(vault_path), "unrelated.tmp"}
+
+
+@pytest.mark.parametrize("winerror", [5, 32, 33])
+def test_transient_windows_replace_denial_retries_the_same_complete_temp(
+    vault_path, monkeypatch, winerror
+):
+    env, _ = V.create_envelope(MASTER, "1234", n_exp=NEXP)
+    V.save_file(vault_path, env)
+    dek, _ = V.unlock_envelope(env, MASTER, "1234")
+    candidate = V.reseal_data(env, dek, {"entries": [SAMPLE[0]], "focus": {}})
+    replace = V.os.replace
+    sources, sleeps = [], []
+
+    def temporarily_denied(source, destination):
+        sources.append(source)
+        if len(sources) < 3:
+            error = PermissionError("Synthetic temporary Windows sharing conflict")
+            error.winerror = winerror
+            raise error
+        replace(source, destination)
+
+    monkeypatch.setattr(V.os, "replace", temporarily_denied)
+    monkeypatch.setattr(V.time, "sleep", sleeps.append)
+    V.save_file(vault_path, candidate)
+    assert len(sources) == 3 and len(set(sources)) == 1
+    assert sleeps == [0.05, 0.1]
+    assert not os.path.exists(sources[0])
+    _, opened = V.unlock_envelope(V.load_file(vault_path), MASTER, "1234")
+    assert opened["entries"] == [SAMPLE[0]]
+
+
+@pytest.mark.parametrize("winerror,attempts", [(5, 6), (None, 1)])
+def test_permanent_replace_denial_propagates_and_preserves_destination(
+    vault_path, monkeypatch, winerror, attempts
+):
+    env, _ = V.create_envelope(MASTER, "1234", n_exp=NEXP)
+    V.save_file(vault_path, env)
+    before = open(vault_path, "rb").read()
+    error = PermissionError("Synthetic permanent replacement denial")
+    if winerror is not None:
+        error.winerror = winerror
+    sources, sleeps = [], []
+
+    def denied(source, destination):
+        sources.append(source)
+        raise error
+
+    monkeypatch.setattr(V.os, "replace", denied)
+    monkeypatch.setattr(V.time, "sleep", sleeps.append)
+    with pytest.raises(PermissionError) as caught:
+        V.save_file(vault_path, env)
+    assert caught.value is error
+    assert len(sources) == attempts
+    assert len(sleeps) == attempts - 1 and sum(sleeps) <= 0.75
+    assert open(vault_path, "rb").read() == before
+    assert set(os.listdir(os.path.dirname(vault_path))) == {os.path.basename(vault_path)}
 
 
 @pytest.mark.parametrize(
@@ -168,3 +281,124 @@ def test_password_generator():
 
 def test_kdf_input_length_prefix():
     assert V.kdf_input("ab", "123") != V.kdf_input("ab1", "23")
+
+
+def test_concurrent_no_clobber(vault_path):
+    # Two sessions on the same vault: a stale one must not wipe the other's entries.
+    def note(idstr):
+        return {"id": idstr, "type": "note", "title": idstr, "group": "", "fields": []}
+
+    a = V.Session(vault_path)
+    a.create("pw", "1234", n_exp=NEXP)
+    a.unlock("pw", "1234")
+    for i in range(3):
+        a.upsert(note(f"a{i}"))  # disk now holds 3 entries
+
+    b = V.Session(vault_path)
+    b.unlock("pw", "1234")  # b loads the 3-entry view
+
+    for i in range(3, 12):
+        a.upsert(note(f"a{i}"))  # a grows the file to 12
+
+    b.upsert(note("b1"))  # b saves; the fix must reload first, not clobber a's 9
+
+    final = V.Session(vault_path).unlock("pw", "1234")
+    ids = {e["id"] for e in final}
+    assert len(final) == 13
+    assert "b1" in ids
+    assert all((f"a{i}") in ids for i in range(12))
+
+
+@pytest.mark.parametrize(
+    "tamper",
+    [
+        {"r": 100000},  # a single parameter out of range
+        {"n": 1 << 21, "r": 64},  # each in range, but the n*r product is far too large
+    ],
+)
+def test_absurd_scrypt_params_rejected(vault_path, tamper):
+    # A tampered Scrypt cost must be rejected up front (Corrupt), before any Scrypt work.
+    V.Session(vault_path).create("pw", "1234", n_exp=NEXP)
+    env = V.load_file(vault_path)
+    env["kdf"].update(tamper)
+    V.save_file(vault_path, env)
+    with pytest.raises((V.Corrupt, V.WrongCredentials)):
+        V.Session(vault_path).unlock("pw", "1234")
+
+
+# ---------------------------------------------------------------- Focus area + backups
+FOCUS = {
+    "name": "Alex",
+    "dailyDay": 20321,
+    "notes": "Ideen: einfach anfangen.",
+    "lists": [
+        {"id": "l1", "title": "Heute", "items": [{"id": "i1", "text": "Posten", "done": True}]}
+    ],
+}
+
+
+def test_focus_roundtrip(vault_path):
+    s = V.Session(vault_path)
+    s.create("pw", "1234", n_exp=NEXP)
+    s.unlock("pw", "1234")
+    assert s.focus == {}  # a fresh vault starts with empty focus
+    s.set_focus(copy.deepcopy(FOCUS))
+
+    reopened = V.Session(vault_path)
+    reopened.unlock("pw", "1234")
+    assert reopened.focus == FOCUS
+    assert reopened.entries == []  # focus lives alongside entries, not instead of them
+
+
+def test_focus_and_entries_coexist(vault_path):
+    s = V.Session(vault_path)
+    s.create("pw", "1234", n_exp=NEXP)
+    s.unlock("pw", "1234")
+    s.upsert(copy.deepcopy(SAMPLE[0]))
+    s.set_focus(copy.deepcopy(FOCUS))
+    s.upsert(copy.deepcopy(SAMPLE[1]))  # saving an entry must not drop focus
+
+    got = V.Session(vault_path)
+    got.unlock("pw", "1234")
+    assert len(got.entries) == 2
+    assert got.focus["name"] == "Alex"
+
+
+def test_old_vault_without_focus_still_opens(vault_path):
+    # Simulate a vault written before the Focus feature: its data payload has only "entries".
+    s = V.Session(vault_path)
+    s.create("pw", "1234", n_exp=NEXP)
+    s.unlock("pw", "1234")
+    hdr = V._hdr_of(s.env)
+    old_payload = json.dumps({"entries": [copy.deepcopy(SAMPLE[0])]}).encode("utf-8")
+    s.env["data"] = V._encrypt(bytes(s._dek), old_payload, V._aad("data", hdr))
+    s.env["checksum"] = V._checksum(s.env)
+    V.save_file(vault_path, s.env)
+
+    got = V.Session(vault_path)
+    entries = got.unlock("pw", "1234")
+    assert len(entries) == 1  # entries load unchanged
+    assert got.focus == {}  # missing focus defaults to empty, no crash
+
+
+def test_focus_recovery_unlock(vault_path):
+    s = V.Session(vault_path)
+    recovery = s.create("pw", "1234", n_exp=NEXP)
+    s.unlock("pw", "1234")
+    s.set_focus(copy.deepcopy(FOCUS))
+
+    got = V.Session(vault_path)
+    got.unlock_recovery(recovery)
+    assert got.focus == FOCUS
+
+
+def test_autobackups_created_and_capped(vault_path):
+    s = V.Session(vault_path)
+    s.create("pw", "1234", n_exp=NEXP)
+    s.unlock("pw", "1234")
+    folder = os.path.join(os.path.dirname(vault_path), "backups")
+    assert os.path.isdir(folder)  # create() already made the first backup
+    for i in range(V.BACKUP_KEEP + 5):
+        s.upsert({"id": f"e{i}", "type": "note", "title": str(i), "group": "", "fields": []})
+    backups = [f for f in os.listdir(folder) if f.startswith("vault-")]
+    assert 1 <= len(backups) <= V.BACKUP_KEEP  # kept, and never grows without bound
