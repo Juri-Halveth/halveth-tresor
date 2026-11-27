@@ -1,13 +1,27 @@
-# Tresor v1.1.0
+# Tresor v1.8.0
 
 **A local, offline credential vault for Windows. Your complete access, encrypted in a single file, with no cloud and no account.**
 
-> New in 1.1.0: the interface is now bilingual (German and English). Switch language any time with the DE/EN toggle in the top-right corner or in Settings. Entry types and field names are localized too.
+> New in 1.8.0: you can now **delete a whole list (topic)** in the Focus area. Each list card has a trash button in its top-right corner (on hover) — empty lists go instantly, lists with tasks ask first. Until now only individual tasks could be removed, so unwanted or duplicate lists were stuck.
+>
+> In 1.7.0: a small **tips panel** in the Focus sidebar that shows how to get started — brain-dump into the notepad, split by topic, keep tasks small — with short examples and the handy keyboard shortcuts (Ctrl+C, Ctrl+V, Alt+Tab).
+>
+> In 1.6.2: Focus lists cap at 4 columns on a wide window so task text has more room (still adapting down to 3 / 2 / 1).
+>
+> In 1.6.1: the sidebar's bottom bar (Back up / Lock / Settings) stays pinned to the bottom in Focus and Motivation too.
+>
+> In 1.6.0: the **Text size** setting now scales only the text (which reflows), not the whole window — buttons and the Settings always stay reachable. And the motivational sayings were **rewritten** — 149 new, warmer, more personal lines.
+>
+> Recent: Focus checklists (editable, copyable, reorderable, wrapping long text, with a "Done" section), a dedicated **Motivation** area, and **automatic versioned backups** on every save.
+>
+> Recent: 1.4.0 added a dedicated **Motivation** section with a daily saying and extra boosts. 1.3.0 made Focus tasks editable, copyable, and reorderable with a collapsible "Done" section. 1.2.0 introduced the **Focus area** and **automatic versioned backups**. Switch between Passwords and Focus in the sidebar. Focus holds checklists you tick off (with a progress bar), a free-form notepad, and a **daily personalized motivation**: each day a welcome screen greets you by name with one of 200 hand-written sentences. Everything in Focus is stored encrypted in the same vault. This release also adds **automatic versioned backups** on every save (the last 20 states are kept in a `backups` folder), so any change can be rolled back. Earlier releases: 1.1.3 fixed clipped dashboard cards; 1.1.2 fixed the encrypted backup export and hardened the core; 1.1.1 fixed data loss with two open windows; 1.1.0 added the bilingual German/English interface.
 
 Tresor is a desktop credential vault. It is more than a password manager: it stores complete access, not just passwords. Keep login credentials, websites, FTP, SFTP, SSH, API keys, databases, mail accounts (IMAP/SMTP), cards, notes, and any other secret in one place. Each entry type has fields tailored to it, entries are organized by place or purpose into groups you name (for example Work, Servers, or Personal), and every field is one click to copy. Everything is fully offline: no cloud, no account, no telemetry, and no network calls, all kept in one local encrypted file.
 
 ## Highlights
 
+- **Focus area (new):** a calm, ADHD-friendly companion beside your passwords — checklists with progress bars, a notepad, and a daily personalized motivation that greets you by name. Stored encrypted in the same vault.
+- **Automatic versioned backups (new):** every save keeps a timestamped copy (the last 20) in a `backups` folder, so any earlier state can be restored.
 - **Bilingual, German and English:** switch language any time with the DE/EN toggle; the app remembers your choice.
 - **Complete access, not just passwords:** dedicated entry types for logins, websites, FTP, SFTP, SSH, API keys, databases, mail accounts (IMAP/SMTP), cards, and notes, each with fields tailored to that type.
 - **Organized by place or purpose:** group entries under names you choose, such as Work, Servers, or Personal.
