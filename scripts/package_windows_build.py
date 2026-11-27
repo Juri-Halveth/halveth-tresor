@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import marshal
 import sys
 import tempfile
 from importlib.metadata import distribution
@@ -13,6 +14,7 @@ import pefile
 from check_release import check
 from packaging.requirements import Requirement
 from packaging.utils import canonicalize_name
+from PyInstaller.archive.readers import CArchiveReader
 
 ROOT = Path(__file__).resolve().parents[1]
 EXTRA_NOTICES = ROOT / "packaging" / "notices"
@@ -96,6 +98,23 @@ def finish_build(executable):
         }
     if versions != {(version.encode(), version.encode())}:
         raise ValueError("Executable version mismatch")
+    archive = CArchiveReader(str(executable))
+    ui = next(name for name in archive.toc if name.replace("\\", "/") == "ui/index.html")
+    source = ROOT / "src" / "tresor"
+    if archive.extract(ui) != (source / "ui/index.html").read_bytes():
+        raise ValueError("Executable UI differs from source")
+    modules = archive.open_embedded_archive("PYZ.pyz")
+    for path in sorted(source.glob("*.py")):
+        if path.stem == "__main__":
+            code = marshal.loads(archive.extract("__main__"))
+        else:
+            module = "tresor" if path.stem == "__init__" else "tresor." + path.stem
+            code = modules.extract(module)
+        expected = compile(
+            path.read_bytes(), code.co_filename, "exec", dont_inherit=True, optimize=0
+        )
+        if code != expected:
+            raise ValueError(f"Executable module differs from source: {path.name}")
     with executable.open("rb") as binary:
         checksum = hashlib.file_digest(binary, "sha256").hexdigest().upper()
     with tempfile.TemporaryDirectory(dir=executable.parent) as tmp:
