@@ -86,7 +86,7 @@ jobs:
             dist/Tresor.exe
             dist/Tresor.exe.sha256
       - name: Download the artifact with the tagged release workflow's reader
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: Tresor-windows
           path: ${{ runner.temp }}/tresor-roundtrip
@@ -118,7 +118,7 @@ jobs:
         run: |
           python scripts/check_release.py --tag $env:GITHUB_REF_NAME
           if ($LASTEXITCODE -ne 0) { throw 'Release labels or tag mismatch' }
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: Tresor-windows
           path: dist
