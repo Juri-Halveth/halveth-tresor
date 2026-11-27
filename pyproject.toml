@@ -8,11 +8,12 @@ dynamic = ["version"]
 description = "A local, offline credentials vault for Windows (Python + pywebview)."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "File- and version-specific terms in LICENSES.md: historical MIT and distinguishable new HALVETH PIRL 2.0 contributions." }
+# LICENSES.md maps each grant to its files and versions.
+license = "MIT AND LicenseRef-HALVETH-PIRL-2.0"
+license-files = ["LICENSE", "LICENSES.md", "LICENSE-HALVETH-PIRL-2.0.md", "HALVETH-RIGHTS.md", "HALVETH-RIGHTS.json", "THIRD-PARTY-LICENSES.md"]
 authors = [{ name = "Juri" }]
 keywords = ["password-manager", "credentials", "vault", "encryption", "pywebview", "windows"]
 classifiers = [
-    "License :: Other/Proprietary License",
     "Environment :: Win32 (MS Windows)",
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python :: 3",
@@ -55,9 +56,6 @@ version = {attr = "tresor.__version__"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-
-[tool.setuptools]
-license-files = ["LICENSE", "LICENSES.md", "LICENSE-HALVETH-PIRL-2.0.md", "HALVETH-RIGHTS.md", "THIRD-PARTY-LICENSES.md"]
 
 [tool.setuptools.package-data]
 tresor = ["ui/*.html"]
