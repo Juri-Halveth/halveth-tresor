@@ -85,6 +85,19 @@ jobs:
           path: |
             dist/Tresor.exe
             dist/Tresor.exe.sha256
+      - name: Download the artifact with the tagged release workflow's reader
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: Tresor-windows
+          path: ${{ runner.temp }}/tresor-roundtrip
+      - name: Check the executable and its checksum after download
+        shell: pwsh
+        run: |
+          $expected = (Get-FileHash dist/Tresor.exe -Algorithm SHA256).Hash
+          $download = Join-Path $env:RUNNER_TEMP 'tresor-roundtrip'
+          $actual = (Get-FileHash (Join-Path $download 'Tresor.exe') -Algorithm SHA256).Hash
+          $declared = (Get-Content (Join-Path $download 'Tresor.exe.sha256') -Raw).Trim()
+          if ($actual -ne $expected -or $declared -ne $expected) { throw 'Artifact roundtrip changed executable or checksum' }
 
   release:
     name: Publish tagged Windows release
