@@ -926,13 +926,13 @@ lint = [
 [package.metadata]
 requires-dist = [
     { name = "clr-loader", marker = "sys_platform == 'win32'", specifier = ">=0.2" },
-    { name = "cryptography", specifier = ">=42.0" },
+    { name = "cryptography", specifier = ">=50.0.2" },
     { name = "pillow", marker = "python_full_version >= '3.11' and extra == 'dev'", specifier = ">=13.0.0" },
     { name = "pyinstaller", marker = "extra == 'dev'", specifier = ">=6.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0" },
     { name = "pythonnet", marker = "sys_platform == 'win32'", specifier = ">=3.0" },
-    { name = "pywebview", specifier = ">=5.0" },
+    { name = "pywebview", specifier = ">=6.2.1" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.17.3" },
 ]
 provides-extras = ["dev"]
