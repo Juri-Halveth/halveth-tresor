@@ -10,10 +10,11 @@
   --bg-0:#0a0c12; --bg-1:#0f131c; --bg-2:#151b27; --bg-3:#1b2332;
   --line:#232c3d; --line-soft:#1a2130;
   --tx-hi:#eef2f8; --tx:#aeb9cd; --tx-dim:#66738b;
-  --accent:#5b8cff; --accent-2:#2ee6a6; --gold:#e7b24a;
+  --accent:#5b8cff; --accent-2:#2ee6a6; --gold:#e7b24a; --coral:#ff7ea8;
   --danger:#ff5c72; --warn:#ffb454;
   --shadow:0 18px 50px -12px rgba(0,0,0,.65);
   --radius:16px;
+  --ts:1; /* Textgröße-Faktor: skaliert nur Textgrößen, nie das Layout/die Bedienung */
 }
 *{box-sizing:border-box; margin:0; padding:0}
 html,body{height:100%}
@@ -38,6 +39,14 @@ input,textarea,select{font-family:inherit; font-size:14px}
 ::-webkit-scrollbar{width:10px;height:10px}
 ::-webkit-scrollbar-thumb{background:#232c3d;border-radius:20px;border:2px solid var(--bg-1)}
 ::-webkit-scrollbar-thumb:hover{background:#2f3a4f}
+
+/* ============================ Sprach-Umschalter =================== */
+#langToggle{position:fixed;top:13px;right:16px;z-index:100;display:flex;gap:3px;
+  background:rgba(15,19,28,.72);border:1px solid var(--line);border-radius:20px;padding:3px;backdrop-filter:blur(6px)}
+#langToggle button{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--tx-dim);
+  padding:4px 10px;border-radius:16px;transition:.12s}
+#langToggle button:hover{color:var(--tx-hi)}
+#langToggle button.on{background:var(--accent);color:#08131f}
 
 /* ============================ Zentrierte Screens (Lock / Setup) ==== */
 .center-screen{
@@ -117,7 +126,7 @@ input,textarea,select{font-family:inherit; font-size:14px}
 .nav-item:hover{background:var(--bg-2);color:var(--tx-hi)}
 .nav-item.active{background:linear-gradient(90deg,rgba(91,140,255,.18),rgba(91,140,255,.06));color:#fff}
 .nav-item.active::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--accent)}
-.side-foot{display:flex;gap:8px;border-top:1px solid var(--line-soft);padding-top:12px}
+.side-foot{display:flex;gap:8px;border-top:1px solid var(--line-soft);padding-top:12px;margin-top:auto}
 .side-btn{
   flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px;
   border-radius:11px;background:var(--bg-2);border:1px solid var(--line);color:var(--tx);
@@ -130,7 +139,7 @@ input,textarea,select{font-family:inherit; font-size:14px}
 /* -------- Main -------- */
 #main{display:flex;flex-direction:column;min-width:0;min-height:0}
 .topbar{
-  display:flex;align-items:center;gap:16px;padding:20px 26px 16px;
+  display:flex;align-items:center;gap:16px;padding:20px 96px 16px 26px;
 }
 .topbar .tt{flex:1;min-width:0}
 .topbar h2{font-size:20px;letter-spacing:.2px;display:flex;align-items:center;gap:10px}
@@ -146,6 +155,10 @@ input,textarea,select{font-family:inherit; font-size:14px}
 .cards{
   flex:1;overflow-y:auto;min-height:0;padding:6px 26px 30px;
   display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px;align-content:start;
+  /* Size each row to its cards' full content. Without this the row track can collapse
+     (a grid item with overflow:hidden reports a 0 auto-minimum), which clipped the
+     type/group line and the copy buttons and made cards look "compressed". */
+  grid-auto-rows:max-content;
 }
 .card{
   background:linear-gradient(180deg,var(--bg-2),var(--bg-1));border:1px solid var(--line);
@@ -295,27 +308,230 @@ input,textarea,select{font-family:inherit; font-size:14px}
 @keyframes toastin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @keyframes toastout{to{opacity:0;transform:translateY(8px)}}
 .toast.out{animation:toastout .2s forwards}
+
+/* ===================== FOKUS-BEREICH ===================== */
+@keyframes fkrise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fkpop{40%{transform:scale(1.25)}70%{transform:scale(.92)}100%{transform:scale(1)}}
+@keyframes fkfade{from{opacity:0}to{opacity:1}}
+@keyframes fkfadeout{to{opacity:0;visibility:hidden}}
+#modeToggle{display:flex;flex-direction:column;gap:3px;background:var(--bg-0);border:1px solid var(--line);border-radius:12px;padding:5px}
+#modeToggle button{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--tx-dim);transition:.13s;text-align:left}
+#modeToggle button:hover{color:var(--tx-hi);background:var(--bg-2)}
+#modeToggle button.on{background:var(--bg-2);color:var(--tx-hi)}
+#modeToggle button.on[data-mode="fokus"]{color:var(--gold)}
+#modeToggle button.on[data-mode="motivation"]{color:var(--coral)}
+/* Motivation-Bereich */
+#motivationView{flex:1;overflow-y:auto;min-height:0;padding:22px 26px 50px;display:none;flex-direction:column}
+#motivationView.show{display:flex}
+#motivationView>*{flex-shrink:0}
+.mo-daily{position:relative;overflow:hidden;border-radius:20px;padding:30px 28px;margin-bottom:18px;background:linear-gradient(135deg,#241d17,#16130f 62%);border:1px solid #4a3d1f;box-shadow:var(--shadow)}
+.mo-daily::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(600px 240px at 100% 0,rgba(231,178,74,.18),transparent 60%)}
+.mo-daily .in{position:relative;z-index:1}
+.mo-eyebrow{font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.mo-quote{font-size:27px;line-height:1.45;font-weight:350;color:var(--tx-hi);text-wrap:balance;max-width:36ch}
+.mo-quote em{font-style:normal;color:var(--gold);font-weight:650}
+.mo-boost{position:relative;overflow:hidden;border-radius:20px;padding:30px 28px;text-align:center;background:linear-gradient(135deg,#171d2b,#11151f);border:1px solid var(--line);box-shadow:var(--shadow)}
+.mo-boost .bq{font-size:22px;line-height:1.5;font-weight:350;color:var(--tx-hi);min-height:1.5em;margin-bottom:24px;text-wrap:balance}
+.mo-boost .bq em{font-style:normal;color:var(--accent-2);font-weight:650}
+.mo-boost.hint .bq{color:var(--tx-dim);font-size:16px}
+.mo-boost.reveal .bq{animation:fkrise .5s cubic-bezier(.2,.8,.2,1)}
+.mo-boost-btn{padding:14px 30px;border-radius:14px;font-size:15px;font-weight:650;color:#08131f;background:linear-gradient(180deg,#41ecb0,#2ee6a6);box-shadow:0 12px 28px -10px rgba(46,230,166,.6);transition:.14s}
+.mo-boost-btn:hover{filter:brightness(1.05);transform:translateY(-1px)}
+.mo-boost-btn:active{transform:translateY(0)}
+.mo-count{font-size:12.5px;color:var(--tx-dim);margin-top:14px;min-height:1em}
+@media(max-width:820px){.mo-quote{font-size:22px}.mo-boost .bq{font-size:19px}}
+/* Tipps-Panel in der Seitenleiste (nur im Fokus-Bereich) */
+#fkTips{display:none;flex-direction:column;gap:10px;overflow-y:auto;min-height:0;padding-right:2px}
+#fkTips.show{display:flex}
+.fk-tips-box{background:var(--bg-2);border:1px solid var(--line);border-radius:13px;padding:12px 13px;flex:none}
+.fk-tips-box h4{font-size:11.5px;font-weight:700;letter-spacing:.3px;color:var(--tx-hi);margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.fk-tips-box ul{list-style:none;display:flex;flex-direction:column;gap:7px}
+.fk-tips-box li{font-size:11.5px;line-height:1.5;color:var(--tx-dim)}
+.fk-tips-box li b{color:var(--tx);font-weight:600}
+.fk-tips-ex{font-size:11px;line-height:1.6;color:var(--tx-dim);background:var(--bg-0);border:1px solid var(--line-soft);border-radius:9px;padding:9px 10px;margin-top:9px}
+.fk-tips-ex b{color:var(--tx)}
+kbd{display:inline-block;background:var(--bg-0);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px;font-size:10.5px;font-family:inherit;color:var(--tx);margin:0 1px}
+#fokusView{flex:1;overflow-y:auto;min-height:0;padding:22px 26px 50px;display:none;flex-direction:column}
+#fokusView.show{display:flex}
+/* keep every section at its natural height; the view itself scrolls (stops the daily
+   card, which uses overflow:hidden, from collapsing below its content in the flex column) */
+#fokusView>*{flex-shrink:0}
+.fk-title{background:none;border:1px solid transparent;border-radius:7px;color:var(--tx-hi);font-size:15px;font-weight:700;font-family:inherit;width:100%;padding:2px 6px;margin:-2px -6px 0;outline:none;user-select:text;word-break:break-word;overflow-wrap:anywhere}
+.fk-title:hover{border-color:var(--line)}
+.fk-title:focus{border-color:var(--_c,var(--accent));background:var(--bg-0)}
+.fk-title:empty:before{content:attr(data-ph);color:var(--tx-dim)}
+.fk-head{margin-bottom:18px}
+.fk-head h2{font-size:22px;display:flex;align-items:center;gap:9px}
+.fk-head .sub{color:var(--tx-dim);font-size:13.5px;margin-top:4px}
+.fk-daily{position:relative;overflow:hidden;border-radius:18px;padding:20px 22px;margin-bottom:20px;background:linear-gradient(135deg,#1d1a2e,#141826 62%);border:1px solid #322c48;box-shadow:var(--shadow)}
+.fk-daily::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(600px 220px at 100% 0,rgba(231,178,74,.15),transparent 60%),radial-gradient(520px 240px at 0 100%,rgba(255,126,168,.11),transparent 60%)}
+.fk-daily .in{position:relative;z-index:1}
+.fk-daily .col{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.fk-daily .spark{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;font-size:23px;flex:none;background:radial-gradient(120% 120% at 30% 20%,#3a2f1e,#1c1a2e);border:1px solid #4a3d1f}
+.fk-daily .ct{flex:1;min-width:160px}
+.fk-daily .ct b{font-size:15.5px;display:block}
+.fk-daily .ct span{font-size:12.5px;color:var(--tx-dim)}
+.fk-collect{padding:11px 18px;border-radius:12px;font-weight:650;font-size:13.5px;color:#20160a;background:linear-gradient(180deg,#f0c96a,#e7b24a);box-shadow:0 10px 24px -10px rgba(231,178,74,.6);transition:.14s}
+.fk-collect:hover{filter:brightness(1.05)}
+.fk-daily .opened{display:none}
+.fk-daily.isopen .col{display:none}
+.fk-daily.isopen .opened{display:block}
+.fk-daily .eyebrow{font-size:10.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.fk-daily .quote{font-size:22px;line-height:1.5;font-weight:350;color:var(--tx-hi);max-width:34ch}
+.fk-daily .quote em{font-style:normal;color:var(--gold);font-weight:650}
+.fk-daily .f2{margin-top:14px;font-size:12px;color:var(--tx-dim);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.fk-daily.reveal .quote{animation:fkrise .6s cubic-bezier(.2,.8,.2,1)}
+.fk-namechg{background:none;border:none;color:var(--tx-dim);font-size:12px;text-decoration:underline;cursor:pointer}
+.fk-namechg:hover{color:var(--tx)}
+.fk-hero{background:linear-gradient(135deg,#171d2b,#11151f);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:20px 22px;display:grid;grid-template-columns:auto 1fr;gap:22px;margin-bottom:20px;align-items:center}
+.fk-ring{position:relative;width:110px;height:110px;flex:none}
+.fk-ring svg{transform:rotate(-90deg)}
+.fk-ring .pct{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.fk-ring .pct b{font-size:24px;font-weight:750;font-variant-numeric:tabular-nums;line-height:1}
+.fk-ring .pct span{font-size:10px;color:var(--tx-dim);display:block;margin-top:2px}
+.fk-hero .htxt h3{font-size:16.5px;margin-bottom:3px}
+.fk-hero .htxt p{font-size:13px;color:var(--tx-dim);line-height:1.5;max-width:46ch}
+.fk-hero .today{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+/* max. 4 Spalten (breitere Karten, mehr Text-Platz), dynamisch runter auf 3/2/1 */
+.fk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(max(340px,(100% - 48px)/4),1fr));gap:16px;align-content:start;grid-auto-rows:max-content}
+.fk-card{background:linear-gradient(180deg,var(--bg-2),var(--bg-1));border:1px solid var(--line);border-radius:16px;padding:17px;display:flex;flex-direction:column}
+.fk-card .top{display:flex;align-items:center;gap:11px;margin-bottom:4px}
+.fk-card .em{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:19px;flex:none;background:var(--bg-3);border:1px solid var(--line)}
+.fk-card .ti{flex:1;min-width:0}
+.fk-card .ti b{font-size:15px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fk-card .ti .meta{font-size:11.5px;color:var(--tx-dim);font-variant-numeric:tabular-nums}
+.fk-bar{height:7px;border-radius:6px;background:var(--bg-0);overflow:hidden;margin:9px 2px 12px}
+.fk-bar>i{display:block;height:100%;width:0;border-radius:6px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.fk-items{display:flex;flex-direction:column;gap:2px}
+.fk-row{display:flex;align-items:flex-start;gap:8px;padding:6px 8px;border-radius:10px;transition:background .12s}
+.fk-row:hover{background:var(--bg-3)}
+.fk-grip{opacity:0;cursor:grab;color:var(--tx-dim);width:16px;flex:none;display:grid;place-items:center;transition:.12s;margin-top:3px}
+.fk-grip:active{cursor:grabbing}
+.fk-row:hover .fk-grip{opacity:.55}
+.fk-grip svg{width:15px;height:15px}
+.fk-box{width:21px;height:21px;border-radius:7px;border:2px solid #37435b;flex:none;display:grid;place-items:center;transition:.18s;cursor:pointer;margin-top:3px}
+.fk-box svg{width:12px;height:12px;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .22s .04s;color:#08131f}
+.fk-tinp{flex:1;min-width:0;background:none;border:1px solid transparent;border-radius:7px;color:var(--tx-hi);font-size:13.5px;line-height:1.4;font-family:inherit;padding:4px 6px;outline:none;user-select:text;word-break:break-word;overflow-wrap:anywhere;white-space:pre-wrap}
+.fk-tinp:hover{border-color:var(--line-soft)}
+.fk-tinp:focus{border-color:var(--_c,var(--accent));background:var(--bg-0)}
+.fk-tinp:empty:before{content:attr(data-ph);color:var(--tx-dim)}
+.fk-row .lbl{flex:1;font-size:13.5px;line-height:1.35;word-break:break-word}
+.fk-row.done .fk-box{background:var(--_c,var(--accent-2));border-color:var(--_c,var(--accent-2))}
+.fk-row.done .fk-box svg{stroke-dashoffset:0}
+.fk-row.done .fk-tinp,.fk-row.done .lbl{color:var(--tx-dim);text-decoration:line-through;text-decoration-color:rgba(174,185,205,.45)}
+.fk-row.pop .fk-box{animation:fkpop .32s ease}
+.fk-row.fk-drop-above{box-shadow:inset 0 2px 0 var(--_c,var(--accent))}
+.fk-tools{display:flex;gap:2px;flex:none;opacity:0;transition:.12s;margin-top:2px}
+.fk-row:hover .fk-tools{opacity:1}
+.fk-cp,.fk-del{color:var(--tx-dim);width:25px;height:25px;border-radius:8px;display:grid;place-items:center;flex:none;transition:.12s}
+.fk-cp:hover{color:var(--accent);background:rgba(91,140,255,.1)}
+.fk-del:hover{color:var(--danger);background:rgba(255,92,114,.1)}
+.fk-cp svg,.fk-del svg{width:13px;height:13px}
+.fk-cardtools{flex:none;display:flex;align-items:center;opacity:0;transition:.12s;margin:-4px -4px 0 0}
+.fk-card:hover .fk-cardtools,.fk-cardtools:focus-within{opacity:1}
+.fk-listdel{color:var(--tx-dim);width:28px;height:28px;border-radius:8px;display:grid;place-items:center;transition:.12s}
+.fk-listdel:hover{color:var(--danger);background:rgba(255,92,114,.1)}
+.fk-listdel svg{width:15px;height:15px}
+.fk-done{margin-top:10px;border-top:1px solid var(--line-soft);padding-top:6px}
+.fk-done-h{display:flex;align-items:center;gap:7px;width:100%;padding:6px;border-radius:8px;color:var(--tx-dim);font-size:12.5px;font-weight:600;transition:.12s}
+.fk-done-h:hover{color:var(--tx);background:var(--bg-3)}
+.fk-done-h .chev{font-size:9px;transition:transform .18s;display:inline-block}
+.fk-done.open .fk-done-h .chev{transform:rotate(90deg)}
+.fk-done-items{display:none;margin-top:2px}
+.fk-done.open .fk-done-items{display:block}
+.fk-done .fk-row{opacity:.6}
+.fk-done .fk-row:hover{opacity:1}
+.fk-add{display:flex;align-items:center;gap:9px;margin-top:9px;padding:9px 11px;border-radius:10px;border:1px dashed var(--line)}
+.fk-add:focus-within{border-color:var(--_c,var(--accent));border-style:solid}
+.fk-add .plus{color:var(--tx-dim);font-size:16px}
+.fk-add input{flex:1;background:none;border:none;outline:none;color:var(--tx-hi);font-size:13px;user-select:text}
+.fk-add input::placeholder{color:var(--tx-dim)}
+.fk-notes{grid-column:1/-1;background:linear-gradient(180deg,var(--bg-2),var(--bg-1));border:1px solid var(--line);border-radius:16px;padding:17px}
+.fk-notes .top{display:flex;align-items:center;gap:11px;margin-bottom:11px}
+.fk-notes .em{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:19px;background:var(--bg-3);border:1px solid var(--line)}
+.fk-notes textarea{width:100%;min-height:110px;resize:vertical;background:var(--bg-0);border:1px solid var(--line-soft);border-radius:12px;padding:13px 14px;color:var(--tx-hi);font-size:14px;line-height:1.65;outline:none;user-select:text}
+.fk-notes textarea:focus{border-color:var(--gold)}
+.fk-addlist{display:flex;align-items:center;justify-content:center;gap:9px;min-height:110px;border:1.5px dashed var(--line);border-radius:16px;color:var(--tx-dim);font-size:13.5px;font-weight:600;transition:.14s}
+.fk-addlist:hover{border-color:var(--gold);color:var(--gold)}
+.fk-welcome{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;padding:28px;background:radial-gradient(1000px 700px at 15% -10%,rgba(91,140,255,.18),transparent 60%),radial-gradient(900px 800px at 110% 10%,rgba(255,126,168,.14),transparent 55%),radial-gradient(820px 820px at 55% 120%,rgba(231,178,74,.10),transparent 60%),#0a0c12}
+.fk-welcome.show{display:flex;animation:fkfade .5s}
+.fk-welcome.hide{animation:fkfadeout .45s forwards}
+.fk-welcome .wbox{max-width:600px;text-align:center;animation:fkrise .7s cubic-bezier(.2,.8,.2,1)}
+.fk-welcome .wbrand{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--tx-dim);margin-bottom:26px}
+.fk-welcome .wgreet{font-size:21px;color:var(--tx);margin-bottom:32px;font-weight:400}
+.fk-welcome .eyebrow{font-size:10.5px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.fk-welcome .wquote{font-size:30px;line-height:1.45;font-weight:350;color:var(--tx-hi);margin-bottom:38px;text-wrap:balance}
+.fk-welcome .wquote em{font-style:normal;color:var(--gold);font-weight:650}
+.fk-wgo{padding:15px 34px;border-radius:14px;font-weight:650;font-size:15px;color:#08131f;background:linear-gradient(180deg,#6f9bff,#4d7cff);box-shadow:0 14px 30px -10px rgba(91,140,255,.6);transition:.14s}
+.fk-wgo:hover{filter:brightness(1.06)}
+.fk-welcome .fk-namechg{display:block;margin:18px auto 0}
+.fk-onb{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(6,8,12,.72);backdrop-filter:blur(6px)}
+.fk-onb.show{display:flex}
+.fk-onb .box{width:100%;max-width:400px;background:linear-gradient(180deg,var(--bg-2),var(--bg-1));border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:32px 28px;text-align:center;animation:fkrise .4s}
+.fk-onb .em{font-size:38px;margin-bottom:10px}
+.fk-onb h3{font-size:20px;margin-bottom:6px}
+.fk-onb p{font-size:13px;color:var(--tx-dim);margin-bottom:18px;line-height:1.5}
+.fk-onb input{width:100%;background:var(--bg-0);border:1px solid var(--line);border-radius:13px;padding:12px 14px;color:var(--tx-hi);font-size:16px;text-align:center;outline:none;margin-bottom:13px;user-select:text}
+.fk-onb input:focus{border-color:var(--gold)}
+.fk-onb .go{width:100%;padding:12px;border-radius:13px;font-weight:650;font-size:15px;color:#08131f;background:linear-gradient(180deg,#6f9bff,#4d7cff)}
+#fkConfetti{position:fixed;inset:0;pointer-events:none;z-index:75}
+@media (max-width:820px){.fk-hero{grid-template-columns:1fr;text-align:center}.fk-ring{margin:0 auto}.fk-welcome .wquote{font-size:24px}}
+
+/* ============ Textgröße-Einstellung: skaliert NUR Text, nie das Layout ============ */
+/* Sperren / Einrichten */
+.gate h1{font-size:calc(23px*var(--ts))}
+.gate .sub,.search input,.nav-item .nm,.empty p,.btn-line{font-size:calc(13.5px*var(--ts))}
+.field-lab,.form-lab,.ef-key,.card .ti .grp,.type-card .lb,.fk-card .ti .meta{font-size:calc(12px*var(--ts))}
+.inp,.btn-primary{font-size:calc(15px*var(--ts))}
+/* Sidebar / Topbar */
+.side-brand b{font-size:calc(16.5px*var(--ts))}
+.nav-item .ct,.side-brand span{font-size:calc(11px*var(--ts))}
+.side-btn,#modeToggle button,.card .ident,.qbtn,.topbar .cnt{font-size:calc(12.5px*var(--ts))}
+.topbar h2{font-size:calc(20px*var(--ts))}
+.btn-add,.finp,.ef-val,.btn-save{font-size:calc(14px*var(--ts))}
+/* Karten / Passwörter */
+.card .ti b,.fk-title,.dw-head h3{font-size:calc(15px*var(--ts))}
+.empty h3,.sh-head h3{font-size:calc(17px*var(--ts))}
+/* Detail (Drawer) */
+.frow .fk{font-size:calc(11px*var(--ts))}
+.frow .fv{font-size:calc(14.5px*var(--ts))}
+/* Fokus / Notizen / Motivation */
+.fk-tinp{font-size:calc(13.5px*var(--ts))}
+.fk-notes textarea{font-size:calc(14px*var(--ts))}
+.fk-tips-box h4,.fk-tips-box li{font-size:calc(11.5px*var(--ts))}
+.fk-tips-ex{font-size:calc(11px*var(--ts))}
+kbd{font-size:calc(10.5px*var(--ts))}
+.fk-head h2{font-size:calc(22px*var(--ts))}
+.fk-daily .quote{font-size:calc(22px*var(--ts))}
+.mo-quote{font-size:calc(27px*var(--ts))}
+.mo-boost .bq{font-size:calc(22px*var(--ts))}
+/* Einstellungen bleiben normal groß und immer erreichbar (Modal scrollt) */
 </style>
 </head>
 <body>
+
+<div id="langToggle">
+  <button data-lang="de">DE</button>
+  <button data-lang="en">EN</button>
+</div>
 
 <!-- ===================== LOCK ===================== -->
 <div id="screen-lock" class="center-screen hidden">
   <div class="gate">
     <div class="brand-lock" id="lockGlyph"></div>
     <h1>Tresor</h1>
-    <div class="sub">Alle deine Zugänge an einem sicheren Ort.<br>Bitte entsperren.</div>
+    <div class="sub" data-i18n-html="lock.sub"></div>
     <div class="inp-wrap">
-      <label class="field-lab">Master-Passwort</label>
-      <input id="lkPass" class="inp" type="password" autocomplete="off" placeholder="Dein Passwort">
+      <label class="field-lab" data-i18n="lock.master"></label>
+      <input id="lkPass" class="inp" type="password" autocomplete="off" data-i18n-ph="lock.masterPh">
     </div>
     <div class="inp-wrap">
-      <label class="field-lab">PIN</label>
+      <label class="field-lab" data-i18n="lock.pin"></label>
       <input id="lkPin" class="inp pin" type="password" inputmode="numeric" autocomplete="off" placeholder="••••">
     </div>
-    <button id="lkBtn" class="btn-primary">Entsperren</button>
+    <button id="lkBtn" class="btn-primary" data-i18n="lock.unlock"></button>
     <div id="lkMsg" class="gate-msg"></div>
-    <button class="gate-hint" id="lkForgot" style="background:none;border:none;cursor:pointer;text-decoration:underline">Passwort oder PIN vergessen?</button>
+    <button class="gate-hint" id="lkForgot" data-i18n="lock.forgot" style="background:none;border:none;cursor:pointer;text-decoration:underline"></button>
   </div>
 </div>
 
@@ -323,24 +539,24 @@ input,textarea,select{font-family:inherit; font-size:14px}
 <div id="screen-setup" class="center-screen hidden">
   <div class="gate">
     <div class="brand-lock" id="setupGlyph"></div>
-    <h1>Willkommen</h1>
-    <div class="sub">Richte deinen Tresor ein. Merke dir beides gut,<br>ohne diese zwei Angaben kommt niemand hinein, auch du nicht.</div>
+    <h1 data-i18n="setup.welcome"></h1>
+    <div class="sub" data-i18n-html="setup.sub"></div>
     <div class="inp-wrap">
-      <label class="field-lab">Master-Passwort wählen</label>
-      <input id="stPass" class="inp" type="password" autocomplete="off" placeholder="Mindestens 8 Zeichen">
+      <label class="field-lab" data-i18n="setup.chooseMaster"></label>
+      <input id="stPass" class="inp" type="password" autocomplete="off" data-i18n-ph="setup.min8">
       <div class="strength"><i id="stBar"></i></div>
     </div>
     <div class="inp-wrap">
-      <label class="field-lab">Passwort wiederholen</label>
-      <input id="stPass2" class="inp" type="password" autocomplete="off" placeholder="Nochmal eingeben">
+      <label class="field-lab" data-i18n="setup.repeat"></label>
+      <input id="stPass2" class="inp" type="password" autocomplete="off" data-i18n-ph="setup.repeatPh">
     </div>
     <div class="inp-wrap">
-      <label class="field-lab">PIN wählen (4 bis 8 Ziffern)</label>
+      <label class="field-lab" data-i18n="setup.choosePin"></label>
       <input id="stPin" class="inp pin" type="password" inputmode="numeric" autocomplete="off" placeholder="••••">
     </div>
-    <button id="stBtn" class="btn-primary">Tresor erstellen</button>
+    <button id="stBtn" class="btn-primary" data-i18n="setup.create"></button>
     <div id="stMsg" class="gate-msg"></div>
-    <div class="gate-hint">Es gibt keine Passwort-Zurücksetzung. Alles wird nur auf diesem Gerät verschlüsselt gespeichert.</div>
+    <div class="gate-hint" data-i18n="setup.hint"></div>
   </div>
 </div>
 
@@ -348,17 +564,17 @@ input,textarea,select{font-family:inherit; font-size:14px}
 <div id="screen-recovery" class="center-screen hidden">
   <div class="gate" style="max-width:460px">
     <div class="brand-lock" id="recGlyph" style="box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 30px -10px rgba(231,178,74,.5)"></div>
-    <h1>Dein Notfall-Schlüssel</h1>
-    <div class="sub">Falls du Passwort oder PIN vergisst, ist das deine einzige Rettung.<br>Schreib ihn ab und leg ihn an einen sicheren Ort. Er wird nur dieses eine Mal gezeigt.</div>
+    <h1 data-i18n="rec.title"></h1>
+    <div class="sub" data-i18n-html="rec.sub"></div>
     <div style="background:var(--bg-0);border:1px solid #4a3d1f;border-radius:13px;padding:16px;margin-bottom:16px">
       <div class="mono" id="rvKey" style="font-size:16px;letter-spacing:1px;line-height:2;word-break:break-all;color:var(--gold);user-select:text;text-align:center"></div>
-      <button class="btn-line" id="rvCopy" style="margin-top:12px;width:100%">Notfall-Schlüssel kopieren</button>
+      <button class="btn-line" id="rvCopy" data-i18n="rec.copy" style="margin-top:12px;width:100%"></button>
     </div>
     <label style="display:flex;gap:11px;align-items:flex-start;text-align:left;font-size:13px;color:var(--tx);margin-bottom:16px;cursor:pointer">
       <input type="checkbox" id="rvChk" style="margin-top:2px;width:17px;height:17px;accent-color:var(--accent-2);flex:none">
-      <span>Ich habe den Notfall-Schlüssel abgeschrieben und sicher aufbewahrt.</span>
+      <span data-i18n="rec.confirm"></span>
     </label>
-    <button id="rvBtn" class="btn-primary" disabled>Fertig, Tresor öffnen</button>
+    <button id="rvBtn" class="btn-primary" data-i18n="rec.done" disabled></button>
   </div>
 </div>
 
@@ -366,23 +582,23 @@ input,textarea,select{font-family:inherit; font-size:14px}
 <div id="screen-forgot" class="center-screen hidden">
   <div class="gate" style="max-width:460px">
     <div class="brand-lock" id="fgGlyph"></div>
-    <h1>Vergessen?</h1>
-    <div class="sub">Gib deinen Notfall-Schlüssel ein und setze ein neues<br>Master-Passwort samt PIN. Deine Einträge bleiben erhalten.</div>
+    <h1 data-i18n="fg.title"></h1>
+    <div class="sub" data-i18n-html="fg.sub"></div>
     <div class="inp-wrap">
-      <label class="field-lab">Notfall-Schlüssel</label>
+      <label class="field-lab" data-i18n="fg.key"></label>
       <textarea id="fgKey" class="inp mono" rows="2" autocomplete="off" placeholder="XXXXX-XXXXX-XXXXX ..." style="resize:none;letter-spacing:1px"></textarea>
     </div>
     <div class="inp-wrap">
-      <label class="field-lab">Neues Master-Passwort</label>
-      <input id="fgPass" class="inp" type="password" autocomplete="off" placeholder="Mindestens 8 Zeichen">
+      <label class="field-lab" data-i18n="fg.newMaster"></label>
+      <input id="fgPass" class="inp" type="password" autocomplete="off" data-i18n-ph="setup.min8">
     </div>
     <div class="inp-wrap">
-      <label class="field-lab">Neue PIN (4 bis 8 Ziffern)</label>
+      <label class="field-lab" data-i18n="fg.newPin"></label>
       <input id="fgPin" class="inp pin" type="password" inputmode="numeric" autocomplete="off" placeholder="••••">
     </div>
-    <button id="fgBtn" class="btn-primary">Entsperren und neu setzen</button>
+    <button id="fgBtn" class="btn-primary" data-i18n="fg.submit"></button>
     <div id="fgMsg" class="gate-msg"></div>
-    <button class="gate-hint" id="fgBack" style="background:none;border:none;cursor:pointer;text-decoration:underline">Zurück zum Anmelden</button>
+    <button class="gate-hint" id="fgBack" data-i18n="fg.back" style="background:none;border:none;cursor:pointer;text-decoration:underline"></button>
   </div>
 </div>
 
@@ -391,33 +607,92 @@ input,textarea,select{font-family:inherit; font-size:14px}
   <aside id="sidebar">
     <div class="side-brand">
       <div class="mk" id="sideGlyph"></div>
-      <div><b>Tresor</b><span>Zugänge & Schlüssel</span></div>
+      <div><b>Tresor</b><span data-i18n="side.tagline"></span></div>
     </div>
-    <div class="search">
+    <div id="modeToggle">
+      <button data-mode="pw" class="on">🔐 <span data-i18n="mode.pw"></span></button>
+      <button data-mode="fokus">✨ <span data-i18n="mode.fokus"></span></button>
+      <button data-mode="motivation">💪 <span>Motivation</span></button>
+    </div>
+    <div class="search" id="pwSearch">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="searchBox" placeholder="Suchen ...">
+      <input id="searchBox" data-i18n-ph="side.search">
     </div>
     <nav class="nav" id="nav"></nav>
+    <div id="fkTips">
+      <div class="fk-tips-box">
+        <h4>💡 So gehst du vor</h4>
+        <ul>
+          <li>Alles roh in den <b>Notizblock</b> – erstmal Kopf leer machen.</li>
+          <li>Dann nach <b>Themen</b> in Listen aufteilen.</li>
+          <li>Aufgaben klein halten: lieber <b>„Küche aufräumen"</b> als „Wohnung machen".</li>
+          <li>Kein Rechtsklick nötig – <b>anklicken und tippen</b> reicht. Zum Verschieben am ⠿ ziehen.</li>
+        </ul>
+        <div class="fk-tips-ex">
+          <b>Wohnung</b> · Küche · Bad · Wäsche<br>
+          <b>Projekt Video</b> · schneiden · Thumbnail · hochladen<br>
+          <b>Arbeit</b> · Angebot schreiben · Mails
+        </div>
+      </div>
+      <div class="fk-tips-box">
+        <h4>⌨️ Kleine Helfer</h4>
+        <ul>
+          <li><kbd>Strg</kbd>+<kbd>C</kbd> kopieren</li>
+          <li><kbd>Strg</kbd>+<kbd>V</kbd> einfügen</li>
+          <li><kbd>Alt</kbd>+<kbd>Tab</kbd> Fenster wechseln</li>
+        </ul>
+      </div>
+    </div>
     <div class="side-foot">
-      <button class="side-btn" id="btnBackup" title="Verschlüsselte Sicherung speichern">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Sichern</button>
-      <button class="side-btn lock" id="btnLock" title="Tresor sofort abschließen">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10.5" width="16" height="11" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>Sperren</button>
-      <button class="side-btn" id="btnSettings" title="Einstellungen" style="flex:0 0 44px">
+      <button class="side-btn" id="btnBackup" data-i18n-title="side.backupTitle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span data-i18n="side.backup"></span></button>
+      <button class="side-btn lock" id="btnLock" data-i18n-title="side.lockTitle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10.5" width="16" height="11" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg><span data-i18n="side.lock"></span></button>
+      <button class="side-btn" id="btnSettings" data-i18n-title="side.settingsTitle" style="flex:0 0 44px">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></button>
     </div>
   </aside>
 
   <main id="main">
+    <div id="pwView" style="flex:1;min-height:0;display:flex;flex-direction:column">
     <div class="topbar">
       <div class="tt">
-        <h2 id="viewTitle"><span id="viewIcon"></span><span id="viewName">Alle Einträge</span></h2>
+        <h2 id="viewTitle"><span id="viewIcon"></span><span id="viewName"></span></h2>
         <div class="cnt" id="viewCount"></div>
       </div>
       <button class="btn-add" id="btnAdd">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>Neu anlegen</button>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="app.new"></span></button>
     </div>
     <div class="cards" id="cards"></div>
+    </div><!-- /pwView -->
+    <div id="fokusView">
+      <div class="fk-head">
+        <h2>✨ Fokus</h2>
+        <div class="sub">Dein Tag, klar und Schritt für Schritt. Kein Druck – einfach abhaken.</div>
+      </div>
+      <section class="fk-daily" id="fkDaily"></section>
+      <section class="fk-hero">
+        <div class="fk-ring">
+          <svg width="110" height="110" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#1b2332" stroke-width="12"/>
+            <circle id="fkRingFg" cx="60" cy="60" r="52" fill="none" stroke="url(#fkg)" stroke-width="12" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+            <defs><linearGradient id="fkg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2ee6a6"/><stop offset="1" stop-color="#5b8cff"/></linearGradient></defs>
+          </svg>
+          <div class="pct"><div><b id="fkRingPct">0%</b><span>heute</span></div></div>
+        </div>
+        <div class="htxt"><h3 id="fkHeroTitle"></h3><p id="fkHeroMsg"></p><div class="today" id="fkTodayList"></div></div>
+      </section>
+      <div class="fk-grid" id="fkGrid"></div>
+    </div>
+    <div id="motivationView">
+      <div class="fk-head"><h2>💪 Motivation</h2><div class="sub">Dein Spruch für heute – und Extra-Boosts, wann immer du sie brauchst.</div></div>
+      <section class="mo-daily"><div class="in"><div class="mo-eyebrow">Dein Spruch für heute</div><div class="mo-quote" id="moDaily"></div></div></section>
+      <section class="mo-boost hint" id="moBoost">
+        <div class="bq" id="moBoostQ">Brauchst du grad einen Schub? Hol dir einen Boost. 💪</div>
+        <button class="mo-boost-btn" id="moBoostBtn">✨ Noch einen Boost</button>
+        <div class="mo-count" id="moCount"></div>
+      </section>
+    </div>
   </main>
 </div>
 
@@ -433,9 +708,9 @@ input,textarea,select{font-family:inherit; font-size:14px}
   <div class="dw-body" id="dwBody"></div>
   <div class="dw-foot">
     <button class="btn-line" id="dwEdit">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Bearbeiten</button>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span data-i18n="dw.edit"></span></button>
     <button class="btn-line danger" id="dwDel">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>Löschen</button>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg><span data-i18n="dw.delete"></span></button>
   </div>
 </div>
 
@@ -444,7 +719,7 @@ input,textarea,select{font-family:inherit; font-size:14px}
   <div class="sheet">
     <div class="sh-head">
       <div class="badge" id="mdBadge" style="width:38px;height:38px;font-size:18px"></div>
-      <h3 id="mdTitle">Neuer Eintrag</h3>
+      <h3 id="mdTitle"></h3>
       <button class="icon-btn" id="mdClose">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
@@ -458,57 +733,175 @@ input,textarea,select{font-family:inherit; font-size:14px}
   <div class="sheet" style="max-width:520px">
     <div class="sh-head">
       <div class="badge" style="width:38px;height:38px;font-size:18px">⚙️</div>
-      <h3>Einstellungen</h3>
+      <h3 data-i18n="set.title"></h3>
       <button class="icon-btn" id="stClose">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
     <div class="sh-body">
       <div>
-        <label class="form-lab">Automatisch sperren nach</label>
+        <label class="form-lab" data-i18n="set.language"></label>
+        <select class="finp" id="setLangSel">
+          <option value="de">Deutsch</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-lab" data-i18n="set.autolock"></label>
         <select class="finp" id="setAutolock">
-          <option value="1">1 Minute ohne Aktivität</option>
-          <option value="5">5 Minuten ohne Aktivität</option>
-          <option value="15">15 Minuten ohne Aktivität</option>
-          <option value="0">Nicht automatisch sperren</option>
+          <option value="1" data-i18n="set.min1"></option>
+          <option value="5" data-i18n="set.min5"></option>
+          <option value="15" data-i18n="set.min15"></option>
+          <option value="0" data-i18n="set.never"></option>
+        </select>
+      </div>
+      <div>
+        <label class="form-lab" data-i18n="set.textsize"></label>
+        <select class="finp" id="setTextsize">
+          <option value="1" data-i18n="set.sizeNormal"></option>
+          <option value="1.15" data-i18n="set.sizeLarge"></option>
+          <option value="1.3" data-i18n="set.sizeXL"></option>
+          <option value="1.5" data-i18n="set.sizeXXL"></option>
         </select>
       </div>
       <div class="edit-field" style="border-color:var(--line)">
-        <div class="ef-key" style="color:var(--tx-hi);margin-bottom:12px">Master-Passwort und PIN ändern</div>
-        <input class="finp" id="setPass" type="password" placeholder="Neues Master-Passwort" style="margin-bottom:9px" autocomplete="off">
-        <input class="finp" id="setPass2" type="password" placeholder="Neues Passwort wiederholen" style="margin-bottom:9px" autocomplete="off">
-        <input class="finp pin" id="setPin" type="password" inputmode="numeric" placeholder="Neue PIN" style="margin-bottom:12px;letter-spacing:6px" autocomplete="off">
-        <button class="btn-save" id="setChangeBtn" style="width:100%">Passwort und PIN ändern</button>
+        <div class="ef-key" data-i18n="set.changeTitle" style="color:var(--tx-hi);margin-bottom:12px"></div>
+        <input class="finp" id="setPass" type="password" data-i18n-ph="set.newMasterPh" style="margin-bottom:9px" autocomplete="off">
+        <input class="finp" id="setPass2" type="password" data-i18n-ph="set.repeatPh" style="margin-bottom:9px" autocomplete="off">
+        <input class="finp pin" id="setPin" type="password" inputmode="numeric" data-i18n-ph="set.newPinPh" style="margin-bottom:12px;letter-spacing:6px" autocomplete="off">
+        <button class="btn-save" id="setChangeBtn" data-i18n="set.changeBtn" style="width:100%"></button>
         <div id="setMsg" class="gate-msg" style="text-align:center"></div>
       </div>
       <div style="background:var(--bg-0);border:1px solid var(--line-soft);border-radius:13px;padding:14px 16px;font-size:12.5px;color:var(--tx-dim);line-height:1.6">
-        <b style="color:var(--tx);display:block;margin-bottom:6px">Ehrlich gesagt</b>
-        Dieser Tresor schützt deine Daten, wenn jemand die Datei stiehlt. Ohne dein Passwort und deine PIN ist sie wertlos für Fremde.
-        Er schützt dich nicht vor Schadsoftware, die auf diesem PC mitliest, während du entsperrt bist. Und ohne Passwort, PIN oder Notfall-Schlüssel sind die Daten für immer verloren, auch für uns. Tipp: Aktiviere BitLocker für die Festplatte.
+        <b data-i18n="set.honestTitle" style="color:var(--tx);display:block;margin-bottom:6px"></b>
+        <span data-i18n="set.honestBody"></span>
       </div>
     </div>
     <div class="sh-foot">
-      <button class="btn-line" id="setBackup" style="flex:1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Verschlüsselte Sicherung speichern</button>
+      <button class="btn-line" id="setBackup" style="flex:1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span data-i18n="side.backupTitle"></span></button>
     </div>
   </div>
 </div>
+
+<!-- ===================== FOKUS: Willkommen + Name ===================== -->
+<div class="fk-welcome" id="fkWelcome"><div class="wbox">
+  <div class="wbrand">🌱 Tresor · Fokus</div>
+  <div class="wgreet" id="fkWgreet"></div>
+  <div class="eyebrow">Deine Motivation für heute</div>
+  <div class="wquote" id="fkWquote"></div>
+  <button class="fk-wgo" id="fkWgo">Los geht's ✨</button>
+  <button class="fk-namechg" data-chg>Name ändern</button>
+</div></div>
+<div class="fk-onb" id="fkOnb"><div class="box">
+  <div class="em">🌱</div>
+  <h3>Wie heißt du?</h3>
+  <p>Dann hol ich dich jeden Tag persönlich ab. Du kannst den Namen jederzeit ändern.</p>
+  <input id="fkOnbInput" placeholder="Dein Name" maxlength="24" autocomplete="off">
+  <button class="go" id="fkOnbGo">Los geht's ✨</button>
+</div></div>
+<canvas id="fkConfetti"></canvas>
 
 <div id="toast-wrap"></div>
 
 <script>
 /* ================================================================
-   API-Anbindung: echt (pywebview) oder Test-Mock (Browser-Vorschau)
+   Diagnose + sicherer Einstellungs-Speicher
    ================================================================ */
 window.__diag=[];
 window.addEventListener('error',e=>{try{window.__diag.push('ERR: '+(e.message||e.error)+' @'+(e.filename||'').split('/').pop()+':'+e.lineno);}catch(_){}});
 window.addEventListener('unhandledrejection',e=>{try{window.__diag.push('REJ: '+(e.reason&&e.reason.message?e.reason.message:String(e.reason)));}catch(_){}});
 
-/* Sicherer Einstellungs-Speicher: im nativen Fenster (Herkunft about:blank) ist
-   localStorage gesperrt, daher mit try/catch und Rückfall auf den Arbeitsspeicher. */
 const store={_m:{},
   get(k){try{return localStorage.getItem(k);}catch(e){return (k in this._m)?this._m[k]:null;}},
   set(k,v){try{localStorage.setItem(k,v);}catch(e){this._m[k]=String(v);}},
   del(k){try{localStorage.removeItem(k);}catch(e){delete this._m[k];}}
 };
+
+/* ================================================================
+   Sprachen (DE / EN)
+   ================================================================ */
+const I18N={
+ de:{
+  'lock.sub':'Alle deine Zugänge an einem sicheren Ort.<br>Bitte entsperren.',
+  'lock.master':'Master-Passwort','lock.masterPh':'Dein Passwort','lock.pin':'PIN','lock.unlock':'Entsperren','lock.forgot':'Passwort oder PIN vergessen?',
+  'setup.welcome':'Willkommen','setup.sub':'Richte deinen Tresor ein. Merke dir beides gut,<br>ohne diese zwei Angaben kommt niemand hinein, auch du nicht.',
+  'setup.chooseMaster':'Master-Passwort wählen','setup.min8':'Mindestens 8 Zeichen','setup.repeat':'Passwort wiederholen','setup.repeatPh':'Nochmal eingeben',
+  'setup.choosePin':'PIN wählen (4 bis 8 Ziffern)','setup.create':'Tresor erstellen','setup.hint':'Es gibt keine Passwort-Zurücksetzung. Alles wird nur auf diesem Gerät verschlüsselt gespeichert.',
+  'rec.title':'Dein Notfall-Schlüssel','rec.sub':'Falls du Passwort oder PIN vergisst, ist das deine einzige Rettung.<br>Schreib ihn ab und leg ihn an einen sicheren Ort. Er wird nur dieses eine Mal gezeigt.',
+  'rec.copy':'Notfall-Schlüssel kopieren','rec.confirm':'Ich habe den Notfall-Schlüssel abgeschrieben und sicher aufbewahrt.','rec.done':'Fertig, Tresor öffnen','rec.none':'(kein Schlüssel)',
+  'fg.title':'Vergessen?','fg.sub':'Gib deinen Notfall-Schlüssel ein und setze ein neues<br>Master-Passwort samt PIN. Deine Einträge bleiben erhalten.',
+  'fg.key':'Notfall-Schlüssel','fg.newMaster':'Neues Master-Passwort','fg.newPin':'Neue PIN (4 bis 8 Ziffern)','fg.submit':'Entsperren und neu setzen','fg.back':'Zurück zum Anmelden','fg.enterKey':'Bitte den Notfall-Schlüssel eingeben.',
+  'side.tagline':'Zugänge & Fokus','side.search':'Suchen ...','side.backup':'Sichern','side.backupTitle':'Verschlüsselte Sicherung speichern','side.lock':'Sperren','side.lockTitle':'Tresor sofort abschließen','side.settingsTitle':'Einstellungen',
+  'mode.pw':'Passwörter','mode.fokus':'Fokus',
+  'app.new':'Neu anlegen','app.all':'Alle Einträge','app.groups':'Orte / Wofür','app.ungrouped':'Ohne Zuordnung','app.untitled':'Ohne Titel','app.open':'Öffnen',
+  'app.one':'Eintrag','app.many':'Einträge','app.found':'gefunden',
+  'app.emptyReadyTitle':'Dein Tresor ist bereit','app.emptyReadyBody':'Leg deinen ersten Zugang an. Wähle eine Art, gib ihm einen Namen, fertig. Danach kopierst du jedes Feld mit einem Klick.',
+  'app.emptyNoneTitle':'Nichts gefunden','app.emptyNoneBody':'Zu deiner Suche oder diesem Ort gibt es keinen Eintrag.','app.firstEntry':'Ersten Eintrag anlegen',
+  'dw.edit':'Bearbeiten','dw.delete':'Löschen','dw.noFields':'Dieser Eintrag hat noch keine ausgefüllten Felder.',
+  'md.newEntry':'Neuer Eintrag','md.editEntry':'Eintrag bearbeiten','md.newOf':'Neu: {0}','md.whatStore':'Was möchtest du speichern?',
+  'md.name':'Name / Titel','md.namePh':'z. B. Firmen-Server FTP','md.group':'Ort / Wofür','md.groupPh':'z. B. Arbeit, meine-webseite.de',
+  'md.fields':'Felder (jedes wird später mit einem Klick kopierbar)','md.addField':'Feld hinzufügen','md.cancel':'Abbrechen','md.back':'Zurück','md.save':'Speichern',
+  'md.secret':'Geheim','md.valuePh':'Wert ...','md.newField':'Neues Feld','md.genTitle':'Passwort erzeugen','md.field':'Feld',
+  'gen.length':'Länge','gen.upper':'GROSS','gen.lower':'klein','gen.apply':'Übernehmen',
+  'set.title':'Einstellungen','set.language':'Sprache','set.autolock':'Automatisch sperren nach','set.min1':'1 Minute ohne Aktivität','set.min5':'5 Minuten ohne Aktivität','set.min15':'15 Minuten ohne Aktivität','set.never':'Nicht automatisch sperren',
+  'set.textsize':'Textgröße','set.sizeNormal':'Normal','set.sizeLarge':'Groß','set.sizeXL':'Sehr groß','set.sizeXXL':'Riesig',
+  'set.changeTitle':'Master-Passwort und PIN ändern','set.newMasterPh':'Neues Master-Passwort','set.repeatPh':'Neues Passwort wiederholen','set.newPinPh':'Neue PIN','set.changeBtn':'Passwort und PIN ändern',
+  'set.honestTitle':'Ehrlich gesagt','set.honestBody':'Dieser Tresor schützt deine Daten, wenn jemand die Datei stiehlt. Ohne dein Passwort und deine PIN ist sie wertlos für Fremde. Er schützt dich nicht vor Schadsoftware, die auf diesem PC mitliest, während du entsperrt bist. Und ohne Passwort, PIN oder Notfall-Schlüssel sind die Daten für immer verloren, auch für uns. Tipp: Aktiviere BitLocker für die Festplatte.',
+  'toast.copied':'Kopiert','toast.copiedSub':'Wird in {0} s automatisch aus der Zwischenablage gelöscht','toast.saved':'Gespeichert','toast.deleted':'Gelöscht','toast.newPwSet':'Neues Passwort gesetzt','toast.pwChanged':'Passwort und PIN geändert','toast.backupSaved':'Sicherung gespeichert','toast.backupSub':'Verschlüsselte Kopie deines Tresors','toast.autolockSet':'Sperrt nach {0} min','toast.autolockOff':'Auto-Sperre aus','toast.textsizeSet':'Textgröße angepasst',
+  'msg.enterBoth':'Bitte Passwort und PIN eingeben.','msg.min8':'Das Passwort braucht mindestens 8 Zeichen.','msg.min8new':'Das neue Passwort braucht mindestens 8 Zeichen.','msg.min8short':'Mindestens 8 Zeichen.','msg.mismatch':'Die beiden Passwörter sind nicht gleich.','msg.mismatch2':'Die Passwörter sind nicht gleich.','msg.pinFmt':'Die PIN muss 4 bis 8 Ziffern haben.','msg.pinFmtNew':'Die neue PIN muss 4 bis 8 Ziffern haben.','msg.pinFmtShort':'PIN: 4 bis 8 Ziffern.',
+  'confirm.delete':'Eintrag "{0}" wirklich löschen? Das kann nicht rückgängig gemacht werden.',
+  'err.vault_exists':'Es gibt bereits einen Tresor.','err.create_failed':'Der Tresor konnte nicht angelegt werden.','err.wrong_credentials':'Passwort oder PIN ist falsch.','err.corrupt':'Die Tresordatei ist beschädigt.','err.unlock_failed':'Der Tresor konnte nicht geöffnet werden.','err.recovery_wrong':'Der Notfall-Schlüssel ist falsch.','err.recovery_failed':'Öffnen mit Notfall-Schlüssel fehlgeschlagen.','err.locked':'Der Tresor ist gesperrt.','err.save_failed':'Speichern fehlgeschlagen.','err.delete_failed':'Löschen fehlgeschlagen.','err.change_failed':'Ändern fehlgeschlagen.','err.backup_failed':'Die Sicherung ist fehlgeschlagen.','err.no_vault_backup':'Es gibt noch keinen Tresor zum Sichern.','err.unknown':'Etwas ist schiefgelaufen.'
+ },
+ en:{
+  'lock.sub':'All your access in one secure place.<br>Please unlock.',
+  'lock.master':'Master password','lock.masterPh':'Your password','lock.pin':'PIN','lock.unlock':'Unlock','lock.forgot':'Forgot password or PIN?',
+  'setup.welcome':'Welcome','setup.sub':'Set up your vault. Remember both well,<br>without these two, no one gets in, not even you.',
+  'setup.chooseMaster':'Choose a master password','setup.min8':'At least 8 characters','setup.repeat':'Repeat password','setup.repeatPh':'Enter again',
+  'setup.choosePin':'Choose a PIN (4 to 8 digits)','setup.create':'Create vault','setup.hint':'There is no password reset. Everything is stored encrypted on this device only.',
+  'rec.title':'Your recovery key','rec.sub':'If you forget your password or PIN, this is your only way back in.<br>Write it down and keep it somewhere safe. It is shown only this once.',
+  'rec.copy':'Copy recovery key','rec.confirm':'I have written down the recovery key and stored it safely.','rec.done':'Done, open the vault','rec.none':'(no key)',
+  'fg.title':'Forgot?','fg.sub':'Enter your recovery key and set a new<br>master password and PIN. Your entries are kept.',
+  'fg.key':'Recovery key','fg.newMaster':'New master password','fg.newPin':'New PIN (4 to 8 digits)','fg.submit':'Unlock and reset','fg.back':'Back to sign in','fg.enterKey':'Please enter the recovery key.',
+  'side.tagline':'Access & focus','side.search':'Search ...','side.backup':'Back up','side.backupTitle':'Save an encrypted backup','side.lock':'Lock','side.lockTitle':'Lock the vault now','side.settingsTitle':'Settings',
+  'mode.pw':'Passwords','mode.fokus':'Focus',
+  'app.new':'New entry','app.all':'All entries','app.groups':'Places / Purpose','app.ungrouped':'Ungrouped','app.untitled':'Untitled','app.open':'Open',
+  'app.one':'entry','app.many':'entries','app.found':'found',
+  'app.emptyReadyTitle':'Your vault is ready','app.emptyReadyBody':'Add your first entry. Pick a type, give it a name, done. Then copy any field with a single click.',
+  'app.emptyNoneTitle':'Nothing found','app.emptyNoneBody':'No entry matches your search or this place.','app.firstEntry':'Add your first entry',
+  'dw.edit':'Edit','dw.delete':'Delete','dw.noFields':'This entry has no filled fields yet.',
+  'md.newEntry':'New entry','md.editEntry':'Edit entry','md.newOf':'New: {0}','md.whatStore':'What do you want to store?',
+  'md.name':'Name / Title','md.namePh':'e.g. Company Server FTP','md.group':'Place / Purpose','md.groupPh':'e.g. Work, my-website.com',
+  'md.fields':'Fields (each becomes one-click copyable)','md.addField':'Add field','md.cancel':'Cancel','md.back':'Back','md.save':'Save',
+  'md.secret':'Secret','md.valuePh':'Value ...','md.newField':'New field','md.genTitle':'Generate password','md.field':'Field',
+  'gen.length':'Length','gen.upper':'UPPER','gen.lower':'lower','gen.apply':'Apply',
+  'set.title':'Settings','set.language':'Language','set.autolock':'Auto-lock after','set.min1':'1 minute of inactivity','set.min5':'5 minutes of inactivity','set.min15':'15 minutes of inactivity','set.never':'Do not auto-lock',
+  'set.textsize':'Text size','set.sizeNormal':'Normal','set.sizeLarge':'Large','set.sizeXL':'Very large','set.sizeXXL':'Huge',
+  'set.changeTitle':'Change master password and PIN','set.newMasterPh':'New master password','set.repeatPh':'Repeat new password','set.newPinPh':'New PIN','set.changeBtn':'Change password and PIN',
+  'set.honestTitle':'Honestly','set.honestBody':'This vault protects your data if someone steals the file. Without your password and PIN it is worthless to a stranger. It does not protect you from malware reading along on this PC while you are unlocked. And without the password, PIN, or recovery key the data is gone forever, even for us. Tip: enable BitLocker for your drive.',
+  'toast.copied':'Copied','toast.copiedSub':'Cleared from the clipboard automatically in {0} s','toast.saved':'Saved','toast.deleted':'Deleted','toast.newPwSet':'New password set','toast.pwChanged':'Password and PIN changed','toast.backupSaved':'Backup saved','toast.backupSub':'Encrypted copy of your vault','toast.autolockSet':'Locks after {0} min','toast.autolockOff':'Auto-lock off','toast.textsizeSet':'Text size updated',
+  'msg.enterBoth':'Please enter password and PIN.','msg.min8':'The password needs at least 8 characters.','msg.min8new':'The new password needs at least 8 characters.','msg.min8short':'At least 8 characters.','msg.mismatch':'The two passwords do not match.','msg.mismatch2':'The passwords do not match.','msg.pinFmt':'The PIN must be 4 to 8 digits.','msg.pinFmtNew':'The new PIN must be 4 to 8 digits.','msg.pinFmtShort':'PIN: 4 to 8 digits.',
+  'confirm.delete':'Really delete "{0}"? This cannot be undone.',
+  'err.vault_exists':'A vault already exists.','err.create_failed':'The vault could not be created.','err.wrong_credentials':'Password or PIN is wrong.','err.corrupt':'The vault file is damaged.','err.unlock_failed':'The vault could not be opened.','err.recovery_wrong':'The recovery key is wrong.','err.recovery_failed':'Unlocking with the recovery key failed.','err.locked':'The vault is locked.','err.save_failed':'Saving failed.','err.delete_failed':'Deleting failed.','err.change_failed':'Changing failed.','err.backup_failed':'The backup failed.','err.no_vault_backup':'There is no vault to back up yet.','err.unknown':'Something went wrong.'
+ }
+};
+let LANG=(function(){const s=store.get('tresor_lang');if(s==='de'||s==='en')return s;return (navigator.language||'').toLowerCase().indexOf('de')===0?'de':'en';})();
+function t(key,a){let s=(I18N[LANG]&&I18N[LANG][key]);if(s==null)s=(I18N.en[key]!=null?I18N.en[key]:key);if(a!=null)s=String(s).split('{0}').join(a);return s;}
+function errText(r){const c='err.'+((r&&r.error)||'unknown');return (I18N.en[c]!=null)?t(c):t('err.unknown');}
+function applyStatic(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-i18n]').forEach(e=>{e.textContent=t(e.dataset.i18n);});
+  document.querySelectorAll('[data-i18n-html]').forEach(e=>{e.innerHTML=t(e.dataset.i18nHtml);});
+  document.querySelectorAll('[data-i18n-ph]').forEach(e=>{e.placeholder=t(e.dataset.i18nPh);});
+  document.querySelectorAll('[data-i18n-title]').forEach(e=>{e.title=t(e.dataset.i18nTitle);});
+  document.querySelectorAll('#langToggle button').forEach(b=>b.classList.toggle('on',b.dataset.lang===LANG));
+  const ls=$('#setLangSel');if(ls)ls.value=LANG;
+}
+function setLang(l){
+  if(l!==LANG){LANG=l;store.set('tresor_lang',l);}
+  applyStatic();
+  if(!$('#screen-app').classList.contains('hidden')){S.group='__all';renderApp();}
+  if($('#drawer').classList.contains('show')&&S.drawerId)openDrawer(S.drawerId);
+  if($('#modal').classList.contains('show'))closeModal();
+}
 
 const ICONS = {
   copy:'<path d="M9 9h10a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
@@ -517,22 +910,29 @@ const ICONS = {
   eyeoff:'<path d="M9.9 4.2A10.9 10.9 0 0 1 12 4c6.5 0 10 7 10 7a17 17 0 0 1-3.3 4M6.6 6.6A17 17 0 0 0 2 11s3.5 7 10 7a10.8 10.8 0 0 0 4.1-.8"/><path d="m3 3 18 18"/>',
   refresh:'<path d="M21 12a9 9 0 1 1-2.6-6.3M21 4v5h-5"/>',
   lock:'<rect x="4" y="10.5" width="16" height="11" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
   trash:'<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>',
 };
 function svg(name,w){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="'+(w||16)+'" height="'+(w||16)+'">'+ICONS[name]+'</svg>';}
 
-const MockAPI = (()=>{ // nur fuer die Browser-Vorschau, damit man das Design sieht
+/* ================================================================
+   API-Anbindung: echt (pywebview) oder Test-Mock (Browser-Vorschau)
+   ================================================================ */
+const MockAPI = (()=>{
   const KEY='tresor_mock';
   function load(){try{return JSON.parse(store.get(KEY))||null}catch(e){return null}}
   function save(d){store.set(KEY,JSON.stringify(d))}
   let creds=null, data=load();
   return {
     get_state:()=>Promise.resolve({vault_exists:!!data}),
-    create_vault:(m,p)=>{data={entries:[]};creds={m,p};save(data);
+    create_vault:(m,p)=>{data={entries:[],focus:{}};creds={m,p};save(data);
       const rk=Array.from({length:11},()=>Math.random().toString(36).slice(2,7).toUpperCase()).join('-');
       return Promise.resolve({ok:true,recovery:rk})},
-    unlock:(m,p)=>{if(!data)return Promise.resolve({ok:false,error:'Kein Tresor'});creds={m,p};return Promise.resolve({ok:true,entries:data.entries})},
-    unlock_recovery:(rk)=>{if(!data)return Promise.resolve({ok:false,error:'Kein Tresor'});return Promise.resolve({ok:true,entries:data.entries})},
+    unlock:(m,p)=>{if(!data)return Promise.resolve({ok:false,error:'unknown'});creds={m,p};return Promise.resolve({ok:true,entries:data.entries,focus:data.focus||{}})},
+    unlock_recovery:(rk)=>{if(!data)return Promise.resolve({ok:false,error:'unknown'});return Promise.resolve({ok:true,entries:data.entries,focus:data.focus||{}})},
+    get_focus:()=>Promise.resolve({ok:true,focus:(data&&data.focus)||{}}),
+    save_focus:(f)=>{if(data){data.focus=f;save(data);}return Promise.resolve({ok:true,focus:f})},
+    copy_plain:(t)=>{try{navigator.clipboard.writeText(t)}catch(e){}return Promise.resolve({ok:true})},
     change_master:(m,p)=>{creds={m,p};return Promise.resolve({ok:true})},
     lock:()=>{creds=null;return Promise.resolve({ok:true})},
     save_entry:(e)=>{if(!e.id){e.id='id'+Math.random().toString(36).slice(2)}
@@ -542,33 +942,52 @@ const MockAPI = (()=>{ // nur fuer die Browser-Vorschau, damit man das Design si
     generate_password:(len,o)=>{let s='';const L='abcdefghijkmnpqrstuvwxyz',U='ABCDEFGHJKLMNPQRSTUVWXYZ',N='23456789',S='!@#$%&*?-_=+';
       let pool=(o.lower?L:'')+(o.upper?U:'')+(o.digits?N:'')+(o.symbols?S:'');if(!pool)pool=L+U+N;
       for(let i=0;i<len;i++)s+=pool[Math.floor(Math.random()*pool.length)];return Promise.resolve({password:s})},
-    export_backup:()=>Promise.resolve({ok:true,path:'(Vorschau, keine echte Datei)'}),
+    export_backup:()=>Promise.resolve({ok:true,path:'(preview)'}),
   };
 })();
 
-let API=MockAPI;
+/* The MockAPI above is for local UI preview in a browser ONLY, and only when a developer
+   explicitly opts in with "?preview" (or "#preview") in the URL. The packaged desktop app
+   never has that flag and is loaded by pywebview with a real bridge, so the mock can never
+   activate there: it would keep secrets unencrypted in localStorage and "unlock" with any
+   credentials. If the real bridge never arrives in the app, we refuse to operate (boot
+   shows a hard error) instead of silently falling back to the mock. */
+const IS_HTTP = location.protocol==='http:'||location.protocol==='https:';
+const PREVIEW = /[?&#]preview\b/i.test(location.href);  // explicit dev opt-in for the browser mock
+let API=null;              // never default to the mock
+let bridgeFailed=false;
+function useBridge(){if(window.pywebview&&window.pywebview.api){API=window.pywebview.api;return true;}return false;}
 const apiReady=new Promise(res=>{
-  if(window.pywebview&&window.pywebview.api){API=window.pywebview.api;return res();}
-  window.addEventListener('pywebviewready',()=>{API=window.pywebview.api;res();});
-  setTimeout(res,900); // Fallback: Browser-Vorschau ohne pywebview
+  if(useBridge())return res();
+  window.addEventListener('pywebviewready',()=>{useBridge();res();});
+  setTimeout(()=>{
+    if(!useBridge()){
+      if(PREVIEW&&IS_HTTP&&!window.pywebview){API=MockAPI;}   // browser preview only, opt-in
+      else{bridgeFailed=true;}
+    }
+    res();
+  }, PREVIEW?900:6000);
 });
-function call(m,...a){return API[m]?API[m](...a):Promise.reject('no '+m);}
+function call(m,...a){return (API&&API[m])?API[m](...a):Promise.reject('no backend');}
 
 /* ================================================================
-   Typen-Vorlagen
+   Typen-Vorlagen (zweisprachig)
    ================================================================ */
+const F=(de,en)=>({de,en});
 const TYPES={
-  login:{lb:'Login / Webseite',em:'🌐',f:[['Webseite / URL','',0],['Benutzername','',0],['Passwort','',1],['Notiz','',0]]},
-  email:{lb:'E-Mail (IMAP/SMTP)',em:'📧',f:[['E-Mail-Adresse','',0],['Passwort','',1],['IMAP-Server','',0],['IMAP-Port','993',0],['SMTP-Server','',0],['SMTP-Port','465',0],['Verschlüsselung','SSL/TLS',0],['Benutzername','',0]]},
-  ftp:{lb:'FTP / SFTP',em:'📁',f:[['Protokoll','FTP',0],['Host / Server','',0],['Port','21',0],['Benutzername','',0],['Passwort','',1],['Verzeichnis','/',0]]},
-  database:{lb:'Datenbank',em:'🗄️',f:[['Typ','MySQL',0],['Host','',0],['Port','3306',0],['Datenbank','',0],['Benutzer','',0],['Passwort','',1],['Connection-String','',1]]},
-  api:{lb:'API-Verbindung',em:'🔌',f:[['Dienst / Name','',0],['Verbindet (von)','',0],['Verbindet (nach)','',0],['Endpoint / URL','',0],['API-Key','',1],['Client-ID','',0],['Client-Secret','',1],['Public Key','',0],['Private Key','',1],['Notiz','',0]]},
-  ssh:{lb:'SSH / Schlüssel',em:'🔑',f:[['Host','',0],['Benutzer','',0],['Port','22',0],['Public Key','',0],['Private Key','',1],['Passphrase','',1]]},
-  card:{lb:'Karte / Zahlung',em:'💳',f:[['Karteninhaber','',0],['Kartennummer','',1],['Gültig bis','',0],['CVC','',1],['PIN','',1],['Bank','',0]]},
-  note:{lb:'Notiz / Geheimnis',em:'📝',f:[['Inhalt','',1]]},
-  custom:{lb:'Frei / Sonstiges',em:'✨',f:[['Bezeichnung','',0],['Wert','',1]]},
+  login:{lb:{de:'Login / Webseite',en:'Login / Website'},em:'🌐',f:[[F('Webseite / URL','Website / URL'),'',0],[F('Benutzername','Username'),'',0],[F('Passwort','Password'),'',1],[F('Notiz','Note'),'',0]]},
+  email:{lb:{de:'E-Mail (IMAP/SMTP)',en:'Email (IMAP/SMTP)'},em:'📧',f:[[F('E-Mail-Adresse','Email address'),'',0],[F('Passwort','Password'),'',1],[F('IMAP-Server','IMAP server'),'',0],[F('IMAP-Port','IMAP port'),'993',0],[F('SMTP-Server','SMTP server'),'',0],[F('SMTP-Port','SMTP port'),'465',0],[F('Verschlüsselung','Encryption'),'SSL/TLS',0],[F('Benutzername','Username'),'',0]]},
+  ftp:{lb:{de:'FTP / SFTP',en:'FTP / SFTP'},em:'📁',f:[[F('Protokoll','Protocol'),'FTP',0],[F('Host / Server','Host / Server'),'',0],[F('Port','Port'),'21',0],[F('Benutzername','Username'),'',0],[F('Passwort','Password'),'',1],[F('Verzeichnis','Directory'),'/',0]]},
+  database:{lb:{de:'Datenbank',en:'Database'},em:'🗄️',f:[[F('Typ','Type'),'MySQL',0],[F('Host','Host'),'',0],[F('Port','Port'),'3306',0],[F('Datenbank','Database'),'',0],[F('Benutzer','User'),'',0],[F('Passwort','Password'),'',1],[F('Connection-String','Connection string'),'',1]]},
+  api:{lb:{de:'API-Verbindung',en:'API connection'},em:'🔌',f:[[F('Dienst / Name','Service / Name'),'',0],[F('Verbindet (von)','Connects (from)'),'',0],[F('Verbindet (nach)','Connects (to)'),'',0],[F('Endpoint / URL','Endpoint / URL'),'',0],[F('API-Key','API key'),'',1],[F('Client-ID','Client ID'),'',0],[F('Client-Secret','Client secret'),'',1],[F('Public Key','Public key'),'',0],[F('Private Key','Private key'),'',1],[F('Notiz','Note'),'',0]]},
+  ssh:{lb:{de:'SSH / Schlüssel',en:'SSH / Keys'},em:'🔑',f:[[F('Host','Host'),'',0],[F('Benutzer','User'),'',0],[F('Port','Port'),'22',0],[F('Public Key','Public key'),'',0],[F('Private Key','Private key'),'',1],[F('Passphrase','Passphrase'),'',1]]},
+  card:{lb:{de:'Karte / Zahlung',en:'Card / Payment'},em:'💳',f:[[F('Karteninhaber','Cardholder'),'',0],[F('Kartennummer','Card number'),'',1],[F('Gültig bis','Expires'),'',0],[F('CVC','CVC'),'',1],[F('PIN','PIN'),'',1],[F('Bank','Bank'),'',0]]},
+  note:{lb:{de:'Notiz / Geheimnis',en:'Note / Secret'},em:'📝',f:[[F('Inhalt','Content'),'',1]]},
+  custom:{lb:{de:'Frei / Sonstiges',en:'Free / Other'},em:'✨',f:[[F('Bezeichnung','Label'),'',0],[F('Wert','Value'),'',1]]},
 };
 function typeOf(t){return TYPES[t]||TYPES.custom;}
+function typeLb(t){return (t.lb&&t.lb[LANG])||(t.lb&&t.lb.en)||'';}
+function fkey(k){if(k&&typeof k==='object')return k[LANG]||k.en;return k;}
 
 /* ================================================================
    Zustand + Helfer
@@ -591,7 +1010,7 @@ async function copyVal(text,btn){
   if(btn){const old=btn.innerHTML;btn.classList.add('ok','done');btn.innerHTML=svg('check',15);
     setTimeout(()=>{btn.classList.remove('ok','done');btn.innerHTML=old;},1100);}
   const secs=(r&&r.cleared_in)||20;
-  toast('Kopiert','Wird in '+secs+' s automatisch aus der Zwischenablage gelöscht');
+  toast(t('toast.copied'),t('toast.copiedSub',secs));
 }
 
 /* ================================================================
@@ -602,12 +1021,12 @@ function scorePw(p){let s=0;if(p.length>=8)s++;if(p.length>=12)s++;if(/[a-z]/.te
 function bindLock(){
   const go=async()=>{
     const p=$('#lkPass').value,pin=$('#lkPin').value;
-    if(!p||!pin){$('#lkMsg').textContent='Bitte Passwort und PIN eingeben.';return;}
+    if(!p||!pin){$('#lkMsg').textContent=t('msg.enterBoth');return;}
     $('#lkBtn').disabled=true;$('#lkMsg').textContent='';
     const r=await call('unlock',p,pin);
     $('#lkBtn').disabled=false;
-    if(r&&r.ok){S.entries=r.entries||[];$('#lkPass').value='';$('#lkPin').value='';openApp();}
-    else{$('#lkMsg').textContent=(r&&r.error)||'Passwort oder PIN ist falsch.';$('#lkPin').value='';$('#lkPin').focus();}
+    if(r&&r.ok){S.entries=r.entries||[];FK=fkNorm(r.focus);$('#lkPass').value='';$('#lkPin').value='';openApp();}
+    else{$('#lkMsg').textContent=errText(r);$('#lkPin').value='';$('#lkPin').focus();}
   };
   $('#lkBtn').onclick=go;
   ['lkPass','lkPin'].forEach(id=>$('#'+id).addEventListener('keydown',e=>{if(e.key==='Enter')go();}));
@@ -621,43 +1040,43 @@ function bindSetup(){
   const go=async()=>{
     const p=$('#stPass').value,p2=$('#stPass2').value,pin=$('#stPin').value;
     const m=$('#stMsg');
-    if(p.length<8){m.textContent='Das Passwort braucht mindestens 8 Zeichen.';return;}
-    if(p!==p2){m.textContent='Die beiden Passwörter sind nicht gleich.';return;}
-    if(!/^\d{4,8}$/.test(pin)){m.textContent='Die PIN muss 4 bis 8 Ziffern haben.';return;}
+    if(p.length<8){m.textContent=t('msg.min8');return;}
+    if(p!==p2){m.textContent=t('msg.mismatch');return;}
+    if(!/^\d{4,8}$/.test(pin)){m.textContent=t('msg.pinFmt');return;}
     $('#stBtn').disabled=true;m.textContent='';
     const r=await call('create_vault',p,pin);
     $('#stBtn').disabled=false;
     if(r&&r.ok){$('#stPass').value='';$('#stPass2').value='';$('#stPin').value='';showRecovery(r.recovery,p,pin);}
-    else{m.textContent=(r&&r.error)||'Konnte den Tresor nicht erstellen.';}
+    else{m.textContent=errText(r);}
   };
   $('#stBtn').onclick=go;
   $('#stPin').addEventListener('keydown',e=>{if(e.key==='Enter')go();});
 }
 function showRecovery(key,pass,pin){
   show('screen-recovery');
-  $('#rvKey').textContent=key||'(kein Schlüssel)';
+  $('#rvKey').textContent=key||t('rec.none');
   $('#rvChk').checked=false;$('#rvBtn').disabled=true;
   $('#rvChk').onchange=e=>{$('#rvBtn').disabled=!e.target.checked;};
   $('#rvCopy').onclick=()=>{copyVal(key,null);};
   $('#rvBtn').onclick=async()=>{
     $('#rvBtn').disabled=true;
     const u=await call('unlock',pass,pin);
-    S.entries=(u&&u.entries)||[];openApp();
+    S.entries=(u&&u.entries)||[];FK=fkNorm(u&&u.focus);openApp();
   };
 }
 function bindForgot(){
   const go=async()=>{
     const key=$('#fgKey').value.trim(),p=$('#fgPass').value,pin=$('#fgPin').value,m=$('#fgMsg');
-    if(!key){m.textContent='Bitte den Notfall-Schlüssel eingeben.';return;}
-    if(p.length<8){m.textContent='Das neue Passwort braucht mindestens 8 Zeichen.';return;}
-    if(!/^\d{4,8}$/.test(pin)){m.textContent='Die neue PIN muss 4 bis 8 Ziffern haben.';return;}
+    if(!key){m.textContent=t('fg.enterKey');return;}
+    if(p.length<8){m.textContent=t('msg.min8new');return;}
+    if(!/^\d{4,8}$/.test(pin)){m.textContent=t('msg.pinFmtNew');return;}
     $('#fgBtn').disabled=true;m.textContent='';
     const r=await call('unlock_recovery',key);
-    if(!(r&&r.ok)){$('#fgBtn').disabled=false;m.textContent=(r&&r.error)||'Notfall-Schlüssel ist falsch.';return;}
+    if(!(r&&r.ok)){$('#fgBtn').disabled=false;m.textContent=errText(r);return;}
     const c=await call('change_master',p,pin);
     $('#fgBtn').disabled=false;
-    if(c&&c.ok){S.entries=r.entries||[];$('#fgKey').value='';$('#fgPass').value='';$('#fgPin').value='';openApp();toast('Neues Passwort gesetzt');}
-    else{m.textContent=(c&&c.error)||'Konnte das neue Passwort nicht setzen.';}
+    if(c&&c.ok){S.entries=r.entries||[];FK=fkNorm(r.focus);$('#fgKey').value='';$('#fgPass').value='';$('#fgPin').value='';openApp();toast(t('toast.newPwSet'));}
+    else{m.textContent=errText(c);}
   };
   $('#fgBtn').onclick=go;
   $('#lkForgot').onclick=()=>{show('screen-forgot');setTimeout(()=>$('#fgKey').focus(),80);};
@@ -669,17 +1088,17 @@ function bindForgot(){
    ================================================================ */
 function groups(){
   const m=new Map();
-  S.entries.forEach(e=>{const g=(e.group||'Ohne Zuordnung');m.set(g,(m.get(g)||0)+1);});
-  return [...m.entries()].sort((a,b)=>a[0].localeCompare(b[0],'de'));
+  S.entries.forEach(e=>{const g=(e.group||t('app.ungrouped'));m.set(g,(m.get(g)||0)+1);});
+  return [...m.entries()].sort((a,b)=>a[0].localeCompare(b[0],LANG));
 }
 function renderNav(){
   const nav=$('#nav');nav.innerHTML='';
   const all=el('div','nav-item'+(S.group==='__all'?' active':''));
-  all.innerHTML='<span class="ico">🗂️</span><span class="nm">Alle Einträge</span><span class="ct">'+S.entries.length+'</span>';
+  all.innerHTML='<span class="ico">🗂️</span><span class="nm">'+esc(t('app.all'))+'</span><span class="ct">'+S.entries.length+'</span>';
   all.onclick=()=>{S.group='__all';renderApp();};
   nav.appendChild(all);
   const gs=groups();
-  if(gs.length){nav.appendChild(el('div','nav-lab',null)).textContent='Orte / Wofür';}
+  if(gs.length){nav.appendChild(el('div','nav-lab',null)).textContent=t('app.groups');}
   gs.forEach(([g,c])=>{
     const it=el('div','nav-item'+(S.group===g?' active':''));
     it.innerHTML='<span class="ico">📍</span><span class="nm">'+esc(g)+'</span><span class="ct">'+c+'</span>';
@@ -689,10 +1108,10 @@ function renderNav(){
 }
 function visibleEntries(){
   let list=S.entries.slice();
-  if(S.group!=='__all')list=list.filter(e=>(e.group||'Ohne Zuordnung')===S.group);
+  if(S.group!=='__all')list=list.filter(e=>(e.group||t('app.ungrouped'))===S.group);
   const q=S.query.trim().toLowerCase();
   if(q)list=list.filter(e=>{
-    const hay=[e.title,e.group,typeOf(e.type).lb].concat((e.fields||[]).map(f=>f.key+' '+(f.secret?'':f.value))).join(' ').toLowerCase();
+    const hay=[e.title,e.group,typeLb(typeOf(e.type))].concat((e.fields||[]).map(f=>f.key+' '+(f.secret?'':f.value))).join(' ').toLowerCase();
     return hay.includes(q);
   });
   return list.sort((a,b)=>(b.updated||0)-(a.updated||0));
@@ -702,32 +1121,29 @@ function primarySecret(e){return (e.fields||[]).find(x=>x.secret&&x.value)||null
 
 function renderApp(){
   renderNav();
-  const t=typeOf('');
   $('#viewIcon').textContent = S.group==='__all'?'':'📍 ';
-  $('#viewName').textContent = S.group==='__all'?'Alle Einträge':S.group;
+  $('#viewName').textContent = S.group==='__all'?t('app.all'):S.group;
   const list=visibleEntries();
-  $('#viewCount').textContent = list.length+(list.length===1?' Eintrag':' Einträge')+(S.query?' gefunden':'');
+  $('#viewCount').textContent = list.length+' '+(list.length===1?t('app.one'):t('app.many'))+(S.query?(' '+t('app.found')):'');
   const box=$('#cards');box.innerHTML='';
   if(!list.length){
     const e=el('div','empty');
     const first=S.entries.length===0;
-    e.innerHTML='<div class="big">'+svg('lock',40)+'</div><h3>'+(first?'Dein Tresor ist bereit':'Nichts gefunden')+'</h3>'+
-      '<p>'+(first?'Leg deinen ersten Zugang an. Wähle eine Art, gib ihm einen Namen, fertig. Danach kopierst du jedes Feld mit einem Klick.':'Zu deiner Suche oder diesem Ort gibt es keinen Eintrag.')+'</p>'+
-      (first?'<button class="btn-add" style="margin:0 auto" onclick="openEditor()">'+svg('copy',0).replace(ICONS.copy,'<path d=\'M12 5v14M5 12h14\'/>')+'Ersten Eintrag anlegen</button>':'');
+    e.innerHTML='<div class="big">'+svg('lock',40)+'</div><h3>'+esc(first?t('app.emptyReadyTitle'):t('app.emptyNoneTitle'))+'</h3>'+
+      '<p>'+esc(first?t('app.emptyReadyBody'):t('app.emptyNoneBody'))+'</p>';
+    if(first){const b=el('button','btn-add');b.style.margin='0 auto';b.innerHTML=svg('plus',17)+esc(t('app.firstEntry'));b.onclick=()=>openEditor();e.appendChild(b);}
     box.appendChild(e);
-    // Button-Icon sauber setzen
-    const b=box.querySelector('.btn-add');if(b){b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>Ersten Eintrag anlegen';b.onclick=()=>openEditor();}
     return;
   }
   list.forEach(e=>box.appendChild(cardEl(e)));
 }
 function cardEl(e){
-  const t=typeOf(e.type);const c=el('div','card');
+  const t2=typeOf(e.type);const c=el('div','card');
   const id=primaryIdent(e),sec=primarySecret(e);
   c.innerHTML=
-    '<div class="row1"><div class="badge">'+t.em+'</div>'+
-      '<div class="ti"><b>'+esc(e.title||'Ohne Titel')+'</b>'+
-      '<div class="grp">'+t.em+' '+esc(t.lb)+(e.group?' · '+esc(e.group):'')+'</div></div></div>'+
+    '<div class="row1"><div class="badge">'+t2.em+'</div>'+
+      '<div class="ti"><b>'+esc(e.title||t('app.untitled'))+'</b>'+
+      '<div class="grp">'+t2.em+' '+esc(typeLb(t2))+(e.group?' · '+esc(e.group):'')+'</div></div></div>'+
     (id?'<div class="ident"><span class="k">'+esc(id.k)+'</span><span class="v">'+esc(id.v)+'</span></div>':'')+
     '<div class="quick"></div>';
   const q=c.querySelector('.quick');
@@ -735,7 +1151,7 @@ function cardEl(e){
     b.onclick=ev=>{ev.stopPropagation();copyVal(id.v,b);};q.appendChild(b);}
   if(sec){const b=el('button','qbtn pw');b.innerHTML=svg('copy',14)+esc(shorten(sec.key));
     b.onclick=ev=>{ev.stopPropagation();copyVal(sec.value,b);};q.appendChild(b);}
-  if(!id&&!sec){const b=el('button','qbtn');b.innerHTML=svg('eye',14)+'Öffnen';b.onclick=()=>openDrawer(e.id);q.appendChild(b);}
+  if(!id&&!sec){const b=el('button','qbtn');b.innerHTML=svg('eye',14)+esc(t('app.open'));b.onclick=()=>openDrawer(e.id);q.appendChild(b);}
   c.onclick=()=>openDrawer(e.id);
   return c;
 }
@@ -746,10 +1162,10 @@ function shorten(s){s=String(s);return s.length>14?s.slice(0,13)+'…':s;}
    ================================================================ */
 function openDrawer(id){
   const e=S.entries.find(x=>x.id===id);if(!e)return;S.drawerId=id;
-  const t=typeOf(e.type);
-  $('#dwBadge').textContent=t.em;
-  $('#dwTitle').textContent=e.title||'Ohne Titel';
-  $('#dwGroup').textContent=t.lb+(e.group?'  ·  '+e.group:'');
+  const t2=typeOf(e.type);
+  $('#dwBadge').textContent=t2.em;
+  $('#dwTitle').textContent=e.title||t('app.untitled');
+  $('#dwGroup').textContent=typeLb(t2)+(e.group?'  ·  '+e.group:'');
   const body=$('#dwBody');body.innerHTML='';
   (e.fields||[]).filter(f=>f.value!=='').forEach(f=>{
     const row=el('div','frow');
@@ -769,7 +1185,7 @@ function openDrawer(id){
     if(eye)eye.onclick=()=>{shown=!shown;paint();eye.innerHTML=svg(shown?'eyeoff':'eye',15);eye.classList.toggle('ok',shown);};
     row.querySelector('[data-copy]').onclick=(ev)=>copyVal(f.value,ev.currentTarget);
   });
-  if(!body.children.length)body.innerHTML='<div class="frow"><div class="fv" style="color:var(--tx-dim)">Dieser Eintrag hat noch keine ausgefüllten Felder.</div></div>';
+  if(!body.children.length)body.innerHTML='<div class="frow"><div class="fv" style="color:var(--tx-dim)">'+esc(t('dw.noFields'))+'</div></div>';
   $('#ovDrawer').classList.add('show');$('#drawer').classList.add('show');
 }
 function closeDrawer(){$('#ovDrawer').classList.remove('show');$('#drawer').classList.remove('show');S.drawerId=null;}
@@ -780,13 +1196,14 @@ function closeDrawer(){$('#ovDrawer').classList.remove('show');$('#drawer').clas
 function openEditor(id){
   S.editing=id?JSON.parse(JSON.stringify(S.entries.find(x=>x.id===id))):null;
   const md=$('#modal');
-  if(!S.editing){ // Schritt 1: Art waehlen
-    $('#mdTitle').textContent='Neuer Eintrag';$('#mdBadge').textContent='✨';
+  if(!S.editing){
+    $('#mdTitle').textContent=t('md.newEntry');$('#mdBadge').textContent='✨';
     $('#mdFoot').innerHTML='';
-    const body=$('#mdBody');body.innerHTML='<label class="form-lab">Was möchtest du speichern?</label>';
+    const body=$('#mdBody');body.innerHTML='';
+    const lab=el('label','form-lab');lab.textContent=t('md.whatStore');body.appendChild(lab);
     const grid=el('div','type-grid');
-    Object.entries(TYPES).forEach(([k,t])=>{
-      const c=el('button','type-card');c.innerHTML='<span class="em">'+t.em+'</span><span class="lb">'+esc(t.lb)+'</span>';
+    Object.entries(TYPES).forEach(([k,tp])=>{
+      const c=el('button','type-card');c.innerHTML='<span class="em">'+tp.em+'</span><span class="lb">'+esc(typeLb(tp))+'</span>';
       c.onclick=()=>startForm(k);grid.appendChild(c);
     });
     body.appendChild(grid);
@@ -794,33 +1211,31 @@ function openEditor(id){
   md.classList.add('show');
 }
 function startForm(type,existing){
-  const t=typeOf(type);
-  const e=existing||{type,title:'',group:(S.group!=='__all'?S.group:''),fields:t.f.map(([k,v,s])=>({key:k,value:v,secret:!!s}))};
+  const tp=typeOf(type);
+  const e=existing||{type,title:'',group:(S.group!=='__all'?S.group:''),fields:tp.f.map(([k,v,s])=>({key:fkey(k),value:v,secret:!!s}))};
   S.editing=e;
-  $('#mdBadge').textContent=t.em;
-  $('#mdTitle').textContent=existing?'Eintrag bearbeiten':'Neu: '+t.lb;
+  $('#mdBadge').textContent=tp.em;
+  $('#mdTitle').textContent=existing?t('md.editEntry'):t('md.newOf',typeLb(tp));
   const body=$('#mdBody');body.innerHTML='';
-  // Titel + Gruppe
   const glist=[...new Set(S.entries.map(x=>x.group).filter(Boolean))];
   const head=el('div');
   head.innerHTML=
-    '<label class="form-lab">Name / Titel</label><input class="finp" id="fTitle" placeholder="z. B. Firmen-Server FTP" value="'+esc(e.title)+'" style="margin-bottom:16px">'+
-    '<label class="form-lab">Ort / Wofür</label><input class="finp" id="fGroup" list="glist" placeholder="z. B. Arbeit, meine-webseite.de" value="'+esc(e.group)+'">'+
+    '<label class="form-lab">'+esc(t('md.name'))+'</label><input class="finp" id="fTitle" placeholder="'+esc(t('md.namePh'))+'" value="'+esc(e.title)+'" style="margin-bottom:16px">'+
+    '<label class="form-lab">'+esc(t('md.group'))+'</label><input class="finp" id="fGroup" list="glist" placeholder="'+esc(t('md.groupPh'))+'" value="'+esc(e.group)+'">'+
     '<datalist id="glist">'+glist.map(g=>'<option value="'+esc(g)+'">').join('')+'</datalist>';
   body.appendChild(head);
   const sep=el('div');sep.style.cssText='height:1px;background:var(--line-soft);margin:18px 0';body.appendChild(sep);
-  body.appendChild(el('label','form-lab',null)).textContent='Felder (jedes wird später mit einem Klick kopierbar)';
+  body.appendChild(el('label','form-lab',null)).textContent=t('md.fields');
   const wrap=el('div');wrap.id='fieldWrap';wrap.style.cssText='display:flex;flex-direction:column;gap:10px';body.appendChild(wrap);
   (e.fields||[]).forEach(f=>wrap.appendChild(fieldRow(f)));
-  const add=el('button','add-field');add.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Feld hinzufügen';
-  add.onclick=()=>wrap.appendChild(fieldRow({key:'Neues Feld',value:'',secret:false},true));
+  const add=el('button','add-field');add.innerHTML=svg('plus',16)+esc(t('md.addField'));
+  add.onclick=()=>wrap.appendChild(fieldRow({key:t('md.newField'),value:'',secret:false},true));
   body.appendChild(add);
-  // Footer
   $('#mdFoot').innerHTML='';
-  const back=el('button','btn-line');back.style.flex='0 0 auto';back.textContent=existing?'Abbrechen':'Zurück';
+  const back=el('button','btn-line');back.style.flex='0 0 auto';back.textContent=existing?t('md.cancel'):t('md.back');
   back.onclick=()=>{ if(existing)closeModal(); else openEditor(); };
   const spring=el('div','spring');
-  const saveB=el('button','btn-save');saveB.textContent='Speichern';saveB.onclick=saveForm;
+  const saveB=el('button','btn-save');saveB.textContent=t('md.save');saveB.onclick=saveForm;
   $('#mdFoot').append(back,spring,saveB);
   setTimeout(()=>$('#fTitle').focus(),50);
 }
@@ -828,10 +1243,10 @@ function fieldRow(f,focus){
   const row=el('div','edit-field');row.dataset.field='1';
   row.innerHTML=
     '<div class="ef-top"><input class="ef-key" value="'+esc(f.key)+'">'+
-      '<div class="ef-tools"><button class="chip-tog'+(f.secret?' on':'')+'" data-sec>'+svg('lock',12)+'Geheim</button>'+
+      '<div class="ef-tools"><button class="chip-tog'+(f.secret?' on':'')+'" data-sec>'+svg('lock',12)+esc(t('md.secret'))+'</button>'+
       '<button class="ef-x" data-del><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div></div>'+
-    '<div class="ef-val-line"><input class="ef-val" value="'+esc(f.value)+'" '+(f.secret?'type="password"':'')+' placeholder="Wert ...">'+
-      '<button class="mini" data-gen title="Passwort erzeugen">'+svg('refresh',15)+'</button></div>';
+    '<div class="ef-val-line"><input class="ef-val" value="'+esc(f.value)+'" '+(f.secret?'type="password"':'')+' placeholder="'+esc(t('md.valuePh'))+'">'+
+      '<button class="mini" data-gen title="'+esc(t('md.genTitle'))+'">'+svg('refresh',15)+'</button></div>';
   const secBtn=row.querySelector('[data-sec]');
   const val=row.querySelector('.ef-val');
   let secret=!!f.secret;
@@ -848,10 +1263,10 @@ function openGen(row,valInput){
   const g=el('div','gen-tool');
   g.innerHTML=
     '<div class="gen-out"><span class="val mono" data-out>...</span><button class="mini" data-reroll>'+svg('refresh',15)+'</button></div>'+
-    '<div class="gen-row"><label style="flex:1">Länge <b data-lenlab>20</b><br><input type="range" min="8" max="48" value="20" data-len style="width:100%"></label></div>'+
-    '<div class="gen-row"><label><input type="checkbox" data-o="upper" checked>GROSS</label><label><input type="checkbox" data-o="lower" checked>klein</label>'+
+    '<div class="gen-row"><label style="flex:1">'+esc(t('gen.length'))+' <b data-lenlab>20</b><br><input type="range" min="8" max="48" value="20" data-len style="width:100%"></label></div>'+
+    '<div class="gen-row"><label><input type="checkbox" data-o="upper" checked>'+esc(t('gen.upper'))+'</label><label><input type="checkbox" data-o="lower" checked>'+esc(t('gen.lower'))+'</label>'+
       '<label><input type="checkbox" data-o="digits" checked>123</label><label><input type="checkbox" data-o="symbols" checked>!@#</label>'+
-      '<div style="flex:1"></div><button class="gen-apply" data-apply>Übernehmen</button></div>';
+      '<div style="flex:1"></div><button class="gen-apply" data-apply>'+esc(t('gen.apply'))+'</button></div>';
   row.appendChild(g);
   const out=g.querySelector('[data-out]');
   const opts=()=>({upper:g.querySelector('[data-o=upper]').checked,lower:g.querySelector('[data-o=lower]').checked,digits:g.querySelector('[data-o=digits]').checked,symbols:g.querySelector('[data-o=symbols]').checked});
@@ -865,18 +1280,18 @@ function openGen(row,valInput){
 }
 async function saveForm(){
   const e=S.editing;
-  e.title=$('#fTitle').value.trim()||'Ohne Titel';
+  e.title=$('#fTitle').value.trim()||t('app.untitled');
   e.group=$('#fGroup').value.trim();
   const rows=[...$('#fieldWrap').querySelectorAll('[data-field]')];
-  e.fields=rows.map(r=>({key:r.querySelector('.ef-key').value.trim()||'Feld',value:r.querySelector('.ef-val').value,secret:r.dataset.secret==='1'}));
+  e.fields=rows.map(r=>({key:r.querySelector('.ef-key').value.trim()||t('md.field'),value:r.querySelector('.ef-val').value,secret:r.dataset.secret==='1'}));
   e.updated=Date.now();
   const r=await call('save_entry',e);
   if(r&&r.ok){
     const saved=r.entry||e;
     const i=S.entries.findIndex(x=>x.id===saved.id);
     if(i>=0)S.entries[i]=saved;else S.entries.push(saved);
-    closeModal();renderApp();toast('Gespeichert');
-  }else{toast((r&&r.error)||'Speichern fehlgeschlagen',null,true);}
+    closeModal();renderApp();toast(t('toast.saved'));
+  }else{toast(errText(r),null,true);}
 }
 function closeModal(){$('#modal').classList.remove('show');S.editing=null;}
 
@@ -886,25 +1301,42 @@ function closeModal(){$('#modal').classList.remove('show');S.editing=null;}
 async function delEntry(){
   const id=S.drawerId;if(!id)return;
   const e=S.entries.find(x=>x.id===id);
-  if(!confirm('Eintrag "'+(e?e.title:'')+'" wirklich löschen? Das kann nicht rückgängig gemacht werden.'))return;
+  if(!confirm(t('confirm.delete',(e?e.title:''))))return;
   const r=await call('delete_entry',id);
-  if(r&&r.ok){S.entries=S.entries.filter(x=>x.id!==id);closeDrawer();renderApp();toast('Gelöscht');}
+  if(r&&r.ok){S.entries=S.entries.filter(x=>x.id!==id);closeDrawer();renderApp();toast(t('toast.deleted'));}
 }
 async function lockNow(){
-  await call('lock');S.entries=[];S.group='__all';S.query='';
-  closeDrawer();closeModal();$('#searchBox').value='';
-  show('screen-lock');$('#lkPass').focus();
+  if(lockInProgress)return;
+  lockInProgress=true;
+  const gate=$('#screen-lock');
+  gate.inert=true;
+  show('screen-lock');
+  $('#fkWelcome').classList.remove('show');$('#fkOnb').classList.remove('show');
+  closeDrawer();closeModal();closeSettings();
+  try{
+    try{await flushFocus();}catch{$('#lkMsg').textContent=t('err.save_failed');}
+    const result=await call('lock');
+    if(!result?.ok)throw new Error('lock');
+  }catch{
+    $('#lkMsg').textContent=LANG==='en'?'Lock not confirmed. Close the vault window.':'Sperre nicht bestätigt. Schließe das Tresorfenster.';
+  }finally{
+    FK=null;fkSavedRevision=fkRevision;
+    S.entries=[];S.group='__all';S.query='';$('#searchBox').value='';
+    lockInProgress=false;gate.inert=false;$('#lkPass').focus();
+  }
 }
 async function doBackup(){
   const r=await call('export_backup');
-  if(r&&r.ok)toast('Sicherung gespeichert', r.path&&r.path[0]!=='('?r.path:'Verschlüsselte Kopie deines Tresors');
-  else if(r&&r.error)toast(r.error,null,true);
+  if(r&&r.ok)toast(t('toast.backupSaved'), r.path&&r.path[0]!=='('?r.path:t('toast.backupSub'));
+  else if(r&&r.error)toast(errText(r),null,true);
 }
 
 /* ================================================================
    Einstellungen + Auto-Sperre
    ================================================================ */
 let autolockMin = (function(){const v=parseInt(store.get('tresor_autolock'),10);return isNaN(v)?5:v;})();
+let textScale = (function(){const v=parseFloat(store.get('tresor_textscale'));return (v>=1&&v<=2)?v:1;})();
+function applyTextScale(){try{document.documentElement.style.setProperty('--ts',textScale);document.body.style.zoom='';}catch(e){}}
 let idleTimer=null, lastReset=0;
 function resetIdle(){
   const now=performance.now();
@@ -916,6 +1348,8 @@ function resetIdle(){
 }
 function openSettings(){
   $('#setAutolock').value=String(autolockMin);
+  $('#setTextsize').value=String(textScale);
+  $('#setLangSel').value=LANG;
   $('#setPass').value='';$('#setPass2').value='';$('#setPin').value='';$('#setMsg').textContent='';
   $('#settings').classList.add('show');
 }
@@ -924,24 +1358,29 @@ function bindSettings(){
   $('#btnSettings').onclick=openSettings;
   $('#stClose').onclick=closeSettings;
   $('#setBackup').onclick=doBackup;
-  $('#setAutolock').onchange=e=>{autolockMin=parseInt(e.target.value,10)||0;store.set('tresor_autolock',autolockMin);resetIdle();toast(autolockMin?('Sperrt nach '+autolockMin+' min'):'Auto-Sperre aus');};
+  $('#setLangSel').onchange=e=>{setLang(e.target.value);};
+  $('#setAutolock').onchange=e=>{autolockMin=parseInt(e.target.value,10)||0;store.set('tresor_autolock',autolockMin);resetIdle();toast(autolockMin?t('toast.autolockSet',autolockMin):t('toast.autolockOff'));};
+  $('#setTextsize').onchange=e=>{textScale=parseFloat(e.target.value)||1;store.set('tresor_textscale',textScale);applyTextScale();toast(t('toast.textsizeSet'));};
   $('#setChangeBtn').onclick=async()=>{
     const p=$('#setPass').value,p2=$('#setPass2').value,pin=$('#setPin').value,m=$('#setMsg');
-    if(p.length<8){m.textContent='Mindestens 8 Zeichen.';return;}
-    if(p!==p2){m.textContent='Die Passwörter sind nicht gleich.';return;}
-    if(!/^\d{4,8}$/.test(pin)){m.textContent='PIN: 4 bis 8 Ziffern.';return;}
+    if(p.length<8){m.textContent=t('msg.min8short');return;}
+    if(p!==p2){m.textContent=t('msg.mismatch2');return;}
+    if(!/^\d{4,8}$/.test(pin)){m.textContent=t('msg.pinFmtShort');return;}
     $('#setChangeBtn').disabled=true;
     const r=await call('change_master',p,pin);
     $('#setChangeBtn').disabled=false;
-    if(r&&r.ok){closeSettings();toast('Passwort und PIN geändert');}
-    else{m.textContent=(r&&r.error)||'Ändern fehlgeschlagen.';}
+    if(r&&r.ok){closeSettings();toast(t('toast.pwChanged'));}
+    else{m.textContent=errText(r);}
   };
+}
+function bindLang(){
+  document.querySelectorAll('#langToggle button').forEach(b=>{b.onclick=()=>setLang(b.dataset.lang);});
 }
 
 /* ================================================================
    Start
    ================================================================ */
-function openApp(){show('screen-app');S.group='__all';S.query='';renderApp();resetIdle();}
+function openApp(){show('screen-app');S.group='__all';S.query='';renderApp();fkInitAfterUnlock();resetIdle();}
 function wire(){
   $('#btnAdd').onclick=()=>openEditor();
   $('#btnLock').onclick=lockNow;
@@ -954,10 +1393,26 @@ function wire(){
   ['mousemove','keydown','click','scroll','touchstart'].forEach(ev=>document.addEventListener(ev,resetIdle,{passive:true}));
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#settings').classList.contains('show'))closeSettings();else if($('#modal').classList.contains('show'))closeModal();else if($('#drawer').classList.contains('show'))closeDrawer();}});
 }
+function showBridgeError(){
+  const de=(typeof LANG==='undefined')||LANG!=='en';
+  const title=de?'Sicherer Kern nicht geladen':'Secure core not loaded';
+  const msg=de
+    ?'Tresor konnte seinen verschlüsselten Kern nicht starten. Aus Sicherheitsgründen wurde nichts geöffnet und nichts gespeichert. Bitte schließe Tresor komplett und starte es neu.'
+    :'Tresor could not start its encrypted core. For your safety nothing was opened and nothing was saved. Please close Tresor completely and start it again.';
+  document.body.innerHTML=
+    '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;'
+    +'background:#0a0c12;color:#e6e9f0;font-family:system-ui,Segoe UI,sans-serif;padding:32px;box-sizing:border-box;text-align:center">'
+    +'<div style="max-width:520px"><div style="font-size:46px;margin-bottom:18px">&#128274;</div>'
+    +'<h1 style="font-size:20px;margin:0 0 12px;font-weight:600"></h1>'
+    +'<p style="margin:0;opacity:.82;line-height:1.55;font-size:15px"></p></div></div>';
+  document.body.querySelector('h1').textContent=title;
+  document.body.querySelector('p').textContent=msg;
+}
 async function boot(){
-  try{initGlyphs();bindLock();bindSetup();bindForgot();bindSettings();wire();}
+  try{initGlyphs();bindLock();bindSetup();bindForgot();bindSettings();bindLang();wire();applyStatic();applyTextScale();}
   catch(e){window.__diag.push('BIND-THREW: '+(e&&e.message||e));}
   await apiReady;
+  if(!API||bridgeFailed){showBridgeError();return;}
   let st=null;
   try{st=await call('get_state');window.__diag.push('get_state ok: '+JSON.stringify(st));}
   catch(e){window.__diag.push('get_state THREW: '+(e&&e.message||e));}
@@ -966,6 +1421,273 @@ async function boot(){
     else{show('screen-setup');setTimeout(()=>$('#stPass').focus(),100);}
   }catch(e){window.__diag.push('SHOW-THREW: '+(e&&e.message||e));}
 }
+/* ================================================================
+   Fokus-Bereich: Checklisten, Notizblock, tägliche Motivation
+   ================================================================ */
+const FK_CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+const FK_X='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+const FK_GRIP='<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
+const FK_COPY='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 9h10a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const FK_TRASH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/></svg>';
+let fkDrag=null; const fkExpandedDone=new Set();
+const FK_MANTRAS=["Du schaffst das, {name}. Ganz sicher.","{name}, du bist stärker, als du gerade glaubst.","Egal wie heute läuft – du gibst dein Bestes, und das genügt, {name}.","Ein Schritt nach dem anderen, {name}. Du machst das richtig gut.","{name}, du hast schon so viel gepackt. Das hier packst du auch.","Heute wird ein guter Tag, {name} – weil du ihn dazu machst.","Du bist genau richtig, {name}. So, wie du bist.","Atme einmal tief durch, {name}. Du kriegst das hin.","Sei stolz auf dich, {name}. Du hältst durch, wo andere längst aufgeben.","{name}, du musst heute nicht perfekt sein. Nur du selbst.","Trau dir das zu, {name}. Du hast allen Grund dazu.","Du bist nicht allein, {name}. Und stärker, als du denkst.","Kleine Schritte zählen auch, {name}. Jeder einzelne.","Mach heute eine Sache, auf die du abends stolz bist, {name}.","{name}, du wächst gerade – auch wenn es sich nicht immer so anfühlt.","Gönn dir ein Lächeln, {name}. Du machst das wirklich gut.","Du darfst auch mal langsam machen, {name}. Hauptsache, du bleibst dran.","{name}, das, was du aufbaust, ist es wert. Und du bist es auch.","Heute reicht es, wenn du anfängst, {name}. Der Rest kommt von allein.","Du bist mutiger, als du dir zutraust, {name}.","{name}, dein Ich von morgen zählt auf dich – und es glaubt an dich.","Fang klein an, {name}. Groß wirst du unterwegs.","Du hast heute schon so viel richtig gemacht, {name}. Auch das, was keiner sieht.","{name}, sei heute ein bisschen sanfter mit dir. Du gibst dir Mühe.","Was du dir vornimmst, kriegst du hin, {name}. Schritt für Schritt.","{name}, du bist kein bisschen zu spät dran. Du bist genau im richtigen Moment.","Vertrau dir, {name}. Du weißt mehr, als du denkst.","Heute ist ein guter Tag, um stolz auf dich zu sein, {name}.","{name}, du musst nicht alles auf einmal schaffen. Nur das Nächste.","Du bist genug, {name} – heute, morgen, immer.","Steh auf und mach dein Ding, {name}. Die Welt kann dich brauchen.","{name}, auch an schweren Tagen bist du genau da, wo du sein sollst.","Du hast das Zeug dazu, {name}. Ehrlich.","Denk dran, wie weit du schon gekommen bist, {name}.","{name}, sei geduldig mit dir. Gutes braucht ein bisschen Zeit.","Heute ein Prozent besser, {name} – das reicht völlig.","Du bist niemandem etwas schuldig, {name}. Nur dir selbst dein Bestes.","{name}, glaub weiter an deinen Weg. Er ist deiner, und er ist gut.","Ein kleiner Anfang ist mehr wert als ein perfekter Plan, {name}.","Du machst das großartig, {name}. Auch wenn es sich normal anfühlt.","{name}, das Leben meint es gut mit dir. Bleib dran.","Sei heute an deiner eigenen Seite, {name}. Immer.","{name}, du darfst stolz sein, ohne fertig zu sein.","Gib nicht auf, {name}. Genau jetzt beginnt der schöne Teil.","Du bist es wert, dass du an dich glaubst, {name}.","{name}, jeder Tag, an dem du weitermachst, macht dich ein Stück freier.","Heute zählt nicht, wie viel du schaffst, {name}. Nur, dass du dranbleibst.","Du bist auf einem guten Weg, {name}. Wirklich.","{name}, du bist stärker als jeder Zweifel in deinem Kopf.","Mach dir heute den Tag leicht, {name}. Eine Sache nach der anderen.","{name}, du bringst etwas in diese Welt, das nur du hast.","Trau dich, sichtbar zu sein, {name}. Du hast so viel zu geben.","Du darfst dir das gönnen, {name}: an dich zu glauben.","{name}, das Beste an dir sieht man nicht auf den ersten Blick – aber es ist da.","Heute reicht ein einziger mutiger Moment, {name}.","{name}, du bist kein Projekt, das fertig werden muss. Du bist schon gut.","Bleib dir treu, {name}. Das ist deine größte Stärke.","Du hast heute die Wahl, {name}: freundlich zu dir zu sein. Nimm sie.","{name}, was dich gerade fordert, macht dich gerade stark.","Sei stolz auf jeden kleinen Sieg, {name}. Sie zählen alle.","Du musst nicht laut sein, um viel zu bewegen, {name}.","{name}, dein Tempo ist genau richtig. Wirklich.","Heute darfst du einfach anfangen, {name} – nicht perfekt, nur echt.","Du bist mehr als deine schwersten Tage, {name}.","{name}, du bist genau richtig für dein eigenes Leben.","Ein Schritt reicht heute, {name}. Fang mit dem an.","Du machst deinen Menschen stolz, {name} – und dich selbst auch.","{name}, wenn heute nur eine Sache klappt, ist das ein voller Erfolg.","Halt durch, {name}. Du bist näher dran, als du denkst.","Du bist gut, so wie du bist, {name}. Und du wirst noch besser.","{name}, gib dem Tag deine Energie, nicht deine Zweifel.","Heute machst du wieder ein Stück von dem, was du dir wünschst, {name}.","Du kannst das, {name}. Nicht, weil es leicht ist, sondern weil du es bist.","{name}, jeder Tag ist eine neue Chance, dir selbst näherzukommen.","Sei sanft mit dem Menschen, der du gerade wirst, {name}.","Du bist nicht hinterher, {name}. Du bist auf deinem eigenen Weg.","{name}, deine Ruhe ist eine Stärke, keine Schwäche.","Fang an, bevor du dich bereit fühlst, {name}. Bereit wirst du dabei.","Du hast schon Schlimmeres geschafft, {name}. Das hier auch.","{name}, heute ein kleines Ziel – und dann feier es.","Vertrau dem Weg, {name}. Er entsteht, während du gehst.","Du darfst groß träumen, {name}. Und klein anfangen.","{name}, was du heute tust, dankt dir dein Ich von morgen.","Sei mutig für fünf Sekunden, {name}. Danach läuft es von selbst.","Du machst das mit Herz, {name}. Das merkt man.","{name}, du bist genau richtig, um deinen Traum zu tragen.","Heute darfst du stolz auf dich sein – einfach so, {name}.","Du bist stärker geworden, {name}. Auch wenn du es kaum gemerkt hast.","{name}, mach weiter. Genau da liegt dein Unterschied.","Ein guter Tag beginnt mit einem guten Gedanken über dich, {name}.","Du bist wichtig, {name}. Nicht wegen dem, was du leistest – einfach so.","{name}, trau dich, dir selbst zu vertrauen.","Heute ein Häkchen nach dem anderen, {name}. So gewinnt man.","Du bist die beste Wahl für deinen eigenen Weg, {name}.","{name}, kein perfekter Tag nötig. Nur ein ehrlicher.","Bleib dran, {name}. Dein zukünftiges Ich winkt dir schon zu.","Du hast alles in dir, was du heute brauchst, {name}.","{name}, sei stolz auf dich für das Aufstehen. Das war schon mutig.","Mach den ersten Schritt, {name}. Der Rest traut sich dann mit.","Du darfst Fehler machen, {name}. So sieht Wachsen aus.","{name}, du bist genug – schon, bevor du irgendetwas schaffst.","Heute zählt dein Herz, nicht deine To-do-Liste, {name}.","Du bringst Licht mit, {name}. Vergiss das nicht.","{name}, das, was du dir aufbaust, wird dich tragen.","Sei heute gut zu dir, {name}. So, wie du es verdienst.","Du bist tapferer, als du denkst, und mehr geliebt, als du weißt, {name}.","{name}, kleine Schritte sind für dich gemacht.","Heute darfst du anfangen. Nur das. Und das reicht, {name}.","Du machst das gerade wirklich gut, {name}. Ganz ehrlich.","{name}, halt kurz inne und sei stolz. Du hast es verdient.","Vertrau darauf, {name}: Du bist genau da, wo dein Weg dich hinführt.","Du bist stärker als deine Ausreden, {name}.","{name}, gib dir das, was du anderen so leicht gibst: Geduld.","Ein Tag nach dem anderen, {name}. Du kommst an.","Du bist der Beweis, dass Dranbleiben sich lohnt, {name}.","{name}, du darfst leuchten. Trau dich.","Heute machst du einen Schritt, den dein Traum braucht, {name}.","Du bist genau genug, {name}. Nicht zu viel, nicht zu wenig.","{name}, sei stolz auf den weiten Weg, den du still gegangen bist.","Fang einfach an, {name}. Motivation kommt beim Machen.","Du hältst mehr aus, als du glaubst, {name}. Und du wächst daran.","{name}, heute ist dein Tag. Nimm ihn dir.","Sei geduldig, {name}. Großes wächst leise.","Du bist es wert, dass es dir gut geht, {name}.","{name}, du machst das nicht perfekt – du machst es echt. Genau richtig.","Halt durch, {name}. Die Mühe von heute ist deine Freiheit von morgen.","Du bist mutig, weil du es trotzdem versuchst, {name}.","{name}, glaub an dich – auch, wenn es gerade schwerfällt.","Heute reicht ein bisschen, {name}. Ein bisschen ist auch gut.","Du bist stärker rausgekommen, {name}. Jedes Mal.","{name}, dein Weg muss nicht wie der von anderen aussehen. Er ist deiner.","Sei stolz, dass du es überhaupt anpackst, {name}. Das tun nicht viele.","Du darfst dir vertrauen, {name}. Du hast dich noch nie im Stich gelassen.","{name}, heute ein Schritt. Morgen wieder einer. So entsteht alles Große.","Du bist genau richtig, so wie du bist – heute reicht das, {name}.","{name}, du kannst das. Nicht irgendwann. Heute.","Sei lieb zu dir, {name}. Du gibst wirklich dein Bestes.","Du bist nicht zu spät und nicht zu wenig, {name}. Du bist bereit.","{name}, mach heute etwas, das sich nach dir anfühlt.","Du wächst mit jeder Aufgabe, {name}, nicht trotz ihr.","{name}, dein Mut heute ist die schöne Erinnerung von morgen.","Bleib bei dir, {name}. Genau das macht dich besonders.","Du hast heute schon Mut bewiesen, {name} – allein, indem du weitermachst.","{name}, du bist stärker, ruhiger und klüger, als du dir zutraust.","Ein guter Tag fängt bei dir an, {name}. Und der bist du.","Du bist auf dem richtigen Weg, {name}. Vertrau ihm.","{name}, gib heute nicht auf, kurz bevor es schön wird.","Du bist ein Geschenk, {name} – auch für dich selbst.","Sei stolz auf dich, {name}. Immer. Vor allem heute."];
+const FK_SEED_LISTS=[
+ {id:'l1',emoji:'🚀',title:'Social-Media-Start',color:'#5b8cff',items:[
+   {id:'a1',text:'Instagram-Profil anlegen',done:false},{id:'a2',text:'Profilbild + Bio schreiben',done:false},
+   {id:'a3',text:'3 Reel-Ideen sammeln',done:false},{id:'a4',text:'Content-Plan für Woche 1',done:false},
+   {id:'a5',text:'Ersten Beitrag posten',done:false}]},
+ {id:'l2',emoji:'📋',title:'Business-Basics',color:'#2ee6a6',items:[
+   {id:'b1',text:'Marken-Namen festlegen',done:false},{id:'b2',text:'Logo entwerfen',done:false},
+   {id:'b3',text:'Business-E-Mail einrichten',done:false},{id:'b4',text:'Kleinunternehmer klären',done:false}]},
+ {id:'l3',emoji:'🌤️',title:'Heute',color:'#ff7ea8',items:[
+   {id:'c1',text:'20 Min Ideen brainstormen',done:false},{id:'c2',text:'1 Reel aufnehmen',done:false},
+   {id:'c3',text:'Wasser trinken 💧',done:false}]},
+];
+let FK=null, FK_MODE='pw', fkSaveTimer=null;
+let fkRevision=0, fkSavedRevision=0, fkWrite=Promise.resolve(), lockInProgress=false;
+const fkEpochDay=Math.floor(Date.now()/86400000);
+const fkIdx=Math.abs((fkEpochDay*1103515245+12345))%FK_MANTRAS.length;
+
+function fkNorm(f){
+  f=(f&&typeof f==='object')?f:{};
+  const hasLists=Array.isArray(f.lists)&&f.lists.length;
+  return {name:typeof f.name==='string'?f.name:'',
+    dailyDay:(typeof f.dailyDay==='number'&&isFinite(f.dailyDay))?f.dailyDay:-1,
+    notes:typeof f.notes==='string'?f.notes:'',
+    lists:hasLists?f.lists:JSON.parse(JSON.stringify(FK_SEED_LISTS)),
+    motivBoosts:(f.motivBoosts&&typeof f.motivBoosts==='object')?f.motivBoosts:{d:-1,n:0}};
+}
+function flushFocus(){
+  clearTimeout(fkSaveTimer);
+  fkSaveTimer=null;
+  const revision=fkRevision, focus=FK;
+  // Serialize backend writes, including any older save still in flight at lock time.
+  fkWrite=fkWrite.catch(()=>{}).then(async()=>{
+    if(!focus || revision<=fkSavedRevision)return;
+    const result=await call('save_focus',JSON.parse(JSON.stringify(focus)));
+    if(!result?.ok)throw new Error(errText(result));
+    fkSavedRevision=revision;
+  });
+  return fkWrite;
+}
+function fkSave(){
+  fkRevision++;
+  clearTimeout(fkSaveTimer);
+  fkSaveTimer=setTimeout(()=>flushFocus().catch(()=>toast(t('err.save_failed'),null,true)),600);
+}
+function fkMantra(){return FK_MANTRAS[fkIdx].split('{name}').join('<em>'+esc(FK&&FK.name||'du')+'</em>');}
+function fkCounts(l){const its=l.items||[];const d=its.filter(i=>i.done).length;return{d,t:its.length,p:its.length?d/its.length:0};}
+function fkAll(){let d=0,t=0;(FK.lists||[]).forEach(l=>(l.items||[]).forEach(i=>{t++;if(i.done)d++;}));return{d,t,p:t?d/t:0};}
+function fkTodayList(){const ls=FK.lists||[];return ls.find(l=>/heute/i.test(l.title||''))||ls[0]||null;}
+
+function fkRender(){
+  fkRenderDaily();
+  const grid=$('#fkGrid');if(!grid)return;grid.innerHTML='';
+  (FK.lists||[]).forEach(l=>grid.appendChild(fkCard(l)));
+  const al=el('button','fk-addlist');al.innerHTML='<span style="font-size:18px">＋</span> Neue Liste';al.onclick=fkAddList;grid.appendChild(al);
+  const n=el('div','fk-notes');
+  n.innerHTML='<div class="top"><div class="em">📝</div><div><b style="font-size:15px">Notizblock</b><div style="font-size:12px;color:var(--tx-dim)">Kopf frei machen – alles rein, was dir einfällt.</div></div></div>';
+  const ta=el('textarea');ta.placeholder='Schreib einfach los …';ta.value=FK.notes||'';
+  ta.addEventListener('input',e=>{FK.notes=e.target.value;fkSave();});
+  n.appendChild(ta);grid.appendChild(n);
+  fkRenderToday();fkUpdateHero();
+}
+function fkNewId(){return 'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function fkCard(l){
+  const c=fkCounts(l);const card=el('div','fk-card');card.id='fkcard-'+l.id;card.style.setProperty('--_c',l.color||'var(--accent)');
+  const active=(l.items||[]).filter(i=>!i.done), done=(l.items||[]).filter(i=>i.done);
+  card.innerHTML='<div class="top"><div class="em">'+esc(l.emoji||'📌')+'</div><div class="ti"><div class="fk-title" contenteditable="true" data-ph="Listenname"></div><span class="meta"><b>'+c.d+'</b>/'+c.t+' erledigt</span></div><span class="fk-cardtools"><button class="fk-listdel" title="Liste löschen">'+FK_TRASH+'</button></span></div>'
+    +'<div class="fk-bar"><i style="background:'+esc(l.color||'#5b8cff')+'"></i></div>'
+    +'<div class="fk-items"></div>'
+    +'<div class="fk-add"><span class="plus">＋</span><input placeholder="Aufgabe hinzufügen …"></div>'
+    +'<div class="fk-done-wrap"></div>';
+  const tin=card.querySelector('.fk-title');
+  tin.textContent=l.title||'';
+  tin.addEventListener('input',()=>{l.title=tin.textContent;fkSave();});
+  card.querySelector('.fk-listdel').onclick=()=>fkDeleteList(l);
+  const items=card.querySelector('.fk-items');
+  active.forEach(it=>items.appendChild(fkRow(l,it)));
+  items.addEventListener('dragover',e=>{if(fkDrag)e.preventDefault();});
+  items.addEventListener('drop',e=>{if(fkDrag){e.preventDefault();fkMoveItem(fkDrag.listId,fkDrag.itemId,l.id,null);}});
+  card.querySelector('.fk-bar>i').style.width=(c.p*100)+'%';
+  const inp=card.querySelector('.fk-add input');
+  inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&inp.value.trim()){l.items=l.items||[];l.items.push({id:fkNewId(),text:inp.value.trim(),done:false});inp.value='';fkSave();fkRefreshCard(l);}});
+  if(done.length){
+    const dd=el('div','fk-done'+(fkExpandedDone.has(l.id)?' open':''));
+    dd.innerHTML='<button class="fk-done-h"><span class="chev">▶</span> Erledigt (<b>'+done.length+'</b>)</button><div class="fk-done-items"></div>';
+    const di=dd.querySelector('.fk-done-items');
+    done.forEach(it=>di.appendChild(fkRow(l,it)));
+    dd.querySelector('.fk-done-h').onclick=()=>{const op=dd.classList.toggle('open');if(op)fkExpandedDone.add(l.id);else fkExpandedDone.delete(l.id);};
+    card.querySelector('.fk-done-wrap').appendChild(dd);
+  }
+  return card;
+}
+function fkMoveItem(srcListId,itemId,dstListId,beforeItemId){
+  const src=(FK.lists||[]).find(x=>x.id===srcListId), dst=(FK.lists||[]).find(x=>x.id===dstListId);
+  if(!src||!dst||!Array.isArray(src.items)||!Array.isArray(dst.items))return;
+  const idx=src.items.findIndex(i=>i.id===itemId);if(idx<0)return;
+  const item=src.items.splice(idx,1)[0];
+  let at=dst.items.length;
+  if(beforeItemId){const bi=dst.items.findIndex(i=>i.id===beforeItemId);if(bi>=0)at=bi;}
+  dst.items.splice(at,0,item);
+  fkSave();fkRender();
+}
+function fkRow(l,it){
+  const row=el('div','fk-row'+(it.done?' done':''));row.style.setProperty('--_c',l.color||'var(--accent)');
+  row.innerHTML=
+    (it.done?'<span class="fk-grip" style="visibility:hidden"></span>':'<span class="fk-grip" draggable="true" title="Ziehen zum Verschieben">'+FK_GRIP+'</span>')
+    +'<span class="fk-box" title="Erledigt">'+FK_CHECK+'</span>'
+    +'<div class="fk-tinp" contenteditable="true" data-ph="Aufgabe …"></div>'
+    +'<span class="fk-tools"><button class="fk-cp" title="Kopieren">'+FK_COPY+'</button><button class="fk-del" title="Löschen">'+FK_X+'</button></span>';
+  row.querySelector('.fk-box').onclick=()=>{
+    it.done=!it.done;fkSave();
+    if(it.done){row.classList.add('done','pop');setTimeout(()=>fkRefreshCard(l,true),320);}
+    else{fkRefreshCard(l);}
+  };
+  const tin=row.querySelector('.fk-tinp');
+  tin.textContent=it.text||'';
+  tin.addEventListener('input',()=>{it.text=tin.textContent;fkSave();});
+  tin.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();tin.blur();}});
+  row.querySelector('.fk-cp').onclick=()=>{call('copy_plain',it.text).catch(()=>{});toast('Kopiert');};
+  row.querySelector('.fk-del').onclick=()=>{l.items=l.items.filter(x=>x!==it);fkSave();fkRefreshCard(l);};
+  if(!it.done){
+    const grip=row.querySelector('.fk-grip');
+    grip.addEventListener('dragstart',e=>{fkDrag={listId:l.id,itemId:it.id};if(e.dataTransfer){e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',it.id);}catch(_){}}});
+    grip.addEventListener('dragend',()=>{fkDrag=null;});
+    row.addEventListener('dragover',e=>{if(fkDrag){e.preventDefault();e.stopPropagation();row.classList.add('fk-drop-above');}});
+    row.addEventListener('dragleave',()=>row.classList.remove('fk-drop-above'));
+    row.addEventListener('drop',e=>{e.preventDefault();e.stopPropagation();row.classList.remove('fk-drop-above');if(fkDrag)fkMoveItem(fkDrag.listId,fkDrag.itemId,l.id,it.id);});
+  }
+  return row;
+}
+function fkRefreshCard(l,celeb){
+  const old=$('#fkcard-'+l.id);if(!old)return;
+  old.replaceWith(fkCard(l));fkUpdateHero();fkRenderToday();
+  if(celeb){const c=fkCounts(l);if(c.t>0&&c.d===c.t)fkCelebrate(l);}
+}
+function fkRenderToday(){
+  const box=$('#fkTodayList');if(!box)return;box.innerHTML='';
+  const t=fkTodayList();if(!t)return;
+  (t.items||[]).filter(i=>!i.done).slice(0,3).forEach(it=>{
+    const r=el('div','fk-row'+(it.done?' done':''));r.style.setProperty('--_c',t.color||'var(--accent)');r.style.padding='6px 0';
+    r.innerHTML='<div class="fk-box">'+FK_CHECK+'</div><div class="lbl" style="font-size:13px">'+esc(it.text)+'</div>';
+    r.addEventListener('click',()=>{it.done=!it.done;fkSave();fkRefreshCard(t,true);});
+    box.appendChild(r);
+  });
+}
+function fkUpdateHero(){
+  const a=fkAll();const fg=$('#fkRingFg');if(fg)fg.style.strokeDashoffset=326.7*(1-a.p);
+  const rp=$('#fkRingPct');if(rp)rp.textContent=Math.round(a.p*100)+'%';
+  const h=$('#fkHeroTitle'),m=$('#fkHeroMsg');if(!h||!m)return;const nm=FK.name?(', '+FK.name):'';
+  if(a.t===0){h.textContent='Leg los'+nm+' ✨';m.innerHTML='Füg deine erste Aufgabe hinzu oder erstelle eine Liste.';}
+  else if(a.p===0){h.textContent='Bereit loszulegen'+nm+' ☀️';m.innerHTML='Such dir <b>eine</b> Sache aus und fang damit an.';}
+  else if(a.p<1){h.textContent='Du bist dran'+nm+' 💪';m.innerHTML='Schon <b>'+a.d+' von '+a.t+'</b> geschafft. Immer nur der nächste Schritt.';}
+  else{h.textContent='Alles erledigt'+nm+'! 🎉';m.innerHTML='Du hast heute <b>alles</b> abgehakt. Richtig stark.';}
+}
+function fkAddList(){
+  const em=['🎯','💡','🌟','📌','🔥','🎨','📈'];const cols=['#5b8cff','#2ee6a6','#ff7ea8','#e7b24a'];
+  FK.lists=FK.lists||[];
+  FK.lists.push({id:'l'+Date.now().toString(36),emoji:em[FK.lists.length%em.length],title:'Neue Liste',color:cols[FK.lists.length%cols.length],items:[{id:'i'+Date.now().toString(36),text:'Erste Aufgabe',done:false}]});
+  fkSave();fkRender();
+}
+function fkDeleteList(l){
+  const c=fkCounts(l);
+  if(c.t>0){
+    const name=(l.title||'').trim()||'Ohne Titel';
+    if(!confirm('Liste „'+name+'“ mit '+c.t+' Aufgabe'+(c.t===1?'':'n')+' wirklich löschen?\n\nDas lässt sich nicht rückgängig machen.'))return;
+  }
+  FK.lists=(FK.lists||[]).filter(x=>x!==l);
+  fkExpandedDone.delete(l.id);
+  fkSave();fkRender();
+  toast('Liste gelöscht');
+}
+function fkRenderDaily(){
+  const box=$('#fkDaily');if(!box)return;const nm=esc(FK.name||'du');const open=FK.dailyDay===fkEpochDay;
+  box.className='fk-daily'+(open?' isopen':'');
+  box.innerHTML='<div class="in">'
+    +'<div class="col"><div class="spark">✨</div><div class="ct"><b>Deine Motivation für heute</b><span>Ein Satz, nur für dich, '+nm+' 💛</span></div><button class="fk-collect">Abholen ✨</button></div>'
+    +'<div class="opened"><div class="eyebrow">Für dich, '+nm+'</div><div class="quote">'+fkMantra()+'</div><div class="f2"><span>Schön, dass du da bist. Morgen wartet der nächste ✨</span><button class="fk-namechg" data-chg>Name ändern</button></div></div>'
+    +'</div>';
+  const cb=box.querySelector('.fk-collect');if(cb)cb.onclick=()=>{FK.dailyDay=fkEpochDay;fkSave();box.classList.add('isopen','reveal');fkBurst('#e7b24a');};
+  box.querySelectorAll('[data-chg]').forEach(b=>b.onclick=fkOpenOnb);
+}
+function fkGreet(){const h=new Date().getHours();return h<11?'Guten Morgen':(h<18?'Schön, dass du da bist':'Guten Abend');}
+function fkGreetEmoji(){const h=new Date().getHours();return h<11?'☀️':(h<18?'✨':'🌙');}
+function fkShowWelcome(){
+  const w=$('#fkWelcome');if(!w)return;
+  $('#fkWgreet').textContent=fkGreet()+(FK.name?', '+FK.name:'')+' '+fkGreetEmoji();
+  $('#fkWquote').innerHTML=fkMantra();
+  w.classList.remove('hide');w.classList.add('show');
+}
+function fkEnterFromWelcome(){
+  FK.dailyDay=fkEpochDay;fkSave();fkRenderDaily();
+  const w=$('#fkWelcome');w.classList.add('hide');setTimeout(()=>w.classList.remove('show','hide'),460);
+}
+function fkOpenOnb(){const o=$('#fkOnb');o.classList.add('show');const i=$('#fkOnbInput');i.value=(FK&&FK.name)||'';setTimeout(()=>i.focus(),60);}
+function fkSubmitOnb(){const v=$('#fkOnbInput').value.trim();if(!v)return;FK.name=v;fkSave();$('#fkOnb').classList.remove('show');fkRender();if($('#fkWelcome').classList.contains('show'))fkShowWelcome();}
+function setMode(m){
+  FK_MODE=m;
+  $('#pwView').classList.toggle('hidden',m!=='pw');
+  $('#fokusView').classList.toggle('show',m==='fokus');
+  $('#motivationView').classList.toggle('show',m==='motivation');
+  const ps=$('#pwSearch');if(ps)ps.style.display=(m==='pw')?'':'none';
+  const nav=$('#nav');if(nav)nav.style.display=(m==='pw')?'':'none';
+  const tips=$('#fkTips');if(tips)tips.classList.toggle('show',m==='fokus');
+  document.querySelectorAll('#modeToggle button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  if(m==='fokus'){if(FK&&!FK.name){fkOpenOnb();}fkRender();}
+  if(m==='motivation'){if(FK&&!FK.name){fkOpenOnb();}moRender();}
+}
+
+/* ---- Motivation-Bereich: Tagesspruch + Extra-Boosts ---- */
+let moLast=-1;
+function moMantra(i){return FK_MANTRAS[i].split('{name}').join('<em>'+esc(FK&&FK.name||'du')+'</em>');}
+function moBoostsToday(){if(!FK.motivBoosts||FK.motivBoosts.d!==fkEpochDay)FK.motivBoosts={d:fkEpochDay,n:0};return FK.motivBoosts;}
+function moCountText(n){return n?(n+' Boost'+(n===1?'':'s')+' heute geholt 💪'):'';}
+function moRender(){
+  const md=$('#moDaily');if(md)md.innerHTML=fkMantra();
+  const mb=moBoostsToday();
+  const c=$('#moCount');if(c)c.textContent=moCountText(mb.n);
+  const b=$('#moBoost');if(b){b.classList.add('hint');b.classList.remove('reveal');}
+  const bq=$('#moBoostQ');if(bq)bq.textContent='Brauchst du grad einen Schub? Hol dir einen Boost. 💪';
+}
+function moBoost(){
+  let i;do{i=Math.floor(Math.random()*FK_MANTRAS.length);}while(i===moLast&&FK_MANTRAS.length>1);
+  moLast=i;
+  const b=$('#moBoost');b.classList.remove('hint','reveal');void b.offsetWidth;b.classList.add('reveal');
+  $('#moBoostQ').innerHTML=moMantra(i);
+  const mb=moBoostsToday();mb.n++;fkSave();
+  $('#moCount').textContent=moCountText(mb.n);
+  fkBurst('#2ee6a6');
+}
+function fkInitAfterUnlock(){
+  setMode('pw');
+  if(FK&&FK.name&&FK.dailyDay!==fkEpochDay){setMode('fokus');fkShowWelcome();}
+}
+const fkCv=$('#fkConfetti'),fkCx=fkCv?fkCv.getContext('2d'):null;let fkParts=[];
+function fkSize(){if(fkCv){fkCv.width=innerWidth;fkCv.height=innerHeight;}}fkSize();addEventListener('resize',fkSize);
+function fkBurst(color){
+  if(!fkCx||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  const cols=[color,'#2ee6a6','#5b8cff','#ffd479','#ff7ea8','#eef2f8'];
+  for(let i=0;i<80;i++)fkParts.push({x:innerWidth/2,y:innerHeight*.32,vx:(Math.cos(i)*6)+(i%7-3)*1.4,vy:-(6+(i%9))*1.1,r:3+(i%4),c:cols[i%cols.length],rot:i,vr:(i%5-2)*.3,life:0});
+  if(!fkBurst._run){fkBurst._run=true;requestAnimationFrame(fkTick);}
+}
+function fkTick(){
+  fkCx.clearRect(0,0,fkCv.width,fkCv.height);
+  fkParts.forEach(p=>{p.vy+=0.24;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;p.life++;fkCx.save();fkCx.translate(p.x,p.y);fkCx.rotate(p.rot);fkCx.fillStyle=p.c;fkCx.globalAlpha=Math.max(0,1-p.life/120);fkCx.fillRect(-p.r,-p.r,p.r*2,p.r*2.6);fkCx.restore();});
+  fkParts=fkParts.filter(p=>p.life<120&&p.y<fkCv.height+40);
+  if(fkParts.length)requestAnimationFrame(fkTick);else{fkBurst._run=false;fkCx.clearRect(0,0,fkCv.width,fkCv.height);}
+}
+function fkCelebrate(l){toast((l.title||'Liste')+' komplett – stark gemacht! 🎉');fkBurst(l.color||'#e7b24a');}
+function fkWire(){
+  document.querySelectorAll('#modeToggle button').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+  const wgo=$('#fkWgo');if(wgo)wgo.onclick=fkEnterFromWelcome;
+  const og=$('#fkOnbGo');if(og)og.onclick=fkSubmitOnb;
+  const oi=$('#fkOnbInput');if(oi)oi.addEventListener('keydown',e=>{if(e.key==='Enter')fkSubmitOnb();});
+  document.querySelectorAll('#fkWelcome [data-chg]').forEach(b=>b.onclick=fkOpenOnb);
+  const mbb=$('#moBoostBtn');if(mbb)mbb.onclick=moBoost;
+}
+fkWire();
+
 boot();
 </script>
 </body>
