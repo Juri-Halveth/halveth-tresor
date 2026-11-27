@@ -1,12 +1,16 @@
-"""Collect notices from the actual Windows build environment alongside the EXE."""
+"""Verify the frozen Windows executable and prepare its checksum and notices."""
 
 import argparse
+import hashlib
 import json
 import sys
+import tempfile
 from importlib.metadata import distribution
 from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
+import pefile
+from check_release import check
 from packaging.requirements import Requirement
 from packaging.utils import canonicalize_name
 
@@ -39,8 +43,6 @@ def runtime_packages():
 
 
 def windows_sdk_version(webview):
-    import pefile  # Windows build dependency of PyInstaller
-
     assembly = webview.locate_file("webview/lib/Microsoft.Web.WebView2.Core.dll")
     with pefile.PE(str(assembly)) as pe:
         info = pe.VS_FIXEDFILEINFO[0]
@@ -82,7 +84,31 @@ def package_notices(output):
             archive.writestr(ZipInfo(name), data, compress_type=ZIP_DEFLATED)
 
 
+def finish_build(executable):
+    version = check()
+    with pefile.PE(str(executable)) as pe:
+        versions = {
+            (table.entries.get(b"FileVersion"), table.entries.get(b"ProductVersion"))
+            for group in pe.FileInfo
+            for block in group
+            if block.Key == b"StringFileInfo"
+            for table in block.StringTable
+        }
+    if versions != {(version.encode(), version.encode())}:
+        raise ValueError("Executable version mismatch")
+    with executable.open("rb") as binary:
+        checksum = hashlib.file_digest(binary, "sha256").hexdigest().upper()
+    with tempfile.TemporaryDirectory(dir=executable.parent) as tmp:
+        notices = Path(tmp) / "Tresor-notices.zip"
+        package_notices(notices)
+        sidecar = Path(tmp) / (executable.name + ".sha256")
+        sidecar.write_text(checksum + "\n", encoding="ascii")
+        notices.replace(executable.parent / notices.name)
+        sidecar.replace(executable.parent / sidecar.name)
+    print(f"{executable.name} {version}  SHA-256 {checksum}")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("output", type=Path)
-    package_notices(parser.parse_args().output)
+    parser.add_argument("executable", type=Path)
+    finish_build(parser.parse_args().executable)

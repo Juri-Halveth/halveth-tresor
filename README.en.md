@@ -158,10 +158,9 @@ python -m tresor
 # Run the tests
 pytest
 
-# Build the single-file exe (output: dist/Tresor.exe)
+# Build the executable, SHA-256 and component notices with the locked dependencies
+python -m pip install uv==0.12.1
 scripts\build.bat
-# or equivalently:
-python -m PyInstaller packaging/tresor.spec --clean --noconfirm
 ```
 
 The test suite covers roundtrip encryption with no plaintext on disk, wrong password and PIN fail-closed, tamper detection, blocked Scrypt downgrade, recovery key, password change that keeps data, the key being wiped on lock, and helper functions.
