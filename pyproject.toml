@@ -24,8 +24,8 @@ classifiers = [
     "Intended Audience :: End Users/Desktop",
 ]
 dependencies = [
-    "pywebview>=5.0",
-    "cryptography>=42.0",
+    "pywebview>=6.2.1",
+    "cryptography>=50.0.2",
     "pythonnet>=3.0; sys_platform == 'win32'",
     "clr-loader>=0.2; sys_platform == 'win32'",
 ]
@@ -34,10 +34,13 @@ dependencies = [
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
-    "ruff>=0.5",
+    "ruff>=0.17.3",
     "pyinstaller>=6.0",
     "pillow>=13.0.0; python_version >= '3.11'",
 ]
+
+[dependency-groups]
+lint = ["ruff"]
 
 [project.urls]
 Homepage = "https://halveth.de"
