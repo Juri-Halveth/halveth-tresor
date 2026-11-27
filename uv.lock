@@ -927,7 +927,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0" },
     { name = "pythonnet", marker = "sys_platform == 'win32'", specifier = ">=3.0" },
-    { name = "pywebview", specifier = ">=5.0" },
+    { name = "pywebview", specifier = ">=6.2.1" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.5" },
 ]
 provides-extras = ["dev"]
