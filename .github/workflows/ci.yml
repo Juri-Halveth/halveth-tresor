@@ -80,6 +80,8 @@ jobs:
           if ($actual.FileVersion -ne $version -or $actual.ProductVersion -ne $version) { throw 'Executable version mismatch' }
       - name: Compute SHA-256
         run: (Get-FileHash dist/Tresor.exe -Algorithm SHA256).Hash | Out-File -Encoding ascii dist/Tresor.exe.sha256
+      - name: Package notices from the locked Windows build
+        run: uv run --no-sync python scripts/package_notices.py dist/Tresor-notices.zip
       - name: Upload build artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -87,6 +89,7 @@ jobs:
           path: |
             dist/Tresor.exe
             dist/Tresor.exe.sha256
+            dist/Tresor-notices.zip
 
   release:
     name: Publish tagged Windows release
@@ -124,3 +127,4 @@ jobs:
           files: |
             dist/Tresor.exe
             dist/Tresor.exe.sha256
+            dist/Tresor-notices.zip

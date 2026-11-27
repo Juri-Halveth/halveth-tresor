@@ -5,7 +5,7 @@
 Passwörter, Schlüssel und Verbindungsdaten in einer verschlüsselten lokalen Datei
 verwalten — mit Suche, Zwischenablage und einem gesondert aufzubewahrenden Recovery-Key.
 
-**Direkt nutzen:** [Windows-Release v1.8.0 öffnen](https://github.com/Juri-Halveth/halveth-tresor/releases/tag/v1.8.0).
+**[Veröffentlichten Windows-Release öffnen](https://github.com/Juri-Halveth/halveth-tresor/releases/latest).** Die Versionsmarke unten bezeichnet den Quellstand.
 Die EXE ist derzeit nicht code-signiert; Installationsvoraussetzungen und SHA-256-Prüfung stehen [unten](#in-einer-minute-zum-passenden-einstieg).
 
 [Sicherheitsmodell](docs/security-model.md) · [Technische Anleitung auf Englisch](README.en.md) · [HALVETH Starship Lab (optional)](https://juri-halveth.github.io/universum/)
@@ -13,7 +13,7 @@ Die EXE ist derzeit nicht code-signiert; Installationsvoraussetzungen und SHA-25
 ![HALVETH / NETZ – Tresor: geometrische Tresortür mit Schlüsselloch](HALVETH_NETZ_HERO.svg)
 
 [![CI](https://github.com/Juri-Halveth/halveth-tresor/actions/workflows/ci.yml/badge.svg)](https://github.com/Juri-Halveth/halveth-tresor/actions/workflows/ci.yml)
-[![Version 1.8.0](https://img.shields.io/badge/Version-1.8.0-blue.svg)](CHANGELOG.md)
+[![Version 1.8.1](https://img.shields.io/badge/Version-1.8.1-blue.svg)](CHANGELOG.md)
 
 ![Tresor: Kategorien, Suche und gespeicherte Zugangsdaten](assets/screenshots/dashboard.png)
 

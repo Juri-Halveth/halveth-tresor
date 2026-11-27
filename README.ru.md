@@ -2,7 +2,7 @@
 
 # Tresor – локальное хранение учётных данных в Windows
 
-**[Открыть выпуск Windows v1.8.0](https://github.com/Juri-Halveth/halveth-tresor/releases/tag/v1.8.0).** EXE-файл не подписан; перед использованием проверьте опубликованную SHA-256 и [модель безопасности](docs/security-model.md).
+**[Открыть опубликованный выпуск для Windows](https://github.com/Juri-Halveth/halveth-tresor/releases/latest).** EXE-файл не подписан. Перед использованием проверьте опубликованную SHA-256 и [модель безопасности](docs/security-model.md).
 
 **Краткий путеводитель по проекту · EN / RU**
 

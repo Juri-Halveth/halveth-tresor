@@ -2,7 +2,7 @@
 
 # Tresor · local credentials on Windows
 
-**Open the [Windows release v1.8.0](https://github.com/Juri-Halveth/halveth-tresor/releases/tag/v1.8.0).** The EXE is unsigned; check its published SHA-256 and the [security model](docs/security-model.md) before use.
+**[Open the published Windows release](https://github.com/Juri-Halveth/halveth-tresor/releases/latest).** The badge below identifies the source version. Check the unsigned executable's published SHA-256 and the [security model](docs/security-model.md) before use.
 
 **Your complete access, sealed in one local vault.**
 
@@ -13,7 +13,7 @@ A local, offline Desktop Credential Vault for Windows.
 [![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-0078D6.svg)](#requirements)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg)](https://www.python.org/)
 [![Built with pywebview](https://img.shields.io/badge/Built%20with-pywebview-8A2BE2.svg)](https://pywebview.flowrl.com/)
-[![Version 1.8.0](https://img.shields.io/badge/Version-1.8.0-blue.svg)](CHANGELOG.md)
+[![Version 1.8.1](https://img.shields.io/badge/Version-1.8.1-blue.svg)](CHANGELOG.md)
 
 Tresor is a fully offline vault for everything that gets you access: passwords, servers, keys, and secrets. It keeps them in a single encrypted file on your own machine, with no cloud, no account, and no telemetry.
 
@@ -240,7 +240,7 @@ Tresor versions through commit `e6cff6801106343832ca209c971a91abe7648916` remain
 
 Copyright (c) 2026 Juri Janovski, project HALVETH.
 
-Bundled dependencies retain their own permissive terms. Their notices, including the OpenSSL attribution required by the statically linked `cryptography` wheel, are collected in [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md).
+The Windows build includes `Tresor-notices.zip` with the notices and versions collected during packaging. See [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md).
 
 ---
 
