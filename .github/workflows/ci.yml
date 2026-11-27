@@ -48,6 +48,8 @@ jobs:
         run: pip install -e .[dev]
       - name: Run tests
         run: pytest --cov=tresor --cov-report=term-missing
+      - name: Verify envelope validation with optimized Python
+        run: python -O -m pytest -q tests/test_vault.py -k "rejected_before or correct_credentials_open"
 
   build:
     name: Build Windows executable
