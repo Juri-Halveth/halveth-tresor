@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tresor"
-version = "1.0.0"
+dynamic = ["version"]
 description = "A local, offline credentials vault for Windows (Python + pywebview)."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
-authors = [{ name = "Juri Janovski" }]
+license = { text = "File- and version-specific terms in LICENSES.md: historical MIT and distinguishable new HALVETH PIRL 2.0 contributions." }
+authors = [{ name = "Juri" }]
 keywords = ["password-manager", "credentials", "vault", "encryption", "pywebview", "windows"]
 classifiers = [
-    "License :: OSI Approved :: MIT License",
+    "License :: Other/Proprietary License",
     "Environment :: Win32 (MS Windows)",
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python :: 3",
@@ -36,7 +36,7 @@ dev = [
     "pytest-cov>=5.0",
     "ruff>=0.5",
     "pyinstaller>=6.0",
-    "pillow>=10.0",
+    "pillow>=13.0.0; python_version >= '3.11'",
 ]
 
 [project.urls]
@@ -44,13 +44,20 @@ Homepage = "https://halveth.de"
 Repository = "https://github.com/Juri-Halveth/halveth-tresor"
 Issues = "https://github.com/Juri-Halveth/halveth-tresor/issues"
 Changelog = "https://github.com/Juri-Halveth/halveth-tresor/blob/main/CHANGELOG.md"
+License = "https://github.com/Juri-Halveth/halveth-tresor/blob/main/LICENSES.md"
 
 # GUI (windowed) entry point, so no console window appears on launch.
 [project.gui-scripts]
 tresor = "tresor.app:main"
 
+[tool.setuptools.dynamic]
+version = {attr = "tresor.__version__"}
+
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools]
+license-files = ["LICENSE", "LICENSES.md", "LICENSE-HALVETH-PIRL-2.0.md", "HALVETH-RIGHTS.md", "THIRD-PARTY-LICENSES.md"]
 
 [tool.setuptools.package-data]
 tresor = ["ui/*.html"]

@@ -1,10 +1,9 @@
 # Third-Party Licenses
 
-Tresor is released under the MIT License (see [LICENSE](LICENSE)).
+Tresor's own contributions use the path- and version-specific terms in [LICENSES.md](LICENSES.md). This file records the separate terms of bundled third-party components; it does not change those components' permissions.
 
 The distributed Windows executable (`Tresor.exe`, built with PyInstaller) bundles the
-third-party components listed below. Every one is permissive and compatible with the MIT
-license of this project. This file reproduces their license texts and required notices.
+third-party components listed below. This file reproduces their separate license texts and required notices.
 The license texts are copied verbatim from each package as installed at build time.
 
 ---

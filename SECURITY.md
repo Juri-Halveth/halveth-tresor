@@ -4,12 +4,12 @@ Thank you for helping keep Tresor and its users safe. This document explains whi
 
 ## Supported Versions
 
-Security updates are provided for the latest 1.0.x release. Older patch releases are not maintained once a newer 1.0.x is published.
+Security work targets the current 1.8.x source line (the inspected application version is 1.8.0). Use the newest published release from the project's Releases page. Historical 1.0.x versions are no longer the maintained line. This is a maintenance policy, not a guarantee of an independent audit or a response deadline.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.0.x   | Yes                |
-| < 1.0   | No                 |
+| Latest 1.8.x | Current maintenance target |
+| Older lines, including 1.0.x | No |
 
 ## Reporting a Vulnerability
 
@@ -19,7 +19,7 @@ To report, open a private GitHub Security Advisory:
 
 https://github.com/Juri-Halveth/halveth-tresor/security/advisories/new
 
-This channel is private between you and the maintainer and is the preferred way to reach us for security matters. If you are unable to use GitHub Security Advisories, please contact the maintainer through the project's GitHub profile and ask for a private channel before sharing any details.
+If private reporting is available for your account, use that channel. Otherwise contact **security@halveth.de** to arrange a suitable private transfer before sharing sensitive details. Do not include real vaults or credentials.
 
 ### What to include
 
